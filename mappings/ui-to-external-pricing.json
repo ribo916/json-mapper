@@ -1,459 +1,462 @@
 {
-    "name": "ui-to-external-pricing",
-    "version": "1.0.0",
-    "description": "UI → External Pricing Scenario mapping (matches uiToExternalPricingScenario.ts).",
-  
-    "enums": {
-      "LoanPurpose": {
-        "1": "Purchase",
-        "2": "Refinance",
-        "3": "Construction",
-        "4": "ConstructionPerm",
-        "5": "Other",
-        "6": "NoCashOutRefinance",
-        "7": "CashOutRefinance"
-      },
-      "LoanRefinancePurpose": {
-        "0": "None",
-        "1": "NoCashOut",
-        "2": "CashOut",
-        "3": "LimitedCashOut",
-        "4": "HomeImprovement",
-        "5": "DebtConsolidation",
-        "6": "Other"
-      },
-      "Occupancy": {
-        "0": "None",
-        "1": "PrimaryResidence",
-        "2": "SecondHome",
-        "3": "InvestmentProperty"
-      },
-      "PropertyType": {
-        "1": "SFR",
-        "2": "Condominium",
-        "3": "PUD",
-        "5": "Mobile",
-        "6": "TwoForUnit",
-        "7": "Cooperative",
-        "8": "Townhome",
-        "9": "Multifamily",
-        "10": "Commercial",
-        "11": "MixedUse",
-        "12": "Farm",
-        "13": "HomeAndBusiness",
-        "14": "Land",
-        "15": "ManufacturedSingleWide",
-        "16": "ManufacturedDoubleWide"
-      },
-      "Impounds": {
-        "0": "None",
-        "1": "Partial",
-        "2": "Full"
-      },
-      "LoanType": {
-        "1": "Conventional",
-        "2": "FHA",
-        "3": "VA",
-        "4": "USDA",
-        "5": "Jumbo",
-        "8": "NonQM",
-        "9": "HELOC"
-      },
-      "LoanPosition": {
-        "0": "First",
-        "1": "Second",
-        "2": "HELOC",
-        "3": "Third"
-      },
-      "EmploymentDocumentationMethod": {
-        "0": "None",
-        "1": "Stated",
-        "2": "Verified"
-      },
-      "VerificationMethod": {
-        "1": "FullDocument",
-        "2": "BankStatement",
-        "3": "VOE",
-        "4": "AssetQualification",
-        "5": "DSCR",
-        "6": "Method1099",
-        "7": "CPAPAndL"
-      },
-      "Citizenship": {
-        "0": "None",
-        "1": "ForeignNational",
-        "2": "NonPermanentResidentAlien",
-        "3": "PermanentResidentAlien",
-        "4": "USCitizen",
-        "5": "USCitizenAbroad"
-      },
-      "TemporaryBuydown": {
-        "0": "None",
-        "1": "ThreeTwoOne",
-        "2": "TwoOne",
-        "3": "OneOne",
-        "4": "OneZero"
-      },
-      "PropertyAttachment": {
-        "0": "Unspecified",
-        "1": "Detached",
-        "2": "Attached"
-      },
-      "AUS": {
-        "0": "None",
-        "1": "Manual",
-        "2": "DU",
-        "3": "LP",
-        "4": "Other",
-        "5": "NotSpecified"
-      },
-      "StreamlineRefinanceType": {
-        "0": "None",
-        "1": "NoCashoutStreamlinedRefinance",
-        "2": "NoCashOutFHAStreamlinedRefinance"
-      },
-      "PrepayPenaltyStructureType": {
-        "0": "None",
-        "1": "NoPrepay",
-        "2": "Fixed",
-        "3": "Declining",
-        "4": "SixMonthsInterest"
-      },
-      "CreditGrade": {
-        "1": "A",
-        "2": "B",
-        "3": "C",
-        "4": "D",
-        "5": "APlus",
-        "6": "BMinus",
-        "7": "AAA",
-        "8": "AA",
-        "9": "AMinus",
-        "10": "BB",
-        "11": "BPlus",
-        "12": "CMinus",
-        "13": "BBB",
-        "14": "CCC",
-        "15": "CC",
-        "16": "CPlus",
-        "17": "DDD",
-        "18": "DD",
-        "19": "DPlus",
-        "20": "DMinus"
-      },
-      "BrokerPaidBy": {
-        "1": "Lender",
-        "2": "Borrower",
-        "3": "Split"
-      }
-    },
-  
-    "converters": {
-      "toDecimal": {
-        "description": "Convert number/string to a decimal string with up to 4 places, trimming trailing zeros."
-      }
-    },
-  
-    "paths": {},
-  
-    "mapping": {
-      "audienceId": {
-        "from": ["AudienceId", "audienceId"]
-      },
-  
-      "search": {
-        "position": {
-          "from": "Search.Position",
-          "enum": "LoanPosition"
-        },
-        "desiredLockPeriod": {
-          "from": "Search.desiredLockPeriod"
-        },
-        "includeInterestOnlyProducts": {
-          "from": "Search.includeInterestOnlyProducts",
-          "default": false
-        },
-        "loanTypes": {
-          "from": "Search.loanTypes",
-          "default": []
-        },
-        "amortizationTypes": {
-          "from": "Search.amortizationTypes",
-          "default": []
-        },
-        "loanTerms": {
-          "from": "Search.loanTerms",
-          "default": []
-        },
-        "armFixedTerms": {
-          "from": "Search.armFixedTerms",
-          "default": []
-        }
-      },
-  
-      "borrower": {
-        "firstName": {
-          "from": "Borrower.firstName",
-          "default": ""
-        },
-        "lastName": {
-          "from": "Borrower.lastName",
-          "default": ""
-        },
-        "fico": {
-          "from": "Borrower.fico"
-        },
-        "dtiRatio": {
-          "from": "Borrower.dtiRatio",
-          "convert": "toDecimal"
-        },
-        "monthsOfReserves": {
-          "from": "Borrower.monthsOfReserves",
-          "default": 0
-        },
-        "isNonOccupancyBorrower": {
-          "from": "Borrower.isNonOccupancyBorrower",
-          "default": false
-        },
-        "isNonOccupancyCoborrower": {
-          "from": "Borrower.isNonOccupancyCoborrower",
-          "default": false
-        },
-        "propertiesOwned": {
-          "from": "Borrower.propertiesOwned",
-          "default": 0
-        },
-        "isSelfEmployed": {
-          "from": "Borrower.isSelfEmployed",
-          "default": false
-        },
-        "multipleBorrowerPairs": {
-          "from": "Borrower.multipleBorrowerPairs",
-          "default": false
-        },
-  
-        "verificationMethod": {
-          "from": "Borrower.verificationMethod",
-          "enum": "VerificationMethod"
-        },
-        "creditGrade": {
-          "from": "Borrower.creditGrade",
-          "enum": "CreditGrade"
-        },
-        "citizenship": {
-          "from": "Borrower.citizenship",
-          "enum": "Citizenship"
-        },
-        "employmentDocumentationMethod": {
-          "from": "Borrower.employmentDocumentationMethod",
-          "enum": "EmploymentDocumentationMethod"
-        },
-  
-        "isNonTraditionalCredit": {
-          "from": "Borrower.isNonTraditionalCredit",
-          "default": false
-        },
-        "isGiftFunds": {
-          "from": "Borrower.isGiftFunds",
-          "default": false
-        },
-        "isFirstTimeHomeBuyer": {
-          "from": "Borrower.isFirstTimeHomeBuyer",
-          "default": false
-        },
-        "fullDocMonths": {
-          "from": "Borrower.fullDocMonths",
-          "default": 0
-        },
-        "cpaPandLMonths": {
-          "from": "Borrower.cpaPandLMonths",
-          "default": 0
-        },
-        "annualIncome": {
-          "from": "Borrower.income",
-          "default": 0
-        }
-      },
-  
-      "loan": {
-        "purpose": {
-          "from": "Loan.purpose",
-          "enum": "LoanPurpose"
-        },
-        "amount": {
-          "from": "Loan.amount",
-          "convert": "toDecimal"
-        },
-        "purchasePrice": {
-          "from": "Loan.purchasePrice",
-          "convert": "toDecimal"
-        },
-        "propertyValue": {
-          "from": "Loan.propertyValue",
-          "convert": "toDecimal"
-        },
-  
-        "refinancePurpose": {
-          "from": "Loan.refinancePurpose",
-          "enum": "LoanRefinancePurpose"
-        },
-  
-        "cashOutAmount": {
-          "from": "Loan.cashOutAmount",
-          "convert": "toDecimal"
-        },
-        "secondAmount": {
-          "from": "Loan.secondAmount",
-          "convert": "toDecimal"
-        },
-        "helocLineAmount": {
-          "from": "Loan.helocLineAmount",
-          "convert": "toDecimal"
-        },
-        "helocDrawAmount": {
-          "from": "Loan.helocDrawAmount",
-          "convert": "toDecimal"
-        },
-  
-        "isMortgageInsurancePaidByBorrower": {
-          "from": "Loan.isMortgageInsurancePaidByBorrower",
-          "default": false
-        },
-  
-        "impounds": {
-          "from": "Loan.impounds",
-          "enum": "Impounds"
-        },
-        "aus": {
-          "from": "Loan.aus",
-          "enum": "AUS"
-        },
-        "position": {
-          "from": "Loan.position",
-          "enum": "LoanPosition"
-        },
-  
-        "temporaryBuydownType": {
-          "from": "Loan.temporaryBuydownType",
-          "enum": "TemporaryBuydown"
-        },
-        "streamlineRefinanceType": {
-          "from": "Loan.streamlineRefinanceType",
-          "enum": "StreamlineRefinanceType"
-        },
-        "prepaymentPenaltyStructureType": {
-          "from": "Loan.prepaymentPenaltyStructureType",
-          "enum": "PrepayPenaltyStructureType"
-        },
-  
-        "loanType": {
-          "from": "Loan.loanType",
-          "enum": "LoanType"
-        },
-  
-        "ltv": {
-          "from": "Loan.ltv",
-          "convert": "toDecimal"
-        },
-        "cltv": {
-          "from": "Loan.cltv",
-          "convert": "toDecimal"
-        },
-        "hcltv": {
-          "from": "Loan.hcltv",
-          "convert": "toDecimal"
-        }
-      },
-  
-      "property": {
-        "state": {
-          "from": "Property.state"
-        },
-        "county": {
-          "from": "Property.county"
-        },
-        "propertyType": {
-          "from": "Property.propertyType",
-          "enum": "PropertyType"
-        },
-        "occupancy": {
-          "from": "Property.occupancy",
-          "enum": "Occupancy"
-        },
-        "units": {
-          "from": "Property.units",
-          "default": 1
-        },
-        "stories": {
-          "from": "Property.stories",
-          "default": 1
-        },
-        "addressLine1": {
-          "from": "Property.addressLine1"
-        },
-        "addressLine2": {
-          "from": "Property.addressLine2",
-          "default": ""
-        },
-        "city": {
-          "from": "Property.city"
-        },
-        "countyFipsCode": {
-          "from": "Property.countyFipsCode"
-        },
-        "zipCode": {
-          "from": "Property.zipCode"
-        },
-        "propertyAttachmentType": {
-          "from": "Property.propertyAttachmentType",
-          "enum": "PropertyAttachment"
-        }
-      },
-  
-      "brokerCompPlan": {
-        "fixedAmount": {
-          "from": "BrokerCompPlan.fixedAmount",
-          "convert": "toDecimal"
-        },
-        "percent": {
-          "from": "BrokerCompPlan.percent",
-          "convert": "toDecimal"
-        },
-        "minAmount": {
-          "from": "BrokerCompPlan.minAmount",
-          "convert": "toDecimal"
-        },
-        "maxAmount": {
-          "from": "BrokerCompPlan.maxAmount",
-          "convert": "toDecimal"
-        },
-        "calculatedAmount": {
-          "from": "BrokerCompPlan.calculatedAmount",
-          "convert": "toDecimal"
-        },
-        "calculatedAdjustment": {
-          "from": "BrokerCompPlan.calculatedAdjustment",
-          "convert": "toDecimal"
-        },
-        "paidBy": {
-          "from": "BrokerCompPlan.paidBy",
-          "enum": "BrokerPaidBy"
-        }
-      },
-  
-      "customValues": {
-        "from": "CustomValues",
-        "iterate": {
-          "mapping": {
-            "name": { "from": "name" },
-            "value": { "from": "value", "default": null }
-          }
-        }
-      }
+  "name": "ui-to-external-pricing",
+  "version": "1.0.0",
+  "description": "UI → External Pricing Scenario mapping (matches uiToExternalPricingScenario.ts).",
 
-
+  "enums": {
+    "LoanPurpose": {
+      "1": "Purchase",
+      "2": "Refinance",
+      "3": "Construction",
+      "4": "ConstructionPerm",
+      "5": "Other",
+      "6": "NoCashOutRefinance",
+      "7": "CashOutRefinance"
     },
-  
-    "overrides": {}
-  }
-  
+    "LoanRefinancePurpose": {
+      "0": "None",
+      "1": "NoCashOut",
+      "2": "CashOut",
+      "3": "LimitedCashOut",
+      "4": "HomeImprovement",
+      "5": "DebtConsolidation",
+      "6": "Other"
+    },
+    "Occupancy": {
+      "0": "None",
+      "1": "PrimaryResidence",
+      "2": "SecondHome",
+      "3": "InvestmentProperty"
+    },
+    "PropertyType": {
+      "1": "SFR",
+      "2": "Condominium",
+      "3": "PUD",
+      "5": "Mobile",
+      "6": "TwoForUnit",
+      "7": "Cooperative",
+      "8": "Townhome",
+      "9": "Multifamily",
+      "10": "Commercial",
+      "11": "MixedUse",
+      "12": "Farm",
+      "13": "HomeAndBusiness",
+      "14": "Land",
+      "15": "ManufacturedSingleWide",
+      "16": "ManufacturedDoubleWide"
+    },
+    "Impounds": {
+      "0": "None",
+      "1": "Partial",
+      "2": "Full"
+    },
+    "LoanType": {
+      "1": "Conventional",
+      "2": "FHA",
+      "3": "VA",
+      "4": "USDA",
+      "5": "Jumbo",
+      "8": "NonQM",
+      "9": "HELOC"
+    },
+    "LoanPosition": {
+      "0": "First",
+      "1": "Second",
+      "2": "HELOC",
+      "3": "Third"
+    },
+    "EmploymentDocumentationMethod": {
+      "0": "None",
+      "1": "Stated",
+      "2": "Verified"
+    },
+    "VerificationMethod": {
+      "1": "FullDocument",
+      "2": "BankStatement",
+      "3": "VOE",
+      "4": "AssetQualification",
+      "5": "DSCR",
+      "6": "Method1099",
+      "7": "CPAPAndL"
+    },
+    "Citizenship": {
+      "0": "None",
+      "1": "ForeignNational",
+      "2": "NonPermanentResidentAlien",
+      "3": "PermanentResidentAlien",
+      "4": "USCitizen",
+      "5": "USCitizenAbroad"
+    },
+    "TemporaryBuydown": {
+      "0": "None",
+      "1": "ThreeTwoOne",
+      "2": "TwoOne",
+      "3": "OneOne",
+      "4": "OneZero"
+    },
+    "PropertyAttachment": {
+      "0": "Unspecified",
+      "1": "Detached",
+      "2": "Attached"
+    },
+    "AUS": {
+      "0": "None",
+      "1": "Manual",
+      "2": "DU",
+      "3": "LP",
+      "4": "Other",
+      "5": "NotSpecified"
+    },
+    "StreamlineRefinanceType": {
+      "0": "None",
+      "1": "NoCashoutStreamlinedRefinance",
+      "2": "NoCashOutFHAStreamlinedRefinance"
+    },
+    "PrepayPenaltyStructureType": {
+      "0": "None",
+      "1": "NoPrepay",
+      "2": "Fixed",
+      "3": "Declining",
+      "4": "SixMonthsInterest"
+    },
+    "CreditGrade": {
+      "0": "None",
+      "1": "A",
+      "2": "B",
+      "3": "C",
+      "4": "D",
+      "5": "APlus",
+      "6": "BMinus",
+      "7": "AAA",
+      "8": "AA",
+      "9": "AMinus",
+      "10": "BB",
+      "11": "BPlus",
+      "12": "CMinus",
+      "13": "BBB",
+      "14": "CCC",
+      "15": "CC",
+      "16": "CPlus",
+      "17": "DDD",
+      "18": "DD",
+      "19": "DPlus",
+      "20": "DMinus"
+    },
+    "BrokerPaidBy": {
+      "1": "Lender",
+      "2": "Borrower",
+      "3": "Split"
+    }
+  },
+
+  "converters": {
+    "toDecimal": {
+      "description": "Convert number/string to a decimal string with up to 4 places, trimming trailing zeros."
+    }
+  },
+
+  "paths": {},
+
+  "mapping": {
+    "audienceId": {
+      "from": ["AudienceId", "audienceId"]
+    },
+
+    "search": {
+      "position": {
+        "from": "Search.Position",
+        "enum": "LoanPosition"
+      },
+      "desiredLockPeriod": {
+        "from": "Search.desiredLockPeriod"
+      },
+      "includeInterestOnlyProducts": {
+        "from": "Search.includeInterestOnlyProducts",
+        "default": false
+      },
+      "loanTypes": {
+        "from": "Search.loanTypes",
+        "enum": "LoanType",
+        "default": []
+      },
+      "amortizationTypes": {
+        "from": "Search.amortizationTypes",
+        "default": []
+      },
+      "loanTerms": {
+        "from": "Search.loanTerms",
+        "default": []
+      },
+      "armFixedTerms": {
+        "from": "Search.armFixedTerms",
+        "default": []
+      }
+    },
+
+    "settings": {
+      "static": {
+        "operations": ["Eligibility", "Pricing"],
+        "returnTerseResponse": false,
+        "returnTerseProductResponse": false,
+        "returnIneligibleProducts": true,
+        "storeRequestResult": true
+      }
+    },
+
+    "borrower": {
+      "firstName": {
+        "from": "Borrower.firstName",
+        "default": ""
+      },
+      "lastName": {
+        "from": "Borrower.lastName",
+        "default": ""
+      },
+      "fico": {
+        "from": "Borrower.fico"
+      },
+      "dtiRatio": {
+        "from": "Borrower.dtiRatio",
+        "convert": "toDecimal"
+      },
+      "monthsOfReserves": {
+        "from": "Borrower.monthsOfReserves",
+        "default": 0
+      },
+      "isNonOccupancyBorrower": {
+        "from": "Borrower.isNonOccupancyBorrower",
+        "default": false
+      },
+      "isNonOccupancyCoborrower": {
+        "from": "Borrower.isNonOccupancyCoborrower",
+        "default": false
+      },
+      "propertiesOwned": {
+        "from": "Borrower.propertiesOwned",
+        "default": 0
+      },
+      "isSelfEmployed": {
+        "from": "Borrower.isSelfEmployed",
+        "default": false
+      },
+      "multipleBorrowerPairs": {
+        "from": "Borrower.multipleBorrowerPairs",
+        "default": false
+      },
+
+      "verificationMethod": {
+        "from": "Borrower.verificationMethod",
+        "enum": "VerificationMethod"
+      },
+      "creditGrade": {
+        "from": "Borrower.creditGrade",
+        "enum": "CreditGrade"
+      },
+      "citizenship": {
+        "from": "Borrower.citizenship",
+        "enum": "Citizenship"
+      },
+      "employmentDocumentationMethod": {
+        "from": "Borrower.employmentDocumentationMethod",
+        "enum": "EmploymentDocumentationMethod"
+      },
+
+      "isNonTraditionalCredit": {
+        "from": "Borrower.isNonTraditionalCredit",
+        "default": false
+      },
+      "isGiftFunds": {
+        "from": "Borrower.isGiftFunds",
+        "default": false
+      },
+      "isFirstTimeHomeBuyer": {
+        "from": "Borrower.isFirstTimeHomeBuyer",
+        "default": false
+      },
+      "fullDocMonths": {
+        "from": "Borrower.fullDocMonths",
+        "default": 0
+      },
+      "cpaPandLMonths": {
+        "from": "Borrower.cpaPandLMonths",
+        "default": 0
+      },
+      "annualIncome": {
+        "from": "Borrower.income",
+        "default": 0
+      }
+    },
+
+    "loan": {
+      "purpose": {
+        "from": "Loan.purpose",
+        "enum": "LoanPurpose"
+      },
+      "amount": {
+        "from": "Loan.amount",
+        "convert": "toDecimal"
+      },
+      "purchasePrice": {
+        "from": "Loan.purchasePrice",
+        "convert": "toDecimal"
+      },
+      "propertyValue": {
+        "from": "Loan.propertyValue",
+        "convert": "toDecimal"
+      },
+
+      "refinancePurpose": {
+        "from": "Loan.refinancePurpose",
+        "enum": "LoanRefinancePurpose"
+      },
+
+      "cashOutAmount": {
+        "from": "Loan.cashOutAmount",
+        "convert": "toDecimal"
+      },
+      "secondAmount": {
+        "from": "Loan.secondAmount",
+        "convert": "toDecimal"
+      },
+      "helocLineAmount": {
+        "from": "Loan.helocLineAmount",
+        "convert": "toDecimal"
+      },
+      "helocDrawAmount": {
+        "from": "Loan.helocDrawAmount",
+        "convert": "toDecimal"
+      },
+
+      "isMortgageInsurancePaidByBorrower": {
+        "from": "Loan.isMortgageInsurancePaidByBorrower",
+        "default": false
+      },
+
+      "impounds": {
+        "from": "Loan.impounds",
+        "enum": "Impounds"
+      },
+      "aus": {
+        "from": "Loan.aus",
+        "enum": "AUS"
+      },
+      "position": {
+        "from": "Loan.position",
+        "enum": "LoanPosition"
+      },
+
+      "temporaryBuydownType": {
+        "from": "Loan.temporaryBuydownType",
+        "enum": "TemporaryBuydown"
+      },
+      "streamlineRefinanceType": {
+        "from": "Loan.streamlineRefinanceType",
+        "enum": "StreamlineRefinanceType"
+      },
+      "prepaymentPenaltyStructureType": {
+        "from": "Loan.prepaymentPenaltyStructureType",
+        "enum": "PrepayPenaltyStructureType"
+      },
+
+      "loanType": {
+        "from": "Loan.loanType",
+        "enum": "LoanType"
+      },
+
+      "ltv": {
+        "from": "Loan.ltv",
+        "convert": "toDecimal"
+      },
+      "cltv": {
+        "from": "Loan.cltv",
+        "convert": "toDecimal"
+      },
+      "hcltv": {
+        "from": "Loan.hcltv",
+        "convert": "toDecimal"
+      }
+    },
+
+    "property": {
+      "state": {
+        "from": "Property.state"
+      },
+      "county": {
+        "from": "Property.county"
+      },
+      "propertyType": {
+        "from": "Property.propertyType",
+        "enum": "PropertyType"
+      },
+      "occupancy": {
+        "from": "Property.occupancy",
+        "enum": "Occupancy"
+      },
+      "units": {
+        "from": "Property.units",
+        "default": 1
+      },
+      "stories": {
+        "from": "Property.stories",
+        "default": 1
+      },
+      "addressLine1": {
+        "from": "Property.addressLine1"
+      },
+      "addressLine2": {
+        "from": "Property.addressLine2",
+        "default": ""
+      },
+      "city": {
+        "from": "Property.city"
+      },
+      "countyFipsCode": {
+        "from": "Property.countyFipsCode"
+      },
+      "zipCode": {
+        "from": "Property.zipCode"
+      },
+      "propertyAttachmentType": {
+        "from": "Property.propertyAttachmentType",
+        "enum": "PropertyAttachment"
+      }
+    },
+
+    "brokerCompPlan": {
+      "fixedAmount": {
+        "from": "BrokerCompPlan.fixedAmount",
+        "convert": "toDecimal"
+      },
+      "percent": {
+        "from": "BrokerCompPlan.percent",
+        "convert": "toDecimal"
+      },
+      "minAmount": {
+        "from": "BrokerCompPlan.minAmount",
+        "convert": "toDecimal"
+      },
+      "maxAmount": {
+        "from": "BrokerCompPlan.maxAmount",
+        "convert": "toDecimal"
+      },
+      "calculatedAmount": {
+        "from": "BrokerCompPlan.calculatedAmount",
+        "convert": "toDecimal"
+      },
+      "calculatedAdjustment": {
+        "from": "BrokerCompPlan.calculatedAdjustment",
+        "convert": "toDecimal"
+      },
+      "paidBy": {
+        "from": "BrokerCompPlan.paidBy",
+        "enum": "BrokerPaidBy"
+      }
+    },
+
+    "customValues": {
+      "compute": "Array.isArray(src.CustomValues) ? src.CustomValues.map(cv => ({ name: cv.name, value: cv.value ?? null })) : []"
+    }
+  },
+
+  "overrides": {}
+}
