@@ -1,0 +1,477 @@
+{
+    "name": "external-to-getloan",
+    "version": "1.0.0",
+    "description": "Converts external PricingScenarioRequest-style payload into internal getLoan-shaped JSON.",
+    "enums": {},
+    "converters": {
+      "toDecimalStringOrNull": {
+        "description": "Converts numbers to trimmed decimal strings or returns null."
+      },
+      "pascalToScreaming": {
+        "description": "Converts PascalCase to SCREAMING_SNAKE_CASE."
+      },
+      "now": {
+        "description": "Returns current timestamp in ISO 8601 format."
+      }
+    },
+    "paths": {
+      "borrower": "borrower",
+      "loan": "loan",
+      "property": "property"
+    },
+    "mapping": {
+      "borrower": {
+        "firstName": {
+          "from": "borrower.firstName",
+          "default": ""
+        },
+        "lastName": {
+          "from": "borrower.lastName",
+          "default": ""
+        },
+        "fico": {
+          "from": "borrower.fico",
+          "default": null
+        },
+        "dtiRatio": {
+          "from": "borrower.dtiRatio",
+          "convert": "toDecimalStringOrNull"
+        },
+        "assetDepletionAmount": {
+          "static": null
+        },
+        "assetDocumentation": {
+          "static": null
+        },
+        "assetQualificationAmount": {
+          "static": null
+        },
+        "bankStatementExpenseMethod": {
+          "static": null
+        },
+        "businessBankStatementMonths": {
+          "static": null
+        },
+        "citizenship": {
+          "from": "borrower.citizenship",
+          "default": null
+        },
+        "creditGrade": {
+          "from": "borrower.creditGrade",
+          "default": null
+        },
+        "debtServiceCoverageRatio": {
+          "static": null
+        },
+        "employmentVerification": {
+          "static": null
+        },
+        "fullDocMonths": {
+          "from": "borrower.fullDocMonths",
+          "default": null
+        },
+        "isNonOccupancyCoborrower": {
+          "from": "borrower.isNonOccupancyCoborrower",
+          "default": false
+        },
+        "isGiftFunds": {
+          "from": "borrower.isGiftFunds",
+          "default": false
+        },
+        "multipleBorrowerPairs": {
+          "from": "borrower.multipleBorrowerPairs",
+          "default": false
+        },
+        "isNonTraditionalCredit": {
+          "from": "borrower.isNonTraditionalCredit",
+          "default": false
+        },
+        "incomeMonthly": {
+          "when": [
+            {
+              "if": {
+                "exists": "borrower.annualIncome"
+              },
+              "then": {
+                "compute": "borrower.annualIncome / 12",
+                "convert": "toDecimalStringOrNull"
+              }
+            },
+            {
+              "else": null
+            }
+          ]
+        },
+        "isFirstTimeHomeBuyer": {
+          "from": "borrower.isFirstTimeHomeBuyer",
+          "default": false
+        },
+        "isNonOccupancyBuyer": {
+          "from": "borrower.isNonOccupancyBorrower",
+          "default": false
+        },
+        "isSelfEmployed": {
+          "from": "borrower.isSelfEmployed",
+          "default": false
+        },
+        "cpaPandLMonths": {
+          "from": "borrower.cpaPandLMonths",
+          "default": null
+        },
+        "propertiesOwned": {
+          "from": "borrower.propertiesOwned",
+          "default": 0
+        },
+        "monthsOfReserves": {
+          "from": "borrower.monthsOfReserves",
+          "default": 0
+        },
+        "verificationMethod": {
+          "from": "borrower.verificationMethod",
+          "convert": "pascalToScreaming",
+          "default": null
+        },
+        "verificationOfEmploymentAmount": {
+          "static": null
+        },
+        "derogatoryEvents": {
+          "static": {
+            "deMultEvents": null,
+            "deMultBK": null,
+            "latePmt30x12": null,
+            "latePmt60x12": null,
+            "latePmt90x12": null,
+            "latePmt120x12": null,
+            "latePmt30x24": null,
+            "latePmt60x24": null,
+            "latePmt90x24": null,
+            "latePmt120x24": null,
+            "deMonthsDIL": null,
+            "deMonthsShortSale": null,
+            "deMonthsChargeOff": null,
+            "deMonthsBKC7": null,
+            "deMonthsBKC11": null,
+            "deMonthsBKC13": null,
+            "deMonthsLoanMod": null,
+            "deMonthsNoticeOfDefault": null,
+            "deMonthsForeclosure": null
+          }
+        }
+      },
+      "loanofficer": {
+        "name": {
+          "static": ""
+        },
+        "email": {
+          "static": ""
+        },
+        "assistantEmail": {
+          "static": null
+        }
+      },
+      "property": {
+        "addressLine1": {
+          "from": "property.addressLine1",
+          "default": ""
+        },
+        "addressLine2": {
+          "from": "property.addressLine2",
+          "default": ""
+        },
+        "appraisedValue": {
+          "from": "property.appraisedValue",
+          "convert": "toDecimalStringOrNull"
+        },
+        "city": {
+          "from": "property.city",
+          "default": ""
+        },
+        "county": {
+          "from": "property.county",
+          "default": ""
+        },
+        "countyFipsCode": {
+          "from": "property.countyFipsCode",
+          "default": ""
+        },
+        "countyFipsCodeOnly": {
+          "static": null
+        },
+        "isHighCostCounty": {
+          "from": "property.isHighCostCounty",
+          "default": null
+        },
+        "estimatedValue": {
+          "from": "property.estimatedValue",
+          "convert": "toDecimalStringOrNull"
+        },
+        "inspectionWaiver": {
+          "from": "property.inspectionWaiver",
+          "default": null
+        },
+        "isCondotel": {
+          "from": "property.isCondotel",
+          "default": null
+        },
+        "isDecliningMarket": {
+          "from": "property.isDecliningMarket",
+          "default": null
+        },
+        "isNonWarrantableProject": {
+          "from": "property.isNonWarrantableProject",
+          "default": null
+        },
+        "lotSizeInAcres": {
+          "from": "property.lotSizeInAcres",
+          "convert": "toDecimalStringOrNull"
+        },
+        "occupancy": {
+          "from": "property.occupancy",
+          "convert": "pascalToScreaming",
+          "default": "PRIMARY"
+        },
+        "propertyType": {
+          "from": "property.propertyType",
+          "convert": "pascalToScreaming",
+          "default": "SFR"
+        },
+        "propertyAttachmentType": {
+          "from": "property.propertyAttachmentType",
+          "convert": "pascalToScreaming",
+          "default": null
+        },
+        "state": {
+          "from": "property.state",
+          "default": ""
+        },
+        "stateFipsCode": {
+          "static": ""
+        },
+        "stories": {
+          "from": "property.stories",
+          "default": 1
+        },
+        "units": {
+          "from": "property.units",
+          "default": 1
+        },
+        "zipCode": {
+          "from": "property.zipCode",
+          "default": ""
+        },
+        "zipCodePlusFour": {
+          "from": "property.zipCodePlusFour",
+          "default": null
+        },
+        "msaCode": {
+          "static": null
+        },
+        "censusTract": {
+          "static": null
+        },
+        "medianIncome": {
+          "from": "property.medianIncome",
+          "convert": "toDecimalStringOrNull"
+        }
+      },
+      "customValues": {
+        "from": "customValues",
+        "default": null
+      },
+      "externalCreatedAt": {
+        "compute": "now()"
+      },
+      "externalModifiedAt": {
+        "compute": "now()"
+      },
+      "loanNumber": {
+        "static": ""
+      },
+      "purpose": {
+        "from": "purpose",
+        "convert": "pascalToScreaming",
+        "default": "PURCHASE"
+      },
+      "amount": {
+        "from": "loan.amount",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "rate": {
+        "static": null
+      },
+      "productName": {
+        "static": ""
+      },
+      "productCode": {
+        "static": ""
+      },
+      "aus": {
+        "from": "loan.aus",
+        "convert": "pascalToScreaming",
+        "default": "NOT_SPECIFIED"
+      },
+      "applicationDate": {
+        "from": "loan.applicationDate",
+        "default": null
+      },
+      "fundedAt": {
+        "static": null
+      },
+      "ltv": {
+        "from": "loan.ltv",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "cltv": {
+        "from": "loan.cltv",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "hcltv": {
+        "from": "loan.hcltv",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "amortizationType": {
+        "static": null
+      },
+      "documentationType": {
+        "static": null
+      },
+      "cashOutAmount": {
+        "from": "loan.cashOutAmount",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "fhaCaseAssignmentDate": {
+        "from": "loan.fhaPriorEndorsementDate",
+        "default": null
+      },
+      "fhaTotalLoanAmount": {
+        "from": "loan.fhaTotalLoanAmount",
+        "convert": "toDecimalStringOrNull"
+      },
+      "helocDrawAmount": {
+        "from": "loan.helocDrawAmount",
+        "convert": "toDecimalStringOrNull"
+      },
+      "helocLineAmount": {
+        "from": "loan.helocLineAmount",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "isRelocationLoan": {
+        "static": null
+      },
+      "lenderFee": {
+        "from": "loan.lenderFee",
+        "convert": "toDecimalStringOrNull"
+      },
+      "isMortgageInsurancePaidByBorrower": {
+        "compute": "loan.isMortgageInsurancePaidByBorrower !== false"
+      },
+      "prepaymentPenaltyPeriodMonths": {
+        "from": "loan.prepaymentPenaltyPeriodMonths",
+        "default": null
+      },
+      "prepaymentPenaltyStructure": {
+        "from": "loan.prepaymentPenaltyStructure",
+        "convert": "pascalToScreaming",
+        "default": null
+      },
+      "prepaymentPenaltyStructureType": {
+        "from": "loan.prepaymentPenaltyStructureType",
+        "convert": "pascalToScreaming",
+        "default": null
+      },
+      "propertyValue": {
+        "from": "loan.propertyValue",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "purchasePrice": {
+        "from": "loan.purchasePrice",
+        "convert": "toDecimalStringOrNull",
+        "default": "0.0000"
+      },
+      "refinancePurpose": {
+        "static": "NONE"
+      },
+      "secondAmount": {
+        "from": "loan.secondAmount",
+        "convert": "toDecimalStringOrNull"
+      },
+      "position": {
+        "from": "loan.position",
+        "convert": "pascalToScreaming",
+        "default": "FIRST"
+      },
+      "isSecondInvestorSameAsFirst": {
+        "from": "loan.isSecondInvestorSameAsFirst",
+        "default": null
+      },
+      "isSecondCommunityLoan": {
+        "from": "loan.isSecondCommunityLoan",
+        "default": null
+      },
+      "isSecondPiggyback": {
+        "from": "loan.isSecondPiggyback",
+        "default": null
+      },
+      "servicerName": {
+        "static": ""
+      },
+      "temporaryBuydownType": {
+        "from": "loan.temporaryBuydownType",
+        "convert": "pascalToScreaming",
+        "default": null
+      },
+      "loanTerm": {
+        "from": "loan.loanTerm",
+        "default": null
+      },
+      "loanType": {
+        "from": "loan.loanType",
+        "convert": "pascalToScreaming",
+        "default": null
+      },
+      "usdaTotalLoanAmount": {
+        "from": "loan.usdaTotalLoanAmount",
+        "convert": "toDecimalStringOrNull"
+      },
+      "vaTotalLoanAmount": {
+        "from": "loan.vaTotalLoanAmount",
+        "convert": "toDecimalStringOrNull"
+      },
+      "impoundType": {
+        "from": "loan.impounds",
+        "convert": "pascalToScreaming",
+        "default": "FULL"
+      },
+      "rollLenderFee": {
+        "from": "loan.rollLenderFee",
+        "default": null
+      },
+      "streamlineRefinanceType": {
+        "from": "loan.streamlineRefinanceType",
+        "convert": "pascalToScreaming",
+        "default": null
+      },
+      "armFixedTerm": {
+        "from": "loan.armFixedTerm",
+        "default": null
+      },
+      "created": {
+        "compute": "now()"
+      },
+      "modified": {
+        "compute": "now()"
+      },
+      "losLoanId": {
+        "static": ""
+      }
+    },
+    "overrides": {}
+  }
+  
