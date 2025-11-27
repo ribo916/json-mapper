@@ -23,19 +23,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const mappingFile = loadMapping(mapName);
 
-    // 🔥 use the SAME engine as the old project
-    const result = executeMapping(mappingFile, body);
+    // executeMapping now returns { result, log }
+    const { result, log } = executeMapping(mappingFile, body);
 
     return new Response(
       JSON.stringify(
-        { mappingUsed: mapName, result },
+        {
+          mappingUsed: mapName,
+          result,
+          log,
+        },
         null,
         2 // pretty-print 2 spaces
       ),
       {
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
   } catch (err: any) {

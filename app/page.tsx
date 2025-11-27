@@ -1,65 +1,308 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import "jsoneditor/dist/jsoneditor.css";
 
 export default function Home() {
+  const leftEditorRef = useRef<HTMLDivElement | null>(null);
+  const rightEditorRef = useRef<HTMLDivElement | null>(null);
+
+  const leftEditor = useRef<any>(null);
+  const rightEditor = useRef<any>(null);
+  const JSONEditorCtor = useRef<any>(null);
+
+  const [leftMode, setLeftMode] = useState<"tree" | "code">("code");
+  const [rightMode, setRightMode] = useState<"tree" | "code">("code");
+
+  const [mappingName] = useState("ui-to-external-pricing");
+
+  const [toast, setToast] = useState<string | null>(null);
+  const [showLog, setShowLog] = useState(false);
+  const [logLines, setLogLines] = useState<string[]>([]);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 1800);
+  };
+
+  // Load JSONEditor only on client-side
+  useEffect(() => {
+    let cancelled = false;
+
+    async function initEditors() {
+      if (typeof window === "undefined") return;
+      if (!leftEditorRef.current || !rightEditorRef.current) return;
+
+      const mod = await import("jsoneditor");
+      if (cancelled) return;
+
+      const JSONEditor = (mod as any).default ?? mod;
+      JSONEditorCtor.current = JSONEditor;
+
+      if (!leftEditor.current) {
+        leftEditor.current = new JSONEditor(leftEditorRef.current, {
+          mode: leftMode,
+          mainMenuBar: false,
+        });
+        leftEditor.current.set({});
+      }
+
+      if (!rightEditor.current) {
+        rightEditor.current = new JSONEditor(rightEditorRef.current, {
+          mode: rightMode,
+          mainMenuBar: false,
+          navigationBar: false,
+          statusBar: false,
+        });
+        rightEditor.current.set({});
+      }
+    }
+
+    initEditors();
+
+    return () => {
+      cancelled = true;
+      if (leftEditor.current) {
+        leftEditor.current.destroy();
+        leftEditor.current = null;
+      }
+      if (rightEditor.current) {
+        rightEditor.current.destroy();
+        rightEditor.current = null;
+      }
+    };
+  }, []);
+
+  // Update left editor when switching modes
+  useEffect(() => {
+    if (!JSONEditorCtor.current) return;
+    if (!leftEditorRef.current) return;
+    if (!leftEditor.current) return;
+
+    const JSONEditor = JSONEditorCtor.current;
+    const val = leftEditor.current.get();
+
+    leftEditor.current.destroy();
+    leftEditor.current = new JSONEditor(leftEditorRef.current, {
+      mode: leftMode,
+      mainMenuBar: false,
+    });
+    leftEditor.current.set(val);
+  }, [leftMode]);
+
+  // Update right editor mode
+  useEffect(() => {
+    if (!JSONEditorCtor.current) return;
+    if (!rightEditorRef.current) return;
+    if (!rightEditor.current) return;
+
+    const JSONEditor = JSONEditorCtor.current;
+    const val = rightEditor.current.get();
+
+    rightEditor.current.destroy();
+    rightEditor.current = new JSONEditor(rightEditorRef.current, {
+      mode: rightMode,
+      mainMenuBar: false,
+      navigationBar: false,
+      statusBar: false,
+    });
+    rightEditor.current.set(val);
+  }, [rightMode]);
+
+  // Convert
+  const handleConvert = async () => {
+    try {
+      if (!leftEditor.current) return;
+
+      const inputData = leftEditor.current.get();
+
+      // wipe out logs for this new run
+      setLogLines([]);
+
+      const res = await fetch(`/api/convert?map=${mappingName}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(inputData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast("Conversion failed");
+        console.error(data);
+        return;
+      }
+
+      rightEditor.current?.set(data.result);
+      setLogLines(Array.isArray(data.log) ? data.log : []);
+      showToast("Converted!");
+    } catch (err: any) {
+      showToast("Invalid JSON");
+    }
+  };
+
+  // Copy
+  const handleCopy = () => {
+    try {
+      if (!rightEditor.current) {
+        showToast("Nothing to copy");
+        return;
+      }
+
+      const val = rightEditor.current.get();
+
+      if (val === undefined || val === null) {
+        showToast("Nothing to copy");
+        return;
+      }
+
+      const text =
+        typeof val === "string" ? val : JSON.stringify(val, null, 2);
+
+      navigator.clipboard.writeText(text);
+      showToast("Copied!");
+    } catch (err) {
+      showToast("Copy failed");
+    }
+  };
+
+  const btn = (active: boolean) =>
+    active
+      ? "px-3 py-1 rounded bg-blue-600 text-white shadow-sm"
+      : "px-3 py-1 rounded bg-white text-gray-700 border border-gray-300 hover:bg-gray-100";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="w-full h-screen flex flex-col bg-gray-100">
+      {/* Header */}
+      <div className="p-4 border-b bg-white shadow-sm text-xl font-semibold flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Simple logo */}
+          <div className="w-8 h-8 bg-blue-600 text-white flex items-center justify-center rounded-md">
+            <span className="text-lg font-bold">J</span>
+          </div>
+          <span className="tracking-tight">JSON Mapper</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <span className="text-sm text-gray-500">
+          Mapping: <span className="font-mono">{mappingName}</span>
+        </span>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left editor */}
+        <div className="w-1/2 flex flex-col border-r bg-white">
+          <div className="p-2 border-b flex gap-2 bg-gray-50">
+            <button
+              className={btn(leftMode === "tree")}
+              onClick={() => setLeftMode("tree")}
+            >
+              Tree
+            </button>
+            <button
+              className={btn(leftMode === "code")}
+              onClick={() => setLeftMode("code")}
+            >
+              Code
+            </button>
+          </div>
+          <div ref={leftEditorRef} className="flex-1 overflow-auto" />
         </div>
-      </main>
+
+        {/* Center buttons */}
+        <div className="w-20 flex flex-col items-center justify-center gap-4">
+          <button
+            onClick={handleConvert}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
+          >
+            →
+          </button>
+
+          <button
+            onClick={handleCopy}
+            className="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded shadow"
+          >
+            Copy
+          </button>
+
+          <button
+            onClick={() => setShowLog((prev) => !prev)}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded shadow text-sm"
+          >
+            {showLog ? "Hide Log" : "Log"}
+          </button>
+        </div>
+
+        {/* Right editor */}
+        <div className="w-1/2 flex flex-col bg-white">
+          <div className="p-2 border-b flex gap-2 bg-gray-50">
+            <button
+              className={btn(rightMode === "tree")}
+              onClick={() => setRightMode("tree")}
+            >
+              Tree
+            </button>
+            <button
+              className={btn(rightMode === "code")}
+              onClick={() => setRightMode("code")}
+            >
+              Code
+            </button>
+          </div>
+          <div ref={rightEditorRef} className="flex-1 overflow-auto" />
+        </div>
+      </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 bg-gray-900 text-white shadow-lg px-4 py-2 rounded-md border border-black/20 animate-fade z-50">
+          {toast}
+        </div>
+      )}
+
+      {/* Log panel */}
+      {showLog && (
+        <div className="fixed bottom-0 left-0 right-0 h-60 bg-black text-green-200 text-sm font-mono border-t border-gray-700 shadow-lg flex flex-col z-40">
+          <div className="px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+            <span className="font-semibold">Conversion Log</span>
+            <button
+              className="text-xs text-gray-300 hover:text-white"
+              onClick={() => setShowLog(false)}
+            >
+              Close
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto px-4 py-2 space-y-1">
+            {logLines.length === 0 ? (
+              <div className="text-gray-400 italic">
+                No logs yet. Run a conversion to see details.
+              </div>
+            ) : (
+              logLines.map((line, idx) => (
+                <div key={idx} className="whitespace-pre-wrap">
+                  {line}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .animate-fade {
+          animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut {
+          0% {
+            opacity: 1;
+          }
+          75% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 }
