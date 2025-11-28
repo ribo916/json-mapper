@@ -65,6 +65,12 @@
       "2": "HELOC",
       "3": "Third"
     },
+    "SearchPosition": {
+      "1": "First",
+      "2": "Second",
+      "3": "HELOC",
+      "4": "Third"
+    },
     "EmploymentDocumentationMethod": {
       "0": "None",
       "1": "Stated",
@@ -146,6 +152,18 @@
       "1": "Lender",
       "2": "Borrower",
       "3": "Split"
+    },
+    "FHAFinancingOption": {
+      "0": "Finance",
+      "1": "PaidInCash"
+    },
+    "VAFinancingOption": {
+      "0": "Finance",
+      "1": "PaidInCash"
+    },
+    "USDAFinanceOption": {
+      "0": "Finance",
+      "1": "PaidInCash"
     }
   },
 
@@ -165,7 +183,7 @@
     "search": {
       "position": {
         "from": "Search.Position",
-        "enum": "LoanPosition"
+        "enum": "SearchPosition"
       },
       "desiredLockPeriod": {
         "from": "Search.desiredLockPeriod"
@@ -291,6 +309,101 @@
     },
 
     "loan": {
+      "fhaTotalLoanAmount": {
+        "from": "Loan.fhaTotalLoanAmount",
+        "convert": "toNumberSafe"
+      },
+      "fhaMortgageInsurancePremium": {
+        "from": "Loan.fhaMortgageInsurancePremium",
+        "convert": "toNumberSafe"
+      },
+      "fhaMortgageInsurancePremiumAmount": {
+        "from": "Loan.fhaMortgageInsurancePremiumAmount",
+        "convert": "toNumberSafe"
+      },
+      "fhaFinanceAmount": {
+        "from": "Loan.fhaFinanceAmount",
+        "convert": "toNumberSafe"
+      },
+      "fhaCaseAssignmentDate": {
+        "from": "Loan.fhaCaseAssignmentDate",
+        "convert": "toDateOrNull"
+      },
+      "vaTotalLoanAmount": {
+        "from": "Loan.vaTotalLoanAmount",
+        "convert": "toNumberSafe"
+      },       
+      "vaDownPayment": {
+        "from": "Loan.vaDownPayment",
+        "convert": "toNumberSafe"
+      },     
+      "vaDownPaymentAmount": {
+        "from": "Loan.vaDownPaymentAmount",
+        "convert": "toNumberSafe"
+      },
+      "vaFundingFee": {
+        "from": "Loan.vaFundingFee",
+        "convert": "toNumberSafe"
+      },            
+      "vaFundingFeeAmount": {
+        "from": "Loan.vaFundingFeeAmount",
+        "convert": "toNumberSafe"
+      },
+      "vaFinanceAmount": {
+        "from": "Loan.vaFinanceAmount",
+        "convert": "toNumberSafe"
+      },
+      "vaCashoutLTV": {
+        "from": "Loan.vaCashoutLTV",
+        "convert": "toNumberSafe"
+      },
+      "vaCashoutCLTV": {
+        "from": "Loan.vaCashoutCLTV",
+        "convert": "toNumberSafe"
+      },
+      "vaCashoutHCLTV": {
+        "from": "Loan.vaCashoutHCLTV",
+        "convert": "toNumberSafe"
+      },
+      "vaLoanHistory": {
+        "from": "Loan.vaLoanHistory"
+      },
+      "vaFinancingOption": {
+        "from": "Loan.vaFinancingOption",
+        "enum:": "VAFinancingOption"
+      },
+      "usdaFinanceOption": {
+        "from": "Loan.usdaFinanceOption",
+        "enum": "USDAFinanceOption"
+      },
+      "usdaTotalLoanAmount": {
+        "from": "Loan.usdaTotalLoanAmount",
+        "convert": "toNumberSafe"
+      },
+      "usdaGuaranteeFee": {
+        "from": "Loan.usdaGuaranteeFee",
+        "convert": "toNumberSafe"
+      },
+      "usdaGuaranteeFeeAmount": {
+        "from": "Loan.usdaGuaranteeFee",
+        "convert": "toNumberSafe"
+      },
+      "usdaFinanceAmount": {
+        "from": "Loan.usdaFinanceAmount",
+        "convert": "toNumberSafe"
+      },
+      "servicerName": {
+        "from": "Loan.usdaFinanceAmount",
+        "convert": "toNumberSafe"
+      },
+      "prepaymentPenaltyPeriodMonths": {
+        "from": "Loan.prepaymentPenaltyPeriodMonths",
+        "convert": "toNumberSafe"
+      },
+      "fhaFinancingOption": {
+        "from": "Loan.fhaFinancingOption",
+        "enum": "FHAFinancingOption"
+      },
       "purpose": {
         "from": "Loan.purpose",
         "enum": "LoanPurpose"
@@ -380,6 +493,14 @@
     },
 
     "property": {
+      "estimatedValue": {
+        "from": "Property.EstimatedValue",
+        "convert": "toNumberSafe"
+      },
+      "appraisedValue": {
+        "from": "Property.appraisedValue",
+        "convert": "toNumberSafe" 
+      },
       "state": {
         "from": "Property.state"
       },
@@ -412,6 +533,9 @@
       },
       "city": {
         "from": "Property.city"
+      },
+      "stateFipsCode": {
+        "from": "Property.stateFipsCode"
       },
       "countyFipsCode": {
         "from": "Property.countyFipsCode"
