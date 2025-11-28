@@ -185,7 +185,8 @@
       },
       "loanTerms": {
         "from": "Search.loanTerms",
-        "default": []
+        "default": [],
+        "compute": "Array.isArray(get('Search.loanTerms')) ? get('Search.loanTerms').map(t => parseInt(t, 10)) : []"
       },
       "armFixedTerms": {
         "from": "Search.armFixedTerms",
@@ -213,14 +214,16 @@
         "default": ""
       },
       "fico": {
-        "from": "Borrower.fico"
+        "from": "Borrower.fico",
+        "convert": "toNumberSafe"
       },
       "dtiRatio": {
         "from": "Borrower.dtiRatio",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "monthsOfReserves": {
         "from": "Borrower.monthsOfReserves",
+        "convert": "toNumberSafe",
         "default": 0
       },
       "isNonOccupancyBorrower": {
@@ -294,17 +297,16 @@
       },
       "amount": {
         "from": "Loan.amount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "purchasePrice": {
         "from": "Loan.purchasePrice",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "propertyValue": {
         "from": "Loan.propertyValue",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
-
       "refinancePurpose": {
         "from": "Loan.refinancePurpose",
         "enum": "LoanRefinancePurpose"
@@ -312,19 +314,19 @@
 
       "cashOutAmount": {
         "from": "Loan.cashOutAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "secondAmount": {
         "from": "Loan.secondAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "helocLineAmount": {
         "from": "Loan.helocLineAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "helocDrawAmount": {
         "from": "Loan.helocDrawAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
 
       "isMortgageInsurancePaidByBorrower": {
@@ -365,15 +367,15 @@
 
       "ltv": {
         "from": "Loan.ltv",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "cltv": {
         "from": "Loan.cltv",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "hcltv": {
         "from": "Loan.hcltv",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       }
     },
 
@@ -394,7 +396,8 @@
       },
       "units": {
         "from": "Property.units",
-        "default": 1
+        "default": 1,
+        "convert": "toNumberSafe"
       },
       "stories": {
         "from": "Property.stories",
@@ -425,27 +428,27 @@
     "brokerCompPlan": {
       "fixedAmount": {
         "from": "BrokerCompPlan.fixedAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "percent": {
         "from": "BrokerCompPlan.percent",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "minAmount": {
         "from": "BrokerCompPlan.minAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "maxAmount": {
         "from": "BrokerCompPlan.maxAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "calculatedAmount": {
         "from": "BrokerCompPlan.calculatedAmount",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "calculatedAdjustment": {
         "from": "BrokerCompPlan.calculatedAdjustment",
-        "convert": "toDecimal"
+        "convert": "toNumberSafe"
       },
       "paidBy": {
         "from": "BrokerCompPlan.paidBy",
