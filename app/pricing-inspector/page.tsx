@@ -139,7 +139,7 @@ export default function PricingInspector() {
     } catch {
       setError("Invalid JSON");
       setRawResults([]);
-      setFileName(file.name);
+      setFileName(fileName ?? file.name);
     }
   };
 
@@ -769,7 +769,7 @@ export default function PricingInspector() {
                                         <summary className="px-3 py-2 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-800">
                                           <span>
                                             {cat}
-                                            {sub ? ` \u00b7 ${sub}` : ""}
+                                            {sub ? ` · ${sub}` : ""}
                                           </span>
                                           <span className="text-xs text-gray-500">
                                             {list.length} rule
