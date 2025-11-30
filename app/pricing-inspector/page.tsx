@@ -97,7 +97,7 @@ function isPpeResponse(value: unknown): value is PpeResponse {
 /* COMPONENT                                                                 */
 /* -------------------------------------------------------------------------- */
 
-export default function PricingInspector(): JSX.Element {
+export default function PricingInspector() {
   const [rawResults, setRawResults] = useState<PpeResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
