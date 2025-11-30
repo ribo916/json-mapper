@@ -493,22 +493,20 @@ export default function PricingInspector() {
                       Why This Product Is Ineligible
                     </div>
                     <p className="leading-snug">
-                      This product is <strong>ineligible</strong> because it has
-                      a valid result but is marked as not eligible and returns
-                      no price rows. In other words,{" "}
+                      This product is <strong>ineligible</strong> because it has a valid
+                      result but is marked as not eligible.  
+                      <br />
                       <code className="bg-white border px-1 rounded text-xs">
                         $.data.results[x].isValidResult == true
-                      </code>
-                      ,{" "}
-                      <code className="bg-white border px-1 rounded text-xs">
-                        $.data.results[x].isEligible == false
                       </code>{" "}
                       and{" "}
                       <code className="bg-white border px-1 rounded text-xs">
-                        $.data.results[x].prices.length == 0
+                        $.data.results[x].isEligible == false
                       </code>
-                      . The rule evaluations below are used to explain which
-                      eligibility rules disqualified this scenario.
+                      .
+                      <br />
+                      Eligibility rules that evaluated as disqualifying are listed below
+                      along with the raw JSON for each rule.
                     </p>
                   </div>
 
@@ -526,10 +524,7 @@ export default function PricingInspector() {
                       if (rules.length === 0) {
                         return (
                           <div className="text-sm text-gray-600 italic">
-                            No explicit eligibility rules disqualified this
-                            product. It may be ineligible because no priceable
-                            matrix rows exist for this scenario, even though no
-                            individual rule is flagged.
+                            No explicit eligibility rules disqualified this product.
                           </div>
                         );
                       }
@@ -550,19 +545,29 @@ export default function PricingInspector() {
                               <div className="text-sm font-semibold text-gray-800 border-l-4 border-gray-300 pl-3">
                                 {category}
                               </div>
+
                               <div className="space-y-3">
                                 {grouped[category].map((rule, index) => (
                                   <div
                                     key={`${category}-${index}`}
                                     className="border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
                                   >
+                                    {/* Rule title */}
                                     <div className="font-medium text-gray-900 mb-1">
                                       {rule.ruleName}
                                     </div>
+
+                                    {/* Human readable explanation */}
                                     <div className="text-sm text-gray-700 mb-2 leading-snug">
                                       {rule.explanation}
                                     </div>
-                                    <div className="text-xs text-gray-500 space-y-0.5">
+
+                                    {/* Metadata */}
+                                    <div className="text-xs text-gray-500 space-y-1 mb-2">
+                                      <div>
+                                        <span className="font-medium">Category:</span>{" "}
+                                        {rule.categoryLabel}
+                                      </div>
                                       <div>
                                         <span className="font-medium">
                                           Inherited Category:
@@ -570,14 +575,23 @@ export default function PricingInspector() {
                                         {rule.ruleInheritedName || "(none)"}
                                       </div>
                                       <div>
-                                        <span className="font-medium">
-                                          Source Path:
-                                        </span>{" "}
+                                        <span className="font-medium">Source Path:</span>{" "}
                                         <code className="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs">
                                           {rule.jsonPath}
                                         </code>
                                       </div>
                                     </div>
+
+                                    {/* Raw JSON */}
+                                    <details className="text-xs mt-1">
+                                      <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                                        Show rule explanation JSON
+                                      </summary>
+                                      <pre className="mt-2 p-2 bg-gray-100 border rounded text-[11px] overflow-x-auto">
+                                    {JSON.stringify(rule, null, 2)}
+                                      </pre>
+                                    </details>
+
                                   </div>
                                 ))}
                               </div>
@@ -588,55 +602,9 @@ export default function PricingInspector() {
                     })()}
                   </div>
 
-                  {/* FLAT VIEW */}
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-sm text-gray-700 hover:text-gray-900">
-                      Show flat list of disqualifying rules
-                    </summary>
-                    <div className="mt-3 text-sm text-gray-800 space-y-2">
-                      {(() => {
-                        const rules = buildDisqualifyingRuleExplanations(
-                          selectedProduct.ruleResults ?? null
-                        );
-
-                        if (rules.length === 0) {
-                          return (
-                            <div className="text-gray-600 italic">
-                              No disqualifying eligibility rules found for this
-                              product.
-                            </div>
-                          );
-                        }
-
-                        return rules.map((rule, idx) => (
-                          <div
-                            key={idx}
-                            className="border-b border-gray-200 pb-2 last:border-b-0"
-                          >
-                            <div className="font-medium text-gray-900">
-                              {rule.ruleName}
-                            </div>
-                            <div className="text-xs text-gray-600">
-                              {rule.categoryLabel}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-0.5">
-                              <span className="font-medium">
-                                Inherited Category:
-                              </span>{" "}
-                              {rule.ruleInheritedName || "(none)"}{" "}
-                              &middot;{" "}
-                              <span className="font-medium">Path:</span>{" "}
-                              <code className="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs">
-                                {rule.jsonPath}
-                              </code>
-                            </div>
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                  </details>
                 </section>
               )}
+
 
               {/* INVALID VIEW */}
               {selectedIsInvalid && (
