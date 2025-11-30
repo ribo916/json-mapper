@@ -52,7 +52,7 @@ interface PpeResult {
   isEligible?: boolean | null;
   isValidResult?: boolean | null;
 
-  prices?: unknown[] | null;
+  prices?: PriceRow[] | null;
   ruleResults?: RuleResult[] | null;
 
   invalidResultReason?: string | null;
@@ -63,11 +63,11 @@ interface PpeResult {
   allInvestorsExcluded?: boolean | null;
   lockDeskWorkflowResults?: unknown[] | null;
   complianceResults?: unknown[] | null;
-  feeResults?: unknown[] | null;
+  feeResults?: FeeResultLite[] | null;
   inheritance?: unknown[] | null;
   sources?: unknown[] | null;
 
-  // Product-level totals used in Adjustment Summary
+  // Product-level totals
   totalAdjustments?: number | null;
   totalBasePriceAdjustments?: number | null;
   totalSRPAdjustments?: number | null;
@@ -97,7 +97,7 @@ function isPpeResponse(value: unknown): value is PpeResponse {
 /* COMPONENT                                                                 */
 /* -------------------------------------------------------------------------- */
 
-export default function PricingInspector() {
+export default function PricingInspector(): JSX.Element {
   const [rawResults, setRawResults] = useState<PpeResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -202,7 +202,8 @@ export default function PricingInspector() {
 
   const selectedIsInvalid = selectedProduct?.isValidResult === false;
 
-  const pricesCount = (selectedProduct?.prices ?? []).length;
+  const prices = (selectedProduct?.prices ?? []) as PriceRow[];
+  const pricesCount = prices.length;
   const excludedInvestorsCount = (selectedProduct?.excludedInvestors ?? [])
     .length;
 
@@ -492,7 +493,7 @@ export default function PricingInspector() {
                       Eligible Product Summary
                     </div>
                     <p className="leading-snug">
-                      This product is <strong>eligible</strong> because both{" "}
+                      This product is eligible because both{" "}
                       <code className="bg-white border px-1 rounded text-xs">
                         $.data.results[x].isEligible == true
                       </code>{" "}
@@ -500,12 +501,12 @@ export default function PricingInspector() {
                       <code className="bg-white border px-1 rounded text-xs">
                         $.data.results[x].isValidResult == true
                       </code>{" "}
-                      are satisfied.
+                      are satisfied. The sections below show how the engine
+                      priced this scenario and which rule buckets contributed.
                     </p>
                   </div>
 
                   {(() => {
-                    const prices = (selectedProduct.prices ?? []) as PriceRow[];
                     const feeResults = (selectedProduct.feeResults ??
                       []) as FeeResultLite[];
 
@@ -564,7 +565,7 @@ export default function PricingInspector() {
                       0
                     );
 
-                    // Rule buckets (booleanEquationValue == false)
+                    // Rule buckets (booleanEquationValue == false means rule passed / applied)
                     const usedRules = (selectedProduct.ruleResults ?? []).filter(
                       (r) => r.booleanEquationValue === false
                     );
@@ -590,7 +591,7 @@ export default function PricingInspector() {
                                 Min / Max Rate
                               </div>
                               <div>
-                                {minRate} → {maxRate}
+                                {minRate} &rarr; {maxRate}
                               </div>
                             </div>
 
@@ -599,13 +600,13 @@ export default function PricingInspector() {
                                 Best / Worst Price
                               </div>
                               <div>
-                                {bestPrice} → {worstPrice}
+                                {bestPrice} &rarr; {worstPrice}
                               </div>
                             </div>
 
                             <div className="p-3 border rounded bg-white shadow-sm md:col-span-3">
                               <div className="font-medium text-gray-700">
-                                Par-ish Rate (closest to 0)
+                                Par-ish Rate (closest to 0 price)
                               </div>
                               <div>{parRate ?? "(none)"}</div>
                             </div>
@@ -682,8 +683,8 @@ export default function PricingInspector() {
 
                           <div className="mt-2 text-xs text-gray-500">
                             These values are reported totals from PPE and may
-                            include additional internal adjustments not broken
-                            out individually in the response.
+                            include additional internal adjustments that are not
+                            broken out individually in the response.
                           </div>
                         </details>
 
@@ -733,17 +734,22 @@ export default function PricingInspector() {
 
                           {usedRules.length === 0 ? (
                             <div className="mt-3 text-sm text-gray-600 italic">
-                              No rule buckets fired (unexpected for an eligible
-                              product).
+                              No rule buckets fired for this product. This is
+                              unusual for an eligible, priced scenario.
                             </div>
                           ) : (
                             (() => {
+                              // Group by category + subCategory
                               const grouped = usedRules.reduce<
                                 Record<string, RuleResult[]>
                               >((acc, r) => {
                                 const cat = r.category || "Unknown";
-                                if (!acc[cat]) acc[cat] = [];
-                                acc[cat].push(r);
+                                const sub =
+                                  (r as { subCategory?: string | null })
+                                    .subCategory || "";
+                                const key = sub ? `${cat} :: ${sub}` : cat;
+                                if (!acc[key]) acc[key] = [];
+                                acc[key].push(r);
                                 return acc;
                               }, {});
 
@@ -753,58 +759,78 @@ export default function PricingInspector() {
 
                               return (
                                 <div className="mt-3 space-y-3">
-                                  {categoryEntries.map(([cat, list]) => (
-                                    <details
-                                      key={cat}
-                                      className="border border-gray-200 rounded-lg bg-white shadow-sm"
-                                    >
-                                      <summary className="px-3 py-2 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-800">
-                                        <span>{cat}</span>
-                                        <span className="text-xs text-gray-500">
-                                          {list.length} rule
-                                          {list.length === 1 ? "" : "s"}
-                                        </span>
-                                      </summary>
+                                  {categoryEntries.map(([key, list]) => {
+                                    const [cat, sub] = key.split(" :: ");
+                                    return (
+                                      <details
+                                        key={key}
+                                        className="border border-gray-200 rounded-lg bg-white shadow-sm"
+                                      >
+                                        <summary className="px-3 py-2 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-800">
+                                          <span>
+                                            {cat}
+                                            {sub ? ` \u00b7 ${sub}` : ""}
+                                          </span>
+                                          <span className="text-xs text-gray-500">
+                                            {list.length} rule
+                                            {list.length === 1 ? "" : "s"}
+                                          </span>
+                                        </summary>
 
-                                      <div className="px-3 py-3 border-t border-gray-200 space-y-2 text-sm">
-                                        {list.map((r, idx) => (
-                                          <div
-                                            key={idx}
-                                            className="p-2 rounded border border-gray-200 bg-gray-50"
-                                          >
-                                            <div className="font-medium text-gray-900">
-                                              {r.ruleName || "(unnamed rule)"}
-                                            </div>
-                                            <div className="text-xs text-gray-600 mt-0.5">
-                                              Category: {r.category || "Unknown"}
-                                            </div>
-                                            <div className="text-xs text-gray-600 mt-0.5">
-                                              booleanEquationValue:{" "}
-                                              {String(r.booleanEquationValue)}
-                                            </div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                              <span className="font-medium">
-                                                Path:
-                                              </span>{" "}
-                                              <code className="px-1 py-0.5 bg-white border border-gray-300 rounded text-[11px]">
-                                                $.data.results[x].ruleResults[]
-                                              </code>
-                                            </div>
+                                        <div className="px-3 py-3 border-t border-gray-200 space-y-2 text-sm">
+                                          {list.map((r, idx) => (
+                                            <div
+                                              key={idx}
+                                              className="p-2 rounded border border-gray-200 bg-gray-50"
+                                            >
+                                              <div className="font-medium text-gray-900">
+                                                {r.ruleName || "(unnamed rule)"}
+                                              </div>
+                                              <div className="text-xs text-gray-600 mt-0.5">
+                                                Category: {r.category || "Unknown"}
+                                              </div>
+                                              {(
+                                                r as { subCategory?: string | null }
+                                              ).subCategory && (
+                                                <div className="text-xs text-gray-600">
+                                                  Subcategory:{" "}
+                                                  {
+                                                    (
+                                                      r as {
+                                                        subCategory?: string | null;
+                                                      }
+                                                    ).subCategory
+                                                  }
+                                                </div>
+                                              )}
+                                              <div className="text-xs text-gray-600 mt-0.5">
+                                                booleanEquationValue:{" "}
+                                                {String(r.booleanEquationValue)}
+                                              </div>
+                                              <div className="text-xs text-gray-500 mt-1">
+                                                <span className="font-medium">
+                                                  Path:
+                                                </span>{" "}
+                                                <code className="px-1 py-0.5 bg-white border border-gray-300 rounded text-[11px]">
+                                                  $.data.results[x].ruleResults[]
+                                                </code>
+                                              </div>
 
-                                            {/* Raw JSON for this rule */}
-                                            <details className="mt-2 text-xs">
-                                              <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
-                                                Show raw rule JSON
-                                              </summary>
-                                              <pre className="mt-2 p-2 bg-white border rounded text-[11px] overflow-x-auto">
-                                                {JSON.stringify(r, null, 2)}
-                                              </pre>
-                                            </details>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </details>
-                                  ))}
+                                              {/* Raw JSON for this rule */}
+                                              <details className="mt-2 text-xs">
+                                                <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                                                  Show raw rule JSON
+                                                </summary>
+                                                <pre className="mt-2 p-2 bg-white border rounded text-[11px] overflow-x-auto">
+                                                  {JSON.stringify(r, null, 2)}
+                                                </pre>
+                                              </details>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </details>
+                                    );
+                                  })}
                                 </div>
                               );
                             })()
@@ -827,8 +853,8 @@ export default function PricingInspector() {
                       Why This Product Is Ineligible
                     </div>
                     <p className="leading-snug">
-                      This product is <strong>ineligible</strong> because it has
-                      a valid result but is marked as not eligible.{" "}
+                      This product is ineligible because it has a valid result
+                      but is marked as not eligible.{" "}
                       <code className="bg-white border px-1 rounded text-xs">
                         $.data.results[x].isValidResult == true
                       </code>{" "}
@@ -836,9 +862,11 @@ export default function PricingInspector() {
                       <code className="bg-white border px-1 rounded text-xs">
                         $.data.results[x].isEligible == false
                       </code>
-                      . Eligibility rules that evaluated as disqualifying are
-                      listed below along with the raw JSON for each rule
-                      explanation.
+                      . Rules where{" "}
+                      <code className="bg-white border px-1 rounded text-xs">
+                        booleanEquationValue == true
+                      </code>{" "}
+                      indicate eligibility conditions that were violated.
                     </p>
                   </div>
 
@@ -857,7 +885,8 @@ export default function PricingInspector() {
                         return (
                           <div className="text-sm text-gray-600 italic">
                             No explicit eligibility rules disqualified this
-                            product.
+                            product. It may be ineligible because no priceable
+                            matrix or investor rows exist for this scenario.
                           </div>
                         );
                       }
@@ -946,10 +975,8 @@ export default function PricingInspector() {
                       Why This Product Is Invalid
                     </div>
                     <p className="leading-snug mb-1">
-                      This product is <strong>invalid</strong> because PPE could
-                      not generate a usable pricing scenario. Typically this
-                      occurs when no investors, price rows, or configurations
-                      can be evaluated.
+                      This product is invalid because PPE could not generate a
+                      usable pricing scenario. The most common causes are:
                     </p>
                     <ul className="list-disc list-inside text-sm space-y-1">
                       <li>
@@ -958,7 +985,7 @@ export default function PricingInspector() {
                         </code>
                       </li>
                       <li>
-                        Prices are usually empty:{" "}
+                        Prices are empty:{" "}
                         <code className="bg-white border px-1 rounded text-xs">
                           $.data.results[x].prices.length == 0
                         </code>
@@ -967,8 +994,9 @@ export default function PricingInspector() {
                         Often{" "}
                         <code className="bg-white border px-1 rounded text-xs">
                           $.data.results[x].uniqueInvestorCount == 0
-                        </code>
-                        , meaning no investors could price this scenario.
+                        </code>{" "}
+                        which indicates that no investors could price this
+                        scenario.
                       </li>
                     </ul>
                   </div>
