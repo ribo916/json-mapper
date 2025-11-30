@@ -8,11 +8,17 @@
  * response can vary and we only rely on the fields we know exist.
  */
 export interface RuleResult {
-  ruleName: string;
+  ruleName?: string | null;
+  category?: string | null;
+  subCategory?: string | null;  // ✅ ADD THIS
+  booleanEquationValue?: boolean | null;
+  ruleDescription?: string | null;
   ruleInheritedName?: string | null;
-  category: string; // Required because TS error complained earlier
-  booleanEquationValue: boolean;
+  
+  // keep your existing pass-through fields
+  [key: string]: any;
 }
+
 
 /**
  * Normalized + human-readable rule explanation returned to UI.
