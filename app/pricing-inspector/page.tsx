@@ -20,15 +20,41 @@ function toNumberSafe(value: unknown): number {
   return 0;
 }
 
+function sum(values: number[]): number {
+  return values.reduce((acc, v) => acc + v, 0);
+}
+
+const PRICE_RULE_CATEGORIES = ["Adjustment", "SRP", "Margin"] as const;
+
 interface PriceClamp {
+  target?: string | null;
+  category?: string | null;
+  clamped?: unknown;
+  unclamped?: unknown;
+
+  // older names (if Polly ever returns them)
   clampedFrom?: unknown;
   clampedTo?: unknown;
-  category?: string | null;
 }
 
 interface PriceRow {
   rate?: unknown;
+  apr?: unknown;
   price?: unknown;
+  netPrice?: unknown;
+  netPriceBeforeRounding?: unknown;
+  principalAndInterest?: unknown;
+  lockPeriod?: unknown;
+  investor?: unknown;
+
+  priceBeforeAdjustments?: unknown;
+  priceAfterBaseAdjustments?: unknown;
+
+  totalPriceAdjustments?: unknown;
+  totalMarginAdjustments?: unknown;
+  totalPriceSRPAdjustments?: unknown;
+
+  ruleResults?: RuleResult[] | null;
   clampResults?: PriceClamp[] | null;
 }
 
@@ -76,6 +102,15 @@ interface PpeResult {
 
 interface PpeResponse {
   data?: {
+    loan?: {
+      amount?: unknown;
+    };
+    search?: {
+      desiredLockPeriod?: unknown;
+    };
+    brokerCompPlan?: {
+      calculatedAdjustment?: unknown;
+    };
     results?: PpeResult[];
   };
 }
@@ -94,6 +129,124 @@ function isPpeResponse(value: unknown): value is PpeResponse {
 }
 
 /* -------------------------------------------------------------------------- */
+/* PRICE BREAKDOWN HELPERS (mirror wiki logic)                               */
+/* -------------------------------------------------------------------------- */
+
+function pickRuleValues(
+  rules: RuleResult[] | null | undefined,
+  opts: { hidden: boolean }
+): number[] {
+  if (!Array.isArray(rules)) return [];
+  return rules
+    .filter((r) => {
+      const isPriceTarget = r.target === "Price";
+      const fired = r.booleanEquationValue === true;
+      const categoryOk =
+        typeof r.category === "string" &&
+        PRICE_RULE_CATEGORIES.includes(r.category as (typeof PRICE_RULE_CATEGORIES)[number]);
+      const hiddenFlag = r.isHiddenAdjustment === opts.hidden;
+      return isPriceTarget && fired && categoryOk && hiddenFlag;
+    })
+    .map((r) => toNumberSafe(r.resultEquationValue));
+}
+
+function pickClampRemovals(
+  clamps: PriceClamp[] | null | undefined
+): number[] {
+  if (!Array.isArray(clamps)) return [];
+  return clamps
+    .filter((c) => {
+      const isPriceTarget = c.target === "Price";
+      const categoryOk =
+        typeof c.category === "string" &&
+        PRICE_RULE_CATEGORIES.includes(c.category as (typeof PRICE_RULE_CATEGORIES)[number]);
+      return isPriceTarget && categoryOk;
+    })
+    .map((c) => {
+      // Support either (clamped/unclamped) or (clampedFrom/clampedTo)
+      const unclamped =
+        c.unclamped !== undefined ? c.unclamped : c.clampedFrom;
+      const clamped =
+        c.clamped !== undefined ? c.clamped : c.clampedTo;
+      return toNumberSafe(unclamped) - toNumberSafe(clamped);
+    });
+}
+
+interface PriceBreakdown {
+  pba: number | null;
+  paba: number;
+  basePrice: number;
+  visibleResultAdj: number;
+  visibleRowAdj: number;
+  totalVisiblePriceAdj: number;
+  clampAdj: number;
+  reconstructedPrice: number;
+  enginePrice: number;
+  netPrice: number;
+  brokerCompField: number;
+  priceDiff: number;
+  netDiff: number;
+}
+
+function buildPriceBreakdown(
+  product: PpeResult,
+  priceRow: PriceRow,
+  brokerCompField: number
+): PriceBreakdown {
+  const pbaRaw = (priceRow as { priceBeforeAdjustments?: unknown })
+    .priceBeforeAdjustments;
+  const pba =
+    Object.prototype.hasOwnProperty.call(priceRow, "priceBeforeAdjustments") &&
+    pbaRaw !== undefined
+      ? toNumberSafe(pbaRaw)
+      : null;
+
+  const paba = toNumberSafe(
+    (priceRow as { priceAfterBaseAdjustments?: unknown })
+      .priceAfterBaseAdjustments
+  );
+
+  const rlHidden = sum(pickRuleValues(product.ruleResults, { hidden: true }));
+  const rlVisible = sum(pickRuleValues(product.ruleResults, { hidden: false }));
+  const plHidden = sum(pickRuleValues(priceRow.ruleResults, { hidden: true }));
+  const plVisible = sum(pickRuleValues(priceRow.ruleResults, { hidden: false }));
+
+  const basePrice = paba + plHidden;
+
+  const visibleResultAdj = rlVisible;
+  const visibleRowAdj = plVisible;
+  const totalVisiblePriceAdj = visibleResultAdj + visibleRowAdj;
+
+  const clampAdj = sum(pickClampRemovals(priceRow.clampResults));
+
+  const reconstructedPrice = basePrice + totalVisiblePriceAdj - clampAdj;
+
+  const enginePrice = toNumberSafe(priceRow.price);
+  const netPrice = toNumberSafe(
+    (priceRow as { netPrice?: unknown }).netPrice ?? priceRow.price
+  );
+
+  const priceDiff = +(enginePrice - reconstructedPrice).toFixed(3);
+  const netDiff = +((enginePrice + brokerCompField) - netPrice).toFixed(3);
+
+  return {
+    pba,
+    paba,
+    basePrice,
+    visibleResultAdj,
+    visibleRowAdj,
+    totalVisiblePriceAdj,
+    clampAdj,
+    reconstructedPrice,
+    enginePrice,
+    netPrice,
+    brokerCompField,
+    priceDiff,
+    netDiff,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
 /* COMPONENT                                                                 */
 /* -------------------------------------------------------------------------- */
 
@@ -102,10 +255,15 @@ export default function PricingInspector() {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
+  const [loanAmount, setLoanAmount] = useState<number | null>(null);
+  const [desiredLockPeriod, setDesiredLockPeriod] = useState<number | null>(null);
+  const [brokerCompBps, setBrokerCompBps] = useState<number>(0);
+
   const [selectedEligibleCode, setSelectedEligibleCode] = useState<string>("");
   const [selectedIneligibleCode, setSelectedIneligibleCode] =
     useState<string>("");
   const [selectedInvalidCode, setSelectedInvalidCode] = useState<string>("");
+  const [selectedPriceIndex, setSelectedPriceIndex] = useState<number>(0);
 
   /* ------------------------------------------------------------------------ */
   /* FILE UPLOAD                                                              */
@@ -125,6 +283,9 @@ export default function PricingInspector() {
         setError("Missing $.data.results[]");
         setRawResults([]);
         setFileName(file.name);
+        setLoanAmount(null);
+        setDesiredLockPeriod(null);
+        setBrokerCompBps(0);
         return;
       }
 
@@ -133,13 +294,30 @@ export default function PricingInspector() {
       setError(null);
       setFileName(file.name);
 
+      // Pull out shared scenario fields for UI calculations
+      const loanAmt = toNumberSafe(parsed.data?.loan?.amount);
+      setLoanAmount(loanAmt || null);
+
+      const lock = toNumberSafe(parsed.data?.search?.desiredLockPeriod);
+      setDesiredLockPeriod(lock || null);
+
+      const comp = toNumberSafe(
+        parsed.data?.brokerCompPlan?.calculatedAdjustment
+      );
+      setBrokerCompBps(comp || 0);
+
+      // Reset selections
       setSelectedEligibleCode("");
       setSelectedIneligibleCode("");
       setSelectedInvalidCode("");
+      setSelectedPriceIndex(0);
     } catch {
       setError("Invalid JSON");
       setRawResults([]);
       setFileName(fileName ?? file.name);
+      setLoanAmount(null);
+      setDesiredLockPeriod(null);
+      setBrokerCompBps(0);
     }
   };
 
@@ -206,6 +384,9 @@ export default function PricingInspector() {
   const pricesCount = prices.length;
   const excludedInvestorsCount = (selectedProduct?.excludedInvestors ?? [])
     .length;
+
+  const selectedPriceRow: PriceRow | undefined =
+    prices[selectedPriceIndex] ?? prices[0];
 
   /* ------------------------------------------------------------------------ */
   /* RENDER                                                                   */
@@ -328,6 +509,7 @@ export default function PricingInspector() {
                       setSelectedEligibleCode(e.target.value);
                       setSelectedIneligibleCode("");
                       setSelectedInvalidCode("");
+                      setSelectedPriceIndex(0);
                     }}
                   >
                     <option value="">Select eligible product</option>
@@ -357,6 +539,7 @@ export default function PricingInspector() {
                       setSelectedIneligibleCode(e.target.value);
                       setSelectedEligibleCode("");
                       setSelectedInvalidCode("");
+                      setSelectedPriceIndex(0);
                     }}
                   >
                     <option value="">Select ineligible product</option>
@@ -384,6 +567,7 @@ export default function PricingInspector() {
                       setSelectedInvalidCode(e.target.value);
                       setSelectedEligibleCode("");
                       setSelectedIneligibleCode("");
+                      setSelectedPriceIndex(0);
                     }}
                   >
                     <option value="">Select invalid product</option>
@@ -515,7 +699,11 @@ export default function PricingInspector() {
                       .map((p) => toNumberSafe(p.rate))
                       .filter((r) => !Number.isNaN(r));
                     const allPrices = prices
-                      .map((p) => toNumberSafe(p.price))
+                      .map((p) =>
+                        toNumberSafe(
+                          (p as { netPrice?: unknown }).netPrice ?? p.price
+                        )
+                      )
                       .filter((px) => !Number.isNaN(px));
 
                     const minRate = allRates.length
@@ -535,9 +723,11 @@ export default function PricingInspector() {
                     let parDelta = Infinity;
                     for (const row of prices) {
                       const r = toNumberSafe(row.rate);
-                      const p = toNumberSafe(row.price);
+                      const p = toNumberSafe(
+                        (row as { netPrice?: unknown }).netPrice ?? row.price
+                      );
                       if (!Number.isNaN(r) && !Number.isNaN(p)) {
-                        const d = Math.abs(p);
+                        const d = Math.abs(p - 100);
                         if (d < parDelta) {
                           parDelta = d;
                           parRate = r;
@@ -570,14 +760,25 @@ export default function PricingInspector() {
                       (r) => r.booleanEquationValue === false
                     );
 
+                    // Price breakdown for selected row
+                    let priceBreakdown: PriceBreakdown | null = null;
+                    if (selectedPriceRow) {
+                      priceBreakdown = buildPriceBreakdown(
+                        selectedProduct,
+                        selectedPriceRow,
+                        brokerCompBps
+                      );
+                    }
+
                     return (
                       <>
-                        {/* PRICE STACK SUMMARY */}
+                        {/* PRICE STACK SUMMARY + TABLE */}
                         <details className="group">
                           <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
-                            Rate / Price Stack Summary
+                            Rate / Price Stack Summary &amp; Table
                           </summary>
 
+                          {/* High-level stats */}
                           <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div className="p-3 border rounded bg-white shadow-sm">
                               <div className="font-medium text-gray-700">
@@ -597,7 +798,7 @@ export default function PricingInspector() {
 
                             <div className="p-3 border rounded bg-white shadow-sm">
                               <div className="font-medium text-gray-700">
-                                Best / Worst Price
+                                Best / Worst Net Price
                               </div>
                               <div>
                                 {bestPrice} &rarr; {worstPrice}
@@ -606,12 +807,373 @@ export default function PricingInspector() {
 
                             <div className="p-3 border rounded bg-white shadow-sm md:col-span-3">
                               <div className="font-medium text-gray-700">
-                                Par-ish Rate (closest to 0 price)
+                                Par-ish Rate (net price closest to 100.00)
                               </div>
                               <div>{parRate ?? "(none)"}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Uses{" "}
+                                <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                  prices[y].netPrice ?? prices[y].price
+                                </code>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Rate / Price table */}
+                          <div className="mt-4 overflow-x-auto">
+                            <table className="min-w-full text-xs border-collapse">
+                              <thead>
+                                <tr className="bg-gray-100 text-[11px] uppercase tracking-wide text-gray-600">
+                                  <th className="border px-2 py-1 text-left">
+                                    Rate
+                                  </th>
+                                  <th className="border px-2 py-1 text-left">
+                                    Est APR
+                                  </th>
+                                  <th className="border px-2 py-1 text-left">
+                                    Price (Net)
+                                  </th>
+                                  <th className="border px-2 py-1 text-left">
+                                    P&amp;I
+                                  </th>
+                                  <th className="border px-2 py-1 text-left">
+                                    Credit/Cost
+                                  </th>
+                                  <th className="border px-2 py-1 text-left">
+                                    Lock Period
+                                  </th>
+                                  <th className="border px-2 py-1 text-left">
+                                    Investor
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {prices.map((row, idx) => {
+                                  const rate = toNumberSafe(row.rate);
+                                  const apr = toNumberSafe(row.apr);
+                                  const priceEngine = toNumberSafe(row.price);
+                                  const netPrice = toNumberSafe(
+                                    (row as { netPrice?: unknown }).netPrice ??
+                                      row.price
+                                  );
+                                  const pni = toNumberSafe(
+                                    row.principalAndInterest
+                                  );
+
+                                  // Credit/Cost based on net price and loan amount
+                                  const effLoanAmount =
+                                    loanAmount && loanAmount !== 0
+                                      ? loanAmount
+                                      : null;
+                                  let creditPts = 0;
+                                  let creditDollars = 0;
+
+                                  if (effLoanAmount) {
+                                    creditPts = netPrice - 100;
+                                    creditDollars =
+                                      (effLoanAmount * creditPts) / 100;
+                                  }
+
+                                  const hasCredit =
+                                    effLoanAmount !== null && creditPts !== 0;
+                                  const creditLabel = !effLoanAmount
+                                    ? "n/a"
+                                    : !hasCredit
+                                    ? "0.000 ($0)"
+                                    : creditPts > 0
+                                    ? `-${creditPts.toFixed(
+                                        3
+                                      )} (-$${Math.abs(
+                                        creditDollars
+                                      ).toFixed(0)})`
+                                    : `+${Math.abs(
+                                        creditPts
+                                      ).toFixed(3)} (+$${Math.abs(
+                                        creditDollars
+                                      ).toFixed(0)})`;
+
+                                  const lock =
+                                    toNumberSafe(
+                                      row.lockPeriod ?? desiredLockPeriod
+                                    ) || null;
+
+                                  const investor =
+                                    (row.investor as string | undefined) ??
+                                    "(unknown)";
+
+                                  const isSelected =
+                                    idx === selectedPriceIndex;
+
+                                  return (
+                                    <tr
+                                      key={idx}
+                                      className={`cursor-pointer ${
+                                        isSelected
+                                          ? "bg-blue-50"
+                                          : "hover:bg-gray-50"
+                                      }`}
+                                      onClick={() =>
+                                        setSelectedPriceIndex(idx)
+                                      }
+                                    >
+                                      <td className="border px-2 py-1">
+                                        {rate.toFixed(3)}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {apr ? apr.toFixed(6) : "—"}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {netPrice.toFixed(3)}
+                                        <div className="text-[10px] text-gray-500">
+                                          Engine: {priceEngine.toFixed(3)}
+                                        </div>
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {pni ? pni.toFixed(2) : "—"}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {creditLabel}
+                                        <div className="text-[10px] text-gray-500">
+                                          Uses{" "}
+                                          <code className="bg-gray-100 px-1 rounded">
+                                            data.loan.amount
+                                          </code>{" "}
+                                          &amp;{" "}
+                                          <code className="bg-gray-100 px-1 rounded">
+                                            prices[y].netPrice
+                                          </code>
+                                        </div>
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {lock ?? "—"}
+                                      </td>
+                                      <td className="border px-2 py-1">
+                                        {investor}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          <div className="mt-2 text-xs text-gray-500 space-y-1">
+                            <div>
+                              <span className="font-semibold">Rate:</span>{" "}
+                              <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                $.data.results[x].prices[y].rate
+                              </code>
+                            </div>
+                            <div>
+                              <span className="font-semibold">Est APR:</span>{" "}
+                              <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                $.data.results[x].prices[y].apr
+                              </code>
+                            </div>
+                            <div>
+                              <span className="font-semibold">
+                                Price / Net Price:
+                              </span>{" "}
+                              <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                prices[y].price / prices[y].netPrice
+                              </code>
+                            </div>
+                            <div>
+                              <span className="font-semibold">
+                                P&amp;I Payment:
+                              </span>{" "}
+                              <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                prices[y].principalAndInterest
+                              </code>
+                            </div>
+                            <div>
+                              <span className="font-semibold">
+                                Credit/Cost:
+                              </span>{" "}
+                              computed from{" "}
+                              <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                data.loan.amount
+                              </code>{" "}
+                              and{" "}
+                              <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                prices[y].netPrice
+                              </code>
                             </div>
                           </div>
                         </details>
+
+                        {/* PRICE vs NET PRICE BREAKDOWN (selected rate) */}
+                        {selectedPriceRow && priceBreakdown && (
+                          <details className="group">
+                            <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
+                              Price vs NetPrice (Selected Rate Breakdown)
+                            </summary>
+
+                            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                <div className="font-medium text-gray-700">
+                                  Base Components
+                                </div>
+                                <div>
+                                  <span className="font-semibold">PBA:</span>{" "}
+                                  {priceBreakdown.pba !== null
+                                    ? priceBreakdown.pba.toFixed(3)
+                                    : "(not present)"}
+                                  <div className="text-xs text-gray-500">
+                                    from{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      prices[y].priceBeforeAdjustments
+                                    </code>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">PABA:</span>{" "}
+                                  {priceBreakdown.paba.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    from{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      prices[y].priceAfterBaseAdjustments
+                                    </code>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Base Price:
+                                  </span>{" "}
+                                  {priceBreakdown.basePrice.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    PABA + Σ(hidden price-row rules)
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                <div className="font-medium text-gray-700">
+                                  Visible Adjustments &amp; Clamps
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Visible (Result-level):
+                                  </span>{" "}
+                                  {priceBreakdown.visibleResultAdj.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    Σ{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      results[x].ruleResults[]
+                                    </code>{" "}
+                                    visible, Price target, A/S/M
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Visible (Price-row):
+                                  </span>{" "}
+                                  {priceBreakdown.visibleRowAdj.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    Σ{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      prices[y].ruleResults[]
+                                    </code>{" "}
+                                    visible, Price target, A/S/M
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Total Visible:
+                                  </span>{" "}
+                                  {priceBreakdown.totalVisiblePriceAdj.toFixed(
+                                    3
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Clamp Adj:
+                                  </span>{" "}
+                                  {priceBreakdown.clampAdj.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    Σ(unclamped − clamped) from{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      prices[y].clampResults[]
+                                    </code>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                <div className="font-medium text-gray-700">
+                                  Engine Price vs Reconstructed
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Reconstructed Price:
+                                  </span>{" "}
+                                  {priceBreakdown.reconstructedPrice.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    Base + Visible − Clamp
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Polly Engine Price:
+                                  </span>{" "}
+                                  {priceBreakdown.enginePrice.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    from{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      prices[y].price
+                                    </code>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    ΔPrice:
+                                  </span>{" "}
+                                  {priceBreakdown.priceDiff.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    Polly − Reconstructed
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                <div className="font-medium text-gray-700">
+                                  Net Price &amp; Broker Comp
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Broker Comp (bps):
+                                  </span>{" "}
+                                  {priceBreakdown.brokerCompField.toFixed(4)}
+                                  <div className="text-xs text-gray-500">
+                                    from{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      data.brokerCompPlan.calculatedAdjustment
+                                    </code>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">
+                                    Net Price:
+                                  </span>{" "}
+                                  {priceBreakdown.netPrice.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    from{" "}
+                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                      prices[y].netPrice
+                                    </code>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="font-semibold">ΔNet:</span>{" "}
+                                  {priceBreakdown.netDiff.toFixed(3)}
+                                  <div className="text-xs text-gray-500">
+                                    (Price + Comp) − Net
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </details>
+                        )}
 
                         {/* AGGREGATE ADJUSTMENTS (PRODUCT-LEVEL TOTALS) */}
                         <details className="group">
@@ -753,9 +1315,10 @@ export default function PricingInspector() {
                                 return acc;
                               }, {});
 
-                              const categoryEntries = Object.entries(grouped).sort(
-                                ([a], [b]) => a.localeCompare(b)
-                              );
+                              const categoryEntries =
+                                Object.entries(grouped).sort(([a], [b]) =>
+                                  a.localeCompare(b)
+                                );
 
                               return (
                                 <div className="mt-3 space-y-3">

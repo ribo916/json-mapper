@@ -5,6 +5,11 @@ export interface RuleResult {
   ruleInheritedName?: string | null;
   booleanEquationValue?: boolean;
   index: number;
+
+  // New (optional) pricing fields – match PPE response shape
+  target?: string | null; // "Price" | "Rate" | etc.
+  isHiddenAdjustment?: boolean;
+  resultEquationValue?: number;
 }
 
 export interface RuleExplanation {
@@ -38,7 +43,7 @@ function buildExplanation(rule: RuleResult): string {
 }
 
 /* ------------------------------------------------------------ */
-/* Main public function                                          */
+/* Main public function                                         */
 /* ------------------------------------------------------------ */
 export function buildDisqualifyingRuleExplanations(
   ruleResults: RuleResult[] | null | undefined
