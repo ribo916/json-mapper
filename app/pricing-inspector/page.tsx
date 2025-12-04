@@ -6,6 +6,8 @@ import {
   RuleResult,
   RuleExplanation,
 } from "../utils/ruleExplanation";
+import DevConsole from "./DevConsole";
+
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS + LIGHTWEIGHT TYPES                                               */
@@ -1593,6 +1595,24 @@ export default function PricingInspector() {
             </div>
           )}
         </section>
+
+{selectedProduct && selectedPriceRow && (
+  <DevConsole
+    raw={selectedProduct}
+    product={selectedProduct}
+    priceRow={selectedPriceRow}
+    breakdown={buildPriceBreakdown(
+      selectedProduct,
+      selectedPriceRow,
+      brokerCompBps || 0
+    )}
+    ruleResults={selectedProduct.ruleResults}
+  />
+)}
+
+
+
+
       </main>
     </div>
   );
