@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JSON Mapper",
-  description: "JSON transformation and mapping playground",
+  title: "Data Tools Suite",
+  description: "JSON transformation, mapping, and pricing engine analysis tools",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

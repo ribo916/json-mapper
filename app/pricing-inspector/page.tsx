@@ -397,6 +397,12 @@ export default function PricingInspector() {
       {/* HEADER */}
       <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm">
         <div className="flex items-center gap-3">
+          <a
+            href="/"
+            className="text-gray-500 hover:text-gray-700 text-sm font-medium flex items-center gap-1"
+          >
+            ← Back to Tools
+          </a>
           <div className="w-8 h-8 bg-white border border-gray-300 flex items-center justify-center rounded-md">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -417,7 +423,7 @@ export default function PricingInspector() {
           </div>
           <div>
             <div className="text-lg font-semibold tracking-tight">
-              Pricing Scenario Inspector
+              Pricing Inspector
             </div>
             <div className="text-xs text-gray-600">
               Upload a PPE response JSON and inspect products in{" "}
