@@ -11,6 +11,7 @@ interface Product {
   prices?: unknown[] | null;
   uniqueInvestorCount?: number | null;
   excludedInvestors?: unknown[] | null;
+  feeResults?: unknown[] | null;
 }
 
 interface PriceRow {
@@ -22,7 +23,7 @@ interface PriceRow {
 }
 
 interface DevConsoleProps {
-  raw: unknown;
+  raw: unknown;                     // selectedProduct (entire product JSON)
   product: Product;
   priceRow: PriceRow;
   breakdown: unknown;
@@ -36,27 +37,30 @@ export default function DevConsole({
   breakdown,
   ruleResults,
 }: DevConsoleProps) {
-  const [tab, setTab] = useState("raw");
+  const [tab, setTab] = useState("product");
 
   // Editor refs and instances
-  const rawEditorRef = useRef<HTMLDivElement | null>(null);
-  const normalizedEditorRef = useRef<HTMLDivElement | null>(null);
+  const productEditorRef = useRef<HTMLDivElement | null>(null);
+  const pricesEditorRef = useRef<HTMLDivElement | null>(null);
+  const feesEditorRef = useRef<HTMLDivElement | null>(null);
   const priceEditorRef = useRef<HTMLDivElement | null>(null);
   const rulesEditorRef = useRef<HTMLDivElement | null>(null);
   const clampsEditorRef = useRef<HTMLDivElement | null>(null);
 
-  const rawEditor = useRef<any>(null);
-  const normalizedEditor = useRef<any>(null);
+  const productEditor = useRef<any>(null);
+  const pricesEditor = useRef<any>(null);
+  const feesEditor = useRef<any>(null);
   const priceEditor = useRef<any>(null);
   const rulesEditor = useRef<any>(null);
   const clampsEditor = useRef<any>(null);
 
   const Tabs = [
-    { id: "raw", label: "Raw PPE JSON" },
-    { id: "normalized", label: "Normalized Product" },
-    { id: "price", label: "Price Math" },
+    { id: "product", label: "Product" },
+    { id: "prices", label: "Prices" },
+    { id: "fees", label: "FeeResults" },
     { id: "rules", label: "Rules" },
     { id: "clamps", label: "Clamps" },
+    { id: "price", label: "Price Math" },
   ];
 
   // Initialize editors and update content when data changes
@@ -71,46 +75,71 @@ export default function DevConsole({
 
       const JSONEditor = (mod as any).default ?? mod;
 
-      // Initialize each editor if needed and set data
       const editorConfigs = [
-        { ref: rawEditorRef, editor: rawEditor, data: raw },
-        { ref: normalizedEditorRef, editor: normalizedEditor, data: {
-          code: product?.code,
-          name: product?.name,
-          isValid: product?.isValidResult,
-          isEligible: product?.isEligible,
-          prices: (product?.prices || []).length,
-          investors: product?.uniqueInvestorCount,
-          excludedInvestors: product?.excludedInvestors?.length || 0,
-        }},
-        { ref: priceEditorRef, editor: priceEditor, data: {
-          selectedRate: priceRow?.rate,
-          selectedPrice: priceRow?.price,
-          selectedNetPrice: priceRow?.netPrice,
-          breakdown,
-        }},
-        { ref: rulesEditorRef, editor: rulesEditor, data: {
-          resultRules: ruleResults ?? [],
-          rowRules: priceRow?.ruleResults ?? [],
-        }},
-        { ref: clampsEditorRef, editor: clampsEditor, data: {
-          clampResults: priceRow?.clampResults ?? [],
-        }},
+        // Entire product JSON (what you pass as `raw`)
+        { ref: productEditorRef, editor: productEditor, data: raw },
+
+        // Prices: mirror the parent container in the PPE product
+        {
+          ref: pricesEditorRef,
+          editor: pricesEditor,
+          data: {
+            prices: product?.prices ?? [],
+          },
+        },
+
+        // FeeResults: also mirror the parent container
+        {
+          ref: feesEditorRef,
+          editor: feesEditor,
+          data: {
+            feeResults: product?.feeResults ?? [],
+          },
+        },
+
+        // Price math breakdown (selected row)
+        {
+          ref: priceEditorRef,
+          editor: priceEditor,
+          data: {
+            selectedRate: priceRow?.rate,
+            selectedPrice: priceRow?.price,
+            selectedNetPrice: priceRow?.netPrice,
+            breakdown,
+          },
+        },
+
+        // Rules: result-level + row-level, both under their parent keys
+        {
+          ref: rulesEditorRef,
+          editor: rulesEditor,
+          data: {
+            resultRules: ruleResults ?? [],
+            rowRules: priceRow?.ruleResults ?? [],
+          },
+        },
+
+        // Clamps: parent container clampResults
+        {
+          ref: clampsEditorRef,
+          editor: clampsEditor,
+          data: {
+            clampResults: priceRow?.clampResults ?? [],
+          },
+        },
       ];
 
       editorConfigs.forEach(({ ref, editor, data }) => {
         if (ref.current) {
           if (!editor.current) {
-            // Initialize editor
             editor.current = new JSONEditor(ref.current, {
-              mode: "code",
+              mode: "code",             // CODE mode only (no tree)
               mainMenuBar: false,
               navigationBar: false,
               statusBar: false,
-              onEditable: () => false, // read-only
+              onEditable: () => false,  // read-only
             });
           }
-          // Set/update data
           editor.current.set(data);
         }
       });
@@ -126,7 +155,14 @@ export default function DevConsole({
   // Cleanup editors on unmount
   useEffect(() => {
     return () => {
-      [rawEditor, normalizedEditor, priceEditor, rulesEditor, clampsEditor].forEach(editor => {
+      [
+        productEditor,
+        pricesEditor,
+        feesEditor,
+        priceEditor,
+        rulesEditor,
+        clampsEditor,
+      ].forEach((editor) => {
         if (editor.current) {
           editor.current.destroy();
           editor.current = null;
@@ -134,7 +170,6 @@ export default function DevConsole({
       });
     };
   }, []);
-
 
   return (
     <div className="border border-yellow-500 rounded mt-6 p-3 bg-[#1a1a1a] text-gray-200">
@@ -156,24 +191,52 @@ export default function DevConsole({
         ))}
       </div>
 
-      <div className={tab === "raw" ? "block" : "hidden"}>
-        <div ref={rawEditorRef} className="h-[500px] border border-gray-600 rounded" />
+      {/* Product (entire product JSON) */}
+      <div className={tab === "product" ? "block" : "hidden"}>
+        <div
+          ref={productEditorRef}
+          className="h-[500px] border border-gray-600 rounded"
+        />
       </div>
 
-      <div className={tab === "normalized" ? "block" : "hidden"}>
-        <div ref={normalizedEditorRef} className="h-[500px] border border-gray-600 rounded" />
+      {/* Prices: { prices: [...] } */}
+      <div className={tab === "prices" ? "block" : "hidden"}>
+        <div
+          ref={pricesEditorRef}
+          className="h-[500px] border border-gray-600 rounded"
+        />
       </div>
 
-      <div className={tab === "price" ? "block" : "hidden"}>
-        <div ref={priceEditorRef} className="h-[500px] border border-gray-600 rounded" />
+      {/* FeeResults: { feeResults: [...] } */}
+      <div className={tab === "fees" ? "block" : "hidden"}>
+        <div
+          ref={feesEditorRef}
+          className="h-[500px] border border-gray-600 rounded"
+        />
       </div>
 
+      {/* Rules */}
       <div className={tab === "rules" ? "block" : "hidden"}>
-        <div ref={rulesEditorRef} className="h-[500px] border border-gray-600 rounded" />
+        <div
+          ref={rulesEditorRef}
+          className="h-[500px] border border-gray-600 rounded"
+        />
       </div>
 
+      {/* Clamps */}
       <div className={tab === "clamps" ? "block" : "hidden"}>
-        <div ref={clampsEditorRef} className="h-[500px] border border-gray-600 rounded" />
+        <div
+          ref={clampsEditorRef}
+          className="h-[500px] border border-gray-600 rounded"
+        />
+      </div>
+
+      {/* Price Math (last tab) */}
+      <div className={tab === "price" ? "block" : "hidden"}>
+        <div
+          ref={priceEditorRef}
+          className="h-[500px] border border-gray-600 rounded"
+        />
       </div>
     </div>
   );

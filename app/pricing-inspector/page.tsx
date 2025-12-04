@@ -668,8 +668,7 @@ export default function PricingInspector() {
               {selectedIsEligible && (
                 <section className="space-y-8">
                   {(() => {
-                    const feeResults = (selectedProduct.feeResults ??
-                      []) as FeeResultLite[];
+                    const feeResults = (selectedProduct.feeResults ?? []) as FeeResultLite[];
 
                     // Price stack stats
                     const allRates = prices
@@ -677,24 +676,14 @@ export default function PricingInspector() {
                       .filter((r) => !Number.isNaN(r));
                     const allPrices = prices
                       .map((p) =>
-                        toNumberSafe(
-                          (p as { netPrice?: unknown }).netPrice ?? p.price
-                        )
+                        toNumberSafe((p as { netPrice?: unknown }).netPrice ?? p.price)
                       )
                       .filter((px) => !Number.isNaN(px));
 
-                    const minRate = allRates.length
-                      ? Math.min(...allRates)
-                      : null;
-                    const maxRate = allRates.length
-                      ? Math.max(...allRates)
-                      : null;
-                    const bestPrice = allPrices.length
-                      ? Math.max(...allPrices)
-                      : null;
-                    const worstPrice = allPrices.length
-                      ? Math.min(...allPrices)
-                      : null;
+                    const minRate = allRates.length ? Math.min(...allRates) : null;
+                    const maxRate = allRates.length ? Math.max(...allRates) : null;
+                    const bestPrice = allPrices.length ? Math.max(...allPrices) : null;
+                    const worstPrice = allPrices.length ? Math.min(...allPrices) : null;
 
                     let parRate: number | null = null;
                     let parDelta = Infinity;
@@ -725,14 +714,11 @@ export default function PricingInspector() {
                     // Fees
                     const feeTotal = feeResults.reduce(
                       (s, f) =>
-                        s +
-                        toNumberSafe(
-                          f.amount !== undefined ? f.amount : f.feeAmount
-                        ),
+                        s + toNumberSafe(f.amount !== undefined ? f.amount : f.feeAmount),
                       0
                     );
 
-                    // Rule buckets (booleanEquationValue == false means rule passed / applied)
+                    // Rule buckets
                     const usedRules = (selectedProduct.ruleResults ?? []).filter(
                       (r) => r.booleanEquationValue === false
                     );
@@ -749,27 +735,71 @@ export default function PricingInspector() {
 
                     return (
                       <>
-                        {/* PRICE STACK SUMMARY + TABLE */}
+                        {/* ========================================================== */}
+                        {/* ADJUSTMENT SUMMARY (PRODUCT-LEVEL – NOT COLLAPSIBLE)      */}
+                        {/* ========================================================== */}
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            Adjustment Summary (Product-Level Totals)
+                          </h3>
+
+                          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div className="p-3 border rounded bg-white shadow-sm">
+                              <div className="font-medium text-gray-700">
+                                totalBasePriceAdjustments
+                              </div>
+                              <div className="text-gray-900">
+                                {totalBasePriceAdjustments.toFixed(4)}
+                              </div>
+                            </div>
+
+                            <div className="p-3 border rounded bg-white shadow-sm">
+                              <div className="font-medium text-gray-700">
+                                totalSRPAdjustments
+                              </div>
+                              <div className="text-gray-900">
+                                {totalSRPAdjustments.toFixed(4)}
+                              </div>
+                            </div>
+
+                            <div className="p-3 border rounded bg-white shadow-sm">
+                              <div className="font-medium text-gray-700">
+                                totalRateAdjustments
+                              </div>
+                              <div className="text-gray-900">
+                                {totalRateAdjustments.toFixed(4)}
+                              </div>
+                            </div>
+
+                            <div className="p-3 border rounded bg-white shadow-sm">
+                              <div className="font-medium text-gray-700">
+                                totalAdjustments
+                              </div>
+                              <div className="text-gray-900">
+                                {totalAdjustments.toFixed(4)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* ========================================================== */}
+                        {/* RATE / PRICE STACK SUMMARY & TABLE                        */}
+                        {/* ========================================================== */}
                         <details className="group">
                           <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
                             Rate / Price Stack Summary &amp; Table
                           </summary>
 
-                          {/* High-level stats */}
                           <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                Total Price Rows
-                              </div>
+                              <div className="font-medium text-gray-700">Total Price Rows</div>
                               <div>{prices.length}</div>
                             </div>
 
                             <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                Min / Max Rate
-                              </div>
+                              <div className="font-medium text-gray-700">Min / Max Rate</div>
                               <div>
-                                {minRate} &rarr; {maxRate}
+                                {minRate} → {maxRate}
                               </div>
                             </div>
 
@@ -778,50 +808,30 @@ export default function PricingInspector() {
                                 Best / Worst Net Price
                               </div>
                               <div>
-                                {bestPrice} &rarr; {worstPrice}
+                                {bestPrice} → {worstPrice}
                               </div>
                             </div>
 
                             <div className="p-3 border rounded bg-white shadow-sm md:col-span-3">
-                              <div className="font-medium text-gray-700">
-                                Par-ish Rate (net price closest to 100.00)
-                              </div>
+                              <div className="font-medium text-gray-700">Par-ish Rate</div>
                               <div>{parRate ?? "(none)"}</div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                Uses{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  prices[y].netPrice ?? prices[y].price
-                                </code>
-                              </div>
                             </div>
                           </div>
 
-                          {/* Rate / Price table */}
+                          {/* =============================== */}
+                          {/* PRICE TABLE                     */}
+                          {/* =============================== */}
                           <div className="mt-4 overflow-x-auto">
                             <table className="min-w-full text-xs border-collapse">
                               <thead>
                                 <tr className="bg-gray-100 text-[11px] uppercase tracking-wide text-gray-600">
-                                  <th className="border px-2 py-1 text-left">
-                                    Rate
-                                  </th>
-                                  <th className="border px-2 py-1 text-left">
-                                    Est APR
-                                  </th>
-                                  <th className="border px-2 py-1 text-left">
-                                    Price (Net)
-                                  </th>
-                                  <th className="border px-2 py-1 text-left">
-                                    P&amp;I
-                                  </th>
-                                  <th className="border px-2 py-1 text-left">
-                                    Credit/Cost
-                                  </th>
-                                  <th className="border px-2 py-1 text-left">
-                                    Lock Period
-                                  </th>
-                                  <th className="border px-2 py-1 text-left">
-                                    Investor
-                                  </th>
+                                  <th className="border px-2 py-1 text-left">Rate</th>
+                                  <th className="border px-2 py-1 text-left">Est APR</th>
+                                  <th className="border px-2 py-1 text-left">Price (Net)</th>
+                                  <th className="border px-2 py-1 text-left">P&amp;I</th>
+                                  <th className="border px-2 py-1 text-left">Credit/Cost</th>
+                                  <th className="border px-2 py-1 text-left">Lock Period</th>
+                                  <th className="border px-2 py-1 text-left">Investor</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -830,68 +840,35 @@ export default function PricingInspector() {
                                   const apr = toNumberSafe(row.apr);
                                   const priceEngine = toNumberSafe(row.price);
                                   const netPrice = toNumberSafe(
-                                    (row as { netPrice?: unknown }).netPrice ??
-                                      row.price
+                                    (row as { netPrice?: unknown }).netPrice ?? row.price
                                   );
-                                  const pni = toNumberSafe(
-                                    row.principalAndInterest
-                                  );
+                                  const pni = toNumberSafe(row.principalAndInterest);
 
-                                  // Credit/Cost based on net price and loan amount
                                   const effLoanAmount =
-                                    loanAmount && loanAmount !== 0
-                                      ? loanAmount
-                                      : null;
+                                    loanAmount && loanAmount !== 0 ? loanAmount : null;
                                   let creditPts = 0;
                                   let creditDollars = 0;
 
                                   if (effLoanAmount) {
                                     creditPts = netPrice - 100;
-                                    creditDollars =
-                                      (effLoanAmount * creditPts) / 100;
+                                    creditDollars = (effLoanAmount * creditPts) / 100;
                                   }
 
-                                  const hasCredit =
-                                    effLoanAmount !== null && creditPts !== 0;
-                                  const creditLabel = !effLoanAmount
-                                    ? "n/a"
-                                    : !hasCredit
-                                    ? "0.000 ($0)"
-                                    : creditPts > 0
-                                    ? `-${creditPts.toFixed(
-                                        3
-                                      )} (-$${Math.abs(
-                                        creditDollars
-                                      ).toFixed(0)})`
-                                    : `+${Math.abs(
-                                        creditPts
-                                      ).toFixed(3)} (+$${Math.abs(
-                                        creditDollars
-                                      ).toFixed(0)})`;
-
                                   const lock =
-                                    toNumberSafe(
-                                      row.lockPeriod ?? desiredLockPeriod
-                                    ) || null;
+                                    toNumberSafe(row.lockPeriod ?? desiredLockPeriod) || null;
 
                                   const investor =
-                                    (row.investor as string | undefined) ??
-                                    "(unknown)";
+                                    (row.investor as string | undefined) ?? "(unknown)";
 
-                                  const isSelected =
-                                    idx === selectedPriceIndex;
+                                  const isSelected = idx === selectedPriceIndex;
 
                                   return (
                                     <tr
                                       key={idx}
                                       className={`cursor-pointer ${
-                                        isSelected
-                                          ? "bg-blue-50"
-                                          : "hover:bg-gray-50"
+                                        isSelected ? "bg-blue-50" : "hover:bg-gray-50"
                                       }`}
-                                      onClick={() =>
-                                        setSelectedPriceIndex(idx)
-                                      }
+                                      onClick={() => setSelectedPriceIndex(idx)}
                                     >
                                       <td className="border px-2 py-1">
                                         {rate.toFixed(3)}
@@ -909,24 +886,22 @@ export default function PricingInspector() {
                                         {pni ? pni.toFixed(2) : "—"}
                                       </td>
                                       <td className="border px-2 py-1">
-                                        {creditLabel}
-                                        <div className="text-[10px] text-gray-500">
-                                          Uses{" "}
-                                          <code className="bg-gray-100 px-1 rounded">
-                                            data.loan.amount
-                                          </code>{" "}
-                                          &amp;{" "}
-                                          <code className="bg-gray-100 px-1 rounded">
-                                            prices[y].netPrice
-                                          </code>
-                                        </div>
+                                        {effLoanAmount
+                                          ? creditPts > 0
+                                            ? `-${creditPts.toFixed(
+                                                3
+                                              )} (-$${Math.abs(creditDollars).toFixed(0)})`
+                                            : creditPts < 0
+                                            ? `+${Math.abs(
+                                                creditPts
+                                              ).toFixed(3)} (+$${Math.abs(
+                                                  creditDollars
+                                                ).toFixed(0)})`
+                                            : "0.000 ($0)"
+                                          : "n/a"}
                                       </td>
-                                      <td className="border px-2 py-1">
-                                        {lock ?? "—"}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {investor}
-                                      </td>
+                                      <td className="border px-2 py-1">{lock ?? "—"}</td>
+                                      <td className="border px-2 py-1">{investor}</td>
                                     </tr>
                                   );
                                 })}
@@ -934,336 +909,199 @@ export default function PricingInspector() {
                             </table>
                           </div>
 
-                          <div className="mt-2 text-xs text-gray-500 space-y-1">
-                            <div>
-                              <span className="font-semibold">Rate:</span>{" "}
-                              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                $.data.results[x].prices[y].rate
-                              </code>
+                          {/* =============================== */}
+                          {/* PRICE vs NET PRICE BREAKDOWN    */}
+                          {/* =============================== */}
+                          {selectedPriceRow && priceBreakdown && (
+                            <div className="mt-6">
+                              <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                                Price vs NetPrice (Selected Rate Breakdown)
+                              </h4>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                {/* BASE COMPONENTS */}
+                                <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                  <div className="font-medium text-gray-700">
+                                    Base Components
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">PBA:</span>{" "}
+                                    {priceBreakdown.pba !== null
+                                      ? priceBreakdown.pba.toFixed(3)
+                                      : "(not present)"}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">PABA:</span>{" "}
+                                    {priceBreakdown.paba.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Base Price:</span>{" "}
+                                    {priceBreakdown.basePrice.toFixed(3)}
+                                  </div>
+                                </div>
+
+                                {/* ADJUSTMENTS */}
+                                <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                  <div className="font-medium text-gray-700">
+                                    Visible Adjustments &amp; Clamps
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">
+                                      Visible (Result-level):
+                                    </span>{" "}
+                                    {priceBreakdown.visibleResultAdj.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">
+                                      Visible (Price-row):
+                                    </span>{" "}
+                                    {priceBreakdown.visibleRowAdj.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Total Visible:</span>{" "}
+                                    {priceBreakdown.totalVisiblePriceAdj.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Clamp Adj:</span>{" "}
+                                    {priceBreakdown.clampAdj.toFixed(3)}
+                                  </div>
+                                </div>
+
+                                {/* ENGINE COMPARISON */}
+                                <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                  <div className="font-medium text-gray-700">
+                                    Engine Price vs Reconstructed
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">
+                                      Reconstructed Price:
+                                    </span>{" "}
+                                    {priceBreakdown.reconstructedPrice.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Polly Engine Price:</span>{" "}
+                                    {priceBreakdown.enginePrice.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Δ Price:</span>{" "}
+                                    {priceBreakdown.priceDiff.toFixed(3)}
+                                  </div>
+                                </div>
+
+                                {/* NET PRICE */}
+                                <div className="p-3 border rounded bg-white shadow-sm space-y-1">
+                                  <div className="font-medium text-gray-700">
+                                    Net Price &amp; Broker Comp
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Broker Comp (bps):</span>{" "}
+                                    {priceBreakdown.brokerCompField.toFixed(4)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Net Price:</span>{" "}
+                                    {priceBreakdown.netPrice.toFixed(3)}
+                                  </div>
+
+                                  <div>
+                                    <span className="font-semibold">Δ Net:</span>{" "}
+                                    {priceBreakdown.netDiff.toFixed(3)}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <span className="font-semibold">Est APR:</span>{" "}
-                              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                $.data.results[x].prices[y].apr
-                              </code>
-                            </div>
-                            <div>
-                              <span className="font-semibold">
-                                Price / Net Price:
-                              </span>{" "}
-                              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                prices[y].price / prices[y].netPrice
-                              </code>
-                            </div>
-                            <div>
-                              <span className="font-semibold">
-                                P&amp;I Payment:
-                              </span>{" "}
-                              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                prices[y].principalAndInterest
-                              </code>
-                            </div>
-                            <div>
-                              <span className="font-semibold">
-                                Credit/Cost:
-                              </span>{" "}
-                              computed from{" "}
-                              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                data.loan.amount
-                              </code>{" "}
-                              and{" "}
-                              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                prices[y].netPrice
-                              </code>
-                            </div>
-                          </div>
+                          )}
                         </details>
 
-                        {/* PRICE vs NET PRICE BREAKDOWN (selected rate) */}
-                        {selectedPriceRow && priceBreakdown && (
-                          <details className="group">
-                            <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
-                              Price vs NetPrice (Selected Rate Breakdown)
-                            </summary>
-
-                            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-                                <div className="font-medium text-gray-700">
-                                  Base Components
-                                </div>
-                                <div>
-                                  <span className="font-semibold">PBA:</span>{" "}
-                                  {priceBreakdown.pba !== null
-                                    ? priceBreakdown.pba.toFixed(3)
-                                    : "(not present)"}
-                                  <div className="text-xs text-gray-500">
-                                    from{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      prices[y].priceBeforeAdjustments
-                                    </code>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">PABA:</span>{" "}
-                                  {priceBreakdown.paba.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    from{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      prices[y].priceAfterBaseAdjustments
-                                    </code>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Base Price:
-                                  </span>{" "}
-                                  {priceBreakdown.basePrice.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    PABA + Σ(hidden price-row rules)
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-                                <div className="font-medium text-gray-700">
-                                  Visible Adjustments &amp; Clamps
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Visible (Result-level):
-                                  </span>{" "}
-                                  {priceBreakdown.visibleResultAdj.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    Σ{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      results[x].ruleResults[]
-                                    </code>{" "}
-                                    visible, Price target, A/S/M
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Visible (Price-row):
-                                  </span>{" "}
-                                  {priceBreakdown.visibleRowAdj.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    Σ{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      prices[y].ruleResults[]
-                                    </code>{" "}
-                                    visible, Price target, A/S/M
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Total Visible:
-                                  </span>{" "}
-                                  {priceBreakdown.totalVisiblePriceAdj.toFixed(
-                                    3
-                                  )}
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Clamp Adj:
-                                  </span>{" "}
-                                  {priceBreakdown.clampAdj.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    Σ(unclamped − clamped) from{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      prices[y].clampResults[]
-                                    </code>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-                                <div className="font-medium text-gray-700">
-                                  Engine Price vs Reconstructed
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Reconstructed Price:
-                                  </span>{" "}
-                                  {priceBreakdown.reconstructedPrice.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    Base + Visible − Clamp
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Polly Engine Price:
-                                  </span>{" "}
-                                  {priceBreakdown.enginePrice.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    from{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      prices[y].price
-                                    </code>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    ΔPrice:
-                                  </span>{" "}
-                                  {priceBreakdown.priceDiff.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    Polly − Reconstructed
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-                                <div className="font-medium text-gray-700">
-                                  Net Price &amp; Broker Comp
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Broker Comp (bps):
-                                  </span>{" "}
-                                  {priceBreakdown.brokerCompField.toFixed(4)}
-                                  <div className="text-xs text-gray-500">
-                                    from{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      data.brokerCompPlan.calculatedAdjustment
-                                    </code>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">
-                                    Net Price:
-                                  </span>{" "}
-                                  {priceBreakdown.netPrice.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    from{" "}
-                                    <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                      prices[y].netPrice
-                                    </code>
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-semibold">ΔNet:</span>{" "}
-                                  {priceBreakdown.netDiff.toFixed(3)}
-                                  <div className="text-xs text-gray-500">
-                                    (Price + Comp) − Net
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </details>
-                        )}
-
-                        {/* AGGREGATE ADJUSTMENTS (PRODUCT-LEVEL TOTALS) */}
-                        <details className="group">
-                          <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
-                            Adjustment Summary (Aggregated Totals)
-                          </summary>
-
-                          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                totalBasePriceAdjustments
-                              </div>
-                              <div className="text-gray-900">
-                                {totalBasePriceAdjustments.toFixed(4)}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                from{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  $.data.results[x].totalBasePriceAdjustments
-                                </code>
-                              </div>
-                            </div>
-
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                totalSRPAdjustments
-                              </div>
-                              <div className="text-gray-900">
-                                {totalSRPAdjustments.toFixed(4)}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                from{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  $.data.results[x].totalSRPAdjustments
-                                </code>
-                              </div>
-                            </div>
-
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                totalRateAdjustments
-                              </div>
-                              <div className="text-gray-900">
-                                {totalRateAdjustments.toFixed(4)}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                from{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  $.data.results[x].totalRateAdjustments
-                                </code>
-                              </div>
-                            </div>
-
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                totalAdjustments
-                              </div>
-                              <div className="text-gray-900">
-                                {totalAdjustments.toFixed(4)}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                from{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  $.data.results[x].totalAdjustments
-                                </code>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="mt-2 text-xs text-gray-500">
-                            These values are reported totals from PPE.
-                          </div>
-                        </details>
-
-                        {/* FEE SUMMARY */}
+                        {/* ========================================================== */}
+                        {/* FEE SUMMARY (APPLIED ONLY)                                */}
+                        {/* ========================================================== */}
                         <details className="group">
                           <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
                             Fee Summary
                           </summary>
 
-                          <div className="mt-3 text-sm">
-                            <div className="font-medium text-gray-700 mb-1">
-                              Total Fee Amount (reported)
-                            </div>
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              {feeTotal.toFixed(4)}
-                            </div>
+                          {(() => {
+                            // Applied fees = booleanEquationValue === true
+                            const appliedFees = (feeResults ?? []).filter((f: any) => {
+                              return f?.booleanEquationValue === true;
+                            });
 
-                            {feeResults.slice(0, 5).map((f, i) => (
-                              <div
-                                key={i}
-                                className="p-3 mt-2 border rounded bg-white shadow-sm"
-                              >
-                                <div className="font-medium text-gray-900">
-                                  {f.feeName || f.name || "(unnamed fee)"}
+                            // Sum using resultEquationValue (most reliable)
+                            const totalAppliedFees = appliedFees.reduce((sum: number, f: any) => {
+                              const val = toNumberSafe(
+                                f?.resultEquationValue ??
+                                f?.resultEquationValueUnclamped ??
+                                0
+                              );
+                              return sum + val;
+                            }, 0);
+
+                            return (
+                              <div className="mt-3 text-sm">
+                                <div className="font-medium text-gray-700 mb-1">
+                                  Total Applied Fees
                                 </div>
-                                <div className="text-xs text-gray-600">
-                                  Amount:{" "}
-                                  {toNumberSafe(
-                                    f.amount !== undefined
-                                      ? f.amount
-                                      : f.feeAmount
-                                  )}
+
+                                <div className="p-3 border rounded bg-white shadow-sm">
+                                  {totalAppliedFees.toFixed(2)}
                                 </div>
-                                <div className="text-xs text-gray-500">
-                                  Type: {f.feeType || f.type || "(none)"}
-                                </div>
+
+                                {appliedFees.length === 0 && (
+                                  <div className="mt-2 text-xs text-gray-500 italic">
+                                    No applied fees for this scenario.
+                                  </div>
+                                )}
+
+                                {appliedFees.map((f: any, i: number) => {
+                                  const amount = toNumberSafe(
+                                    f?.resultEquationValue ??
+                                    f?.resultEquationValueUnclamped ??
+                                    0
+                                  );
+
+                                  return (
+                                    <div
+                                      key={i}
+                                      className="p-3 mt-2 border rounded bg-white shadow-sm"
+                                    >
+                                      <div className="font-medium text-gray-900">
+                                        {f?.ruleName || "(unnamed fee)"}
+                                      </div>
+
+                                      <div className="text-xs text-gray-600">
+                                        Amount: {amount.toFixed(2)}
+                                      </div>
+
+                                      <div className="text-xs text-gray-500">
+                                        Paid By: {f?.paidBy || "—"}
+                                      </div>
+
+                                      <div className="text-xs text-gray-500">
+                                        Paid To: {f?.paidTo || "—"}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            ))}
-                          </div>
+                            );
+                          })()}
                         </details>
 
-                        {/* RULE BUCKETS USED */}
+                        {/* ========================================================== */}
+                        {/* RULE BUCKETS — UNCHANGED                                   */}
+                        {/* ========================================================== */}
                         <details className="group">
                           <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
                             Rule Buckets Used for Pricing
@@ -1271,34 +1109,31 @@ export default function PricingInspector() {
 
                           {usedRules.length === 0 ? (
                             <div className="mt-3 text-sm text-gray-600 italic">
-                              No rule buckets fired for this product. This is
-                              unusual for an eligible, priced scenario.
+                              No rule buckets fired for this product.
                             </div>
                           ) : (
                             (() => {
-                              // Group by category + subCategory
                               const grouped = usedRules.reduce<
                                 Record<string, RuleResult[]>
                               >((acc, r) => {
                                 const cat = r.category || "Unknown";
                                 const sub =
-                                  (r as { subCategory?: string | null })
-                                    .subCategory || "";
+                                  (r as { subCategory?: string | null }).subCategory || "";
                                 const key = sub ? `${cat} :: ${sub}` : cat;
                                 if (!acc[key]) acc[key] = [];
                                 acc[key].push(r);
                                 return acc;
                               }, {});
 
-                              const categoryEntries =
-                                Object.entries(grouped).sort(([a], [b]) =>
-                                  a.localeCompare(b)
-                                );
+                              const entries = Object.entries(grouped).sort(([a], [b]) =>
+                                a.localeCompare(b)
+                              );
 
                               return (
                                 <div className="mt-3 space-y-3">
-                                  {categoryEntries.map(([key, list]) => {
+                                  {entries.map(([key, list]) => {
                                     const [cat, sub] = key.split(" :: ");
+
                                     return (
                                       <details
                                         key={key}
@@ -1311,7 +1146,6 @@ export default function PricingInspector() {
                                           </span>
                                           <span className="text-xs text-gray-500">
                                             {list.length} rule
-                                            {list.length === 1 ? "" : "s"}
                                           </span>
                                         </summary>
 
@@ -1324,37 +1158,30 @@ export default function PricingInspector() {
                                               <div className="font-medium text-gray-900">
                                                 {r.ruleName || "(unnamed rule)"}
                                               </div>
+
                                               <div className="text-xs text-gray-600 mt-0.5">
                                                 Category: {r.category || "Unknown"}
                                               </div>
-                                              {(
-                                                r as { subCategory?: string | null }
-                                              ).subCategory && (
+
+                                              {(r as any).subCategory && (
                                                 <div className="text-xs text-gray-600">
                                                   Subcategory:{" "}
-                                                  {
-                                                    (
-                                                      r as {
-                                                        subCategory?: string | null;
-                                                      }
-                                                    ).subCategory
-                                                  }
+                                                  {(r as any).subCategory}
                                                 </div>
                                               )}
+
                                               <div className="text-xs text-gray-600 mt-0.5">
                                                 booleanEquationValue:{" "}
                                                 {String(r.booleanEquationValue)}
                                               </div>
+
                                               <div className="text-xs text-gray-500 mt-1">
-                                                <span className="font-medium">
-                                                  Path:
-                                                </span>{" "}
+                                                <span className="font-medium">Path:</span>{" "}
                                                 <code className="px-1 py-0.5 bg-white border border-gray-300 rounded text-[11px]">
                                                   $.data.results[x].ruleResults[]
                                                 </code>
                                               </div>
 
-                                              {/* Raw JSON for this rule */}
                                               <details className="mt-2 text-xs">
                                                 <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
                                                   Show raw rule JSON
@@ -1509,19 +1336,19 @@ export default function PricingInspector() {
           )}
         </section>
 
-{selectedProduct && selectedPriceRow && (
-  <DevConsole
-    raw={selectedProduct}
-    product={selectedProduct}
-    priceRow={selectedPriceRow}
-    breakdown={buildPriceBreakdown(
-      selectedProduct,
-      selectedPriceRow,
-      brokerCompBps || 0
-    )}
-    ruleResults={selectedProduct.ruleResults}
-  />
-)}
+        {selectedProduct && selectedPriceRow && (
+          <DevConsole
+            raw={selectedProduct}
+            product={selectedProduct}
+            priceRow={selectedPriceRow}
+            breakdown={buildPriceBreakdown(
+              selectedProduct,
+              selectedPriceRow,
+              brokerCompBps || 0
+            )}
+            ruleResults={selectedProduct.ruleResults}
+          />
+        )}
 
       </main>
     </div>
