@@ -632,18 +632,6 @@ export default function PricingInspector() {
                     {selectedProduct.name ?? "(missing)"}
                   </div>
                   <div>
-                    <span className="font-medium">isValidResult:</span>{" "}
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      {String(selectedProduct.isValidResult)}
-                    </code>
-                  </div>
-                  <div>
-                    <span className="font-medium">isEligible:</span>{" "}
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      {String(selectedProduct.isEligible)}
-                    </code>
-                  </div>
-                  <div>
                     <span className="font-medium">Prices count:</span>{" "}
                     <code className="bg-gray-100 px-1 rounded text-xs">
                       {pricesCount}
@@ -679,25 +667,6 @@ export default function PricingInspector() {
               {/* ================================================================== */}
               {selectedIsEligible && (
                 <section className="space-y-8">
-                  {/* SUMMARY BANNER */}
-                  <div className="bg-green-50 border border-green-200 p-4 rounded text-sm text-gray-800">
-                    <div className="font-semibold mb-1">
-                      Eligible Product Summary
-                    </div>
-                    <p className="leading-snug">
-                      This product is eligible because both{" "}
-                      <code className="bg-white border px-1 rounded text-xs">
-                        $.data.results[x].isEligible == true
-                      </code>{" "}
-                      and{" "}
-                      <code className="bg-white border px-1 rounded text-xs">
-                        $.data.results[x].isValidResult == true
-                      </code>{" "}
-                      are satisfied. The sections below show how the engine
-                      priced this scenario and which rule buckets contributed.
-                    </p>
-                  </div>
-
                   {(() => {
                     const feeResults = (selectedProduct.feeResults ??
                       []) as FeeResultLite[];
@@ -1252,9 +1221,7 @@ export default function PricingInspector() {
                           </div>
 
                           <div className="mt-2 text-xs text-gray-500">
-                            These values are reported totals from PPE and may
-                            include additional internal adjustments that are not
-                            broken out individually in the response.
+                            These values are reported totals from PPE.
                           </div>
                         </details>
 
@@ -1418,29 +1385,6 @@ export default function PricingInspector() {
               {/* ================================================================== */}
               {selectedIsIneligible && (
                 <section className="space-y-6">
-                  {/* SUMMARY */}
-                  <div className="bg-orange-50 border border-orange-200 p-4 rounded text-sm text-gray-800">
-                    <div className="font-semibold mb-1">
-                      Why This Product Is Ineligible
-                    </div>
-                    <p className="leading-snug">
-                      This product is ineligible because it has a valid result
-                      but is marked as not eligible.{" "}
-                      <code className="bg-white border px-1 rounded text-xs">
-                        $.data.results[x].isValidResult == true
-                      </code>{" "}
-                      and{" "}
-                      <code className="bg-white border px-1 rounded text-xs">
-                        $.data.results[x].isEligible == false
-                      </code>
-                      . Rules where{" "}
-                      <code className="bg-white border px-1 rounded text-xs">
-                        booleanEquationValue == true
-                      </code>{" "}
-                      indicate eligibility conditions that were violated.
-                    </p>
-                  </div>
-
                   {/* GROUPED RULES */}
                   <div className="space-y-4">
                     <h3 className="text-base font-semibold text-gray-900">
@@ -1541,37 +1485,6 @@ export default function PricingInspector() {
               {/* ================================================================== */}
               {selectedIsInvalid && (
                 <section className="space-y-4">
-                  <div className="bg-red-50 border border-red-200 p-4 rounded text-sm text-gray-800">
-                    <div className="font-semibold mb-1">
-                      Why This Product Is Invalid
-                    </div>
-                    <p className="leading-snug mb-1">
-                      This product is invalid because PPE could not generate a
-                      usable pricing scenario. The most common causes are:
-                    </p>
-                    <ul className="list-disc list-inside text-sm space-y-1">
-                      <li>
-                        <code className="bg-white border px-1 rounded text-xs">
-                          $.data.results[x].isValidResult == false
-                        </code>
-                      </li>
-                      <li>
-                        Prices are empty:{" "}
-                        <code className="bg-white border px-1 rounded text-xs">
-                          $.data.results[x].prices.length == 0
-                        </code>
-                      </li>
-                      <li>
-                        Often{" "}
-                        <code className="bg-white border px-1 rounded text-xs">
-                          $.data.results[x].uniqueInvestorCount == 0
-                        </code>{" "}
-                        which indicates that no investors could price this
-                        scenario.
-                      </li>
-                    </ul>
-                  </div>
-
                   <div className="border border-gray-200 rounded-lg bg-white p-4 space-y-2 text-sm text-gray-800">
                     <div>
                       <span className="font-medium">invalidResultReason:</span>{" "}
@@ -1609,9 +1522,6 @@ export default function PricingInspector() {
     ruleResults={selectedProduct.ruleResults}
   />
 )}
-
-
-
 
       </main>
     </div>
