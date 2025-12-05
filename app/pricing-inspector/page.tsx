@@ -7,6 +7,8 @@ import {
   RuleExplanation,
 } from "../utils/ruleExplanation";
 import DevConsole from "./DevConsole";
+import PriceAdjustmentsPanel from "./PriceAdjustmentsPanel";
+
 
 
 /* -------------------------------------------------------------------------- */
@@ -265,7 +267,7 @@ export default function PricingInspector() {
   const [selectedIneligibleCode, setSelectedIneligibleCode] =
     useState<string>("");
   const [selectedInvalidCode, setSelectedInvalidCode] = useState<string>("");
-  const [selectedPriceIndex, setSelectedPriceIndex] = useState<number>(0);
+  const [selectedPriceIndex, setSelectedPriceIndex] = useState<number>(-1);
 
   /* ------------------------------------------------------------------------ */
   /* FILE UPLOAD                                                              */
@@ -312,7 +314,7 @@ export default function PricingInspector() {
       setSelectedEligibleCode("");
       setSelectedIneligibleCode("");
       setSelectedInvalidCode("");
-      setSelectedPriceIndex(0);
+      setSelectedPriceIndex(-1);
     } catch {
       setError("Invalid JSON");
       setRawResults([]);
@@ -517,7 +519,7 @@ export default function PricingInspector() {
                       setSelectedEligibleCode(e.target.value);
                       setSelectedIneligibleCode("");
                       setSelectedInvalidCode("");
-                      setSelectedPriceIndex(0);
+                      setSelectedPriceIndex(-1);
                     }}
                   >
                     <option value="">Select eligible product</option>
@@ -547,7 +549,7 @@ export default function PricingInspector() {
                       setSelectedIneligibleCode(e.target.value);
                       setSelectedEligibleCode("");
                       setSelectedInvalidCode("");
-                      setSelectedPriceIndex(0);
+                      setSelectedPriceIndex(-1);
                     }}
                   >
                     <option value="">Select ineligible product</option>
@@ -575,7 +577,7 @@ export default function PricingInspector() {
                       setSelectedInvalidCode(e.target.value);
                       setSelectedEligibleCode("");
                       setSelectedIneligibleCode("");
-                      setSelectedPriceIndex(0);
+                      setSelectedPriceIndex(-1);
                     }}
                   >
                     <option value="">Select invalid product</option>
@@ -780,12 +782,13 @@ export default function PricingInspector() {
                         </div>
 
                         {/* ========================================================== */}
-                        {/* RATE / PRICE STACK SUMMARY & TABLE                        */}
+                        {/* RATE / PRICE STACK SUMMARY & TABLE (NO TOP ACCORDION)      */}
                         {/* ========================================================== */}
-                        <details className="group">
-                          <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
+
+                        <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             Rate / Price Stack Summary &amp; Table
-                          </summary>
+                          </h3>
 
                           <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div className="p-3 border rounded bg-white shadow-sm">
@@ -831,181 +834,115 @@ export default function PricingInspector() {
                                   <th className="border px-2 py-1 text-left">Investor</th>
                                 </tr>
                               </thead>
+
                               <tbody>
-                              {[...prices]
+                                {[...prices]
                                   .slice()
                                   .sort((a, b) => toNumberSafe(a.rate) - toNumberSafe(b.rate))
                                   .map((row, idx) => {
+                                    const rate = toNumberSafe(row.rate);
+                                    const apr = toNumberSafe(row.apr);
+                                    const priceEngine = toNumberSafe(row.price);
+                                    const netPrice = toNumberSafe(
+                                      (row as { netPrice?: unknown }).netPrice ?? row.price
+                                    );
+                                    const pni = toNumberSafe(row.principalAndInterest);
 
-                                  const rate = toNumberSafe(row.rate);
-                                  const apr = toNumberSafe(row.apr);
-                                  const priceEngine = toNumberSafe(row.price);
-                                  const netPrice = toNumberSafe(
-                                    (row as { netPrice?: unknown }).netPrice ?? row.price
-                                  );
-                                  const pni = toNumberSafe(row.principalAndInterest);
+                                    const effLoanAmount =
+                                      loanAmount && loanAmount !== 0 ? loanAmount : null;
+                                    let creditPts = 0;
+                                    let creditDollars = 0;
 
-                                  const effLoanAmount =
-                                    loanAmount && loanAmount !== 0 ? loanAmount : null;
-                                  let creditPts = 0;
-                                  let creditDollars = 0;
+                                    if (effLoanAmount) {
+                                      creditPts = netPrice - 100;
+                                      creditDollars = (effLoanAmount * creditPts) / 100;
+                                    }
 
-                                  if (effLoanAmount) {
-                                    creditPts = netPrice - 100;
-                                    creditDollars = (effLoanAmount * creditPts) / 100;
-                                  }
+                                    const lock =
+                                      toNumberSafe(row.lockPeriod ?? desiredLockPeriod) || null;
 
-                                  const lock =
-                                    toNumberSafe(row.lockPeriod ?? desiredLockPeriod) || null;
+                                    const investor =
+                                      (row.investor as string | undefined) ?? "(unknown)";
 
-                                  const investor =
-                                    (row.investor as string | undefined) ?? "(unknown)";
+                                    const isSelected = idx === selectedPriceIndex;
 
-                                  const isSelected = idx === selectedPriceIndex;
+                                    return (
+                                      <React.Fragment key={idx}>
+                                        <tr
+                                          className={`cursor-pointer transition-colors ${
+                                            isSelected
+                                              ? "bg-blue-50/70 hover:bg-blue-100"
+                                              : "hover:bg-gray-100"
+                                          }`}
+                                          onClick={() =>
+                                            setSelectedPriceIndex((prev) =>
+                                              prev === idx ? -1 : idx
+                                            )
+                                          }
+                                        >
+                                          <td className="border px-2 py-1">
+                                            {rate.toFixed(3)}
+                                          </td>
+                                          <td className="border px-2 py-1">
+                                            {apr ? apr.toFixed(6) : "—"}
+                                          </td>
+                                          <td className="border px-2 py-1">
+                                            {netPrice.toFixed(3)}
+                                            <div className="text-[10px] text-gray-500">
+                                              Engine: {priceEngine.toFixed(3)}
+                                            </div>
+                                          </td>
+                                          <td className="border px-2 py-1">
+                                            {pni ? pni.toFixed(2) : "—"}
+                                          </td>
+                                          <td className="border px-2 py-1">
+                                            {effLoanAmount
+                                              ? creditPts > 0
+                                                ? `-${creditPts.toFixed(3)} (-$${Math.abs(
+                                                    creditDollars
+                                                  ).toFixed(0)})`
+                                                : creditPts < 0
+                                                ? `+${Math.abs(creditPts).toFixed(
+                                                    3
+                                                  )} (+$${Math.abs(creditDollars).toFixed(
+                                                    0
+                                                  )})`
+                                                : "0.000 ($0)"
+                                              : "n/a"}
+                                          </td>
+                                          <td className="border px-2 py-1">{lock ?? "—"}</td>
+                                          <td className="border px-2 py-1">{investor}</td>
+                                        </tr>
 
-                                  return (
-                                    <tr
-                                      key={idx}
-                                      className={`cursor-pointer ${
-                                        isSelected ? "bg-blue-50" : "hover:bg-gray-50"
-                                      }`}
-                                      onClick={() => setSelectedPriceIndex(idx)}
-                                    >
-                                      <td className="border px-2 py-1">
-                                        {rate.toFixed(3)}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {apr ? apr.toFixed(6) : "—"}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {netPrice.toFixed(3)}
-                                        <div className="text-[10px] text-gray-500">
-                                          Engine: {priceEngine.toFixed(3)}
-                                        </div>
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {pni ? pni.toFixed(2) : "—"}
-                                      </td>
-                                      <td className="border px-2 py-1">
-                                        {effLoanAmount
-                                          ? creditPts > 0
-                                            ? `-${creditPts.toFixed(
-                                                3
-                                              )} (-$${Math.abs(creditDollars).toFixed(0)})`
-                                            : creditPts < 0
-                                            ? `+${Math.abs(
-                                                creditPts
-                                              ).toFixed(3)} (+$${Math.abs(
-                                                  creditDollars
-                                                ).toFixed(0)})`
-                                            : "0.000 ($0)"
-                                          : "n/a"}
-                                      </td>
-                                      <td className="border px-2 py-1">{lock ?? "—"}</td>
-                                      <td className="border px-2 py-1">{investor}</td>
-                                    </tr>
-                                  );
-                                })}
+                                        {isSelected && (
+                                          <tr className="bg-gray-50">
+                                            <td colSpan={7} className="p-3">
+                                              <PriceAdjustmentsPanel
+                                                ruleResultsProduct={
+                                                  selectedProduct.ruleResults ?? []
+                                                }
+                                                ruleResultsRow={row.ruleResults ?? []}
+                                              />
+                                            </td>
+                                          </tr>
+                                        )}
+                                      </React.Fragment>
+                                    );
+                                  })}
                               </tbody>
                             </table>
                           </div>
+                        </div>
 
-{/* 
-===============================
-PRICE vs NET PRICE BREAKDOWN (DISABLED)
-===============================
-
-{selectedPriceRow && priceBreakdown && (
-  <div className="mt-6">
-    <h4 className="text-lg font-semibold text-gray-900 mb-2">
-      Price vs NetPrice (Selected Rate Breakdown)
-    </h4>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-      <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-        <div className="font-medium text-gray-700">Base Components</div>
-        <div>
-          <span className="font-semibold">PBA:</span>{" "}
-          {priceBreakdown.pba !== null
-            ? priceBreakdown.pba.toFixed(3)
-            : "(not present)"}
-        </div>
-        <div>
-          <span className="font-semibold">PABA:</span>{" "}
-          {priceBreakdown.paba.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Base Price:</span>{" "}
-          {priceBreakdown.basePrice.toFixed(3)}
-        </div>
-      </div>
-
-      <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-        <div className="font-medium text-gray-700">Visible Adjustments & Clamps</div>
-        <div>
-          <span className="font-semibold">Visible (Result-level):</span>{" "}
-          {priceBreakdown.visibleResultAdj.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Visible (Price-row):</span>{" "}
-          {priceBreakdown.visibleRowAdj.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Total Visible:</span>{" "}
-          {priceBreakdown.totalVisiblePriceAdj.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Clamp Adj:</span>{" "}
-          {priceBreakdown.clampAdj.toFixed(3)}
-        </div>
-      </div>
-
-      <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-        <div className="font-medium text-gray-700">Engine Price vs Reconstructed</div>
-        <div>
-          <span className="font-semibold">Reconstructed Price:</span>{" "}
-          {priceBreakdown.reconstructedPrice.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Polly Engine Price:</span>{" "}
-          {priceBreakdown.enginePrice.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Δ Price:</span>{" "}
-          {priceBreakdown.priceDiff.toFixed(3)}
-        </div>
-      </div>
-
-      <div className="p-3 border rounded bg-white shadow-sm space-y-1">
-        <div className="font-medium text-gray-700">Net Price & Broker Comp</div>
-        <div>
-          <span className="font-semibold">Broker Comp (bps):</span>{" "}
-          {priceBreakdown.brokerCompField.toFixed(4)}
-        </div>
-        <div>
-          <span className="font-semibold">Net Price:</span>{" "}
-          {priceBreakdown.netPrice.toFixed(3)}
-        </div>
-        <div>
-          <span className="font-semibold">Δ Net:</span>{" "}
-          {priceBreakdown.netDiff.toFixed(3)}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-*/}
-                    
-                        </details>
 
                         {/* ========================================================== */}
                         {/* FEE SUMMARY (APPLIED ONLY)                                */}
                         {/* ========================================================== */}
-                        <details className="group">
-                          <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
+
+                        <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             Applied Fees
-                          </summary>
+                          </h3>
 
                           {(() => {
                             // Applied fees = booleanEquationValue === true
@@ -1014,14 +951,17 @@ PRICE vs NET PRICE BREAKDOWN (DISABLED)
                             });
 
                             // Sum using resultEquationValue (most reliable)
-                            const totalAppliedFees = appliedFees.reduce((sum: number, f: any) => {
-                              const val = toNumberSafe(
-                                f?.resultEquationValue ??
-                                f?.resultEquationValueUnclamped ??
-                                0
-                              );
-                              return sum + val;
-                            }, 0);
+                            const totalAppliedFees = appliedFees.reduce(
+                              (sum: number, f: any) => {
+                                const val = toNumberSafe(
+                                  f?.resultEquationValue ??
+                                  f?.resultEquationValueUnclamped ??
+                                  0
+                                );
+                                return sum + val;
+                              },
+                              0
+                            );
 
                             return (
                               <div className="mt-3 text-sm">
@@ -1072,15 +1012,16 @@ PRICE vs NET PRICE BREAKDOWN (DISABLED)
                               </div>
                             );
                           })()}
-                        </details>
+                        </div>
 
                         {/* ========================================================== */}
-                        {/* RULE BUCKETS — UNCHANGED                                   */}
+                        {/* RULE BUCKETS — TOP SECTION (NO OUTER ACCORDION)            */}
                         {/* ========================================================== */}
-                        <details className="group">
-                          <summary className="cursor-pointer text-lg font-semibold text-gray-900 mb-2">
+
+                        <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
                             Rule Buckets Used for Pricing
-                          </summary>
+                          </h3>
 
                           {usedRules.length === 0 ? (
                             <div className="mt-3 text-sm text-gray-600 italic">
@@ -1088,27 +1029,29 @@ PRICE vs NET PRICE BREAKDOWN (DISABLED)
                             </div>
                           ) : (
                             (() => {
+                              // Group rules by Category :: Subcategory (same as before)
                               const grouped = usedRules.reduce<Record<string, RuleResult[]>>((acc, r) => {
                                 const cat = r.category || "Unknown";
-                            
-                                // Fix: treat "None" as NO subcategory
-                                let sub = (r as any).subCategory || "";
+
+                                let sub = (r as any)?.subCategory || "";
                                 if (sub === "None") sub = "";
-                            
+
                                 const key = sub ? `${cat} :: ${sub}` : cat;
-                            
+
                                 if (!acc[key]) acc[key] = [];
                                 acc[key].push(r);
                                 return acc;
                               }, {});
-                            
-                              const entries = Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b));
-                            
+
+                              const entries = Object.entries(grouped).sort(([a], [b]) =>
+                                a.localeCompare(b)
+                              );
+
                               return (
                                 <div className="mt-3 space-y-3">
                                   {entries.map(([key, list]) => {
                                     const [cat, maybeSub] = key.split(" :: ");
-                            
+
                                     return (
                                       <details
                                         key={key}
@@ -1123,7 +1066,7 @@ PRICE vs NET PRICE BREAKDOWN (DISABLED)
                                             {list.length} rule{list.length === 1 ? "" : "s"}
                                           </span>
                                         </summary>
-                            
+
                                         <div className="px-3 py-3 border-t border-gray-200 space-y-2 text-sm">
                                           {list.map((r, idx) => (
                                             <div
@@ -1133,31 +1076,30 @@ PRICE vs NET PRICE BREAKDOWN (DISABLED)
                                               <div className="font-medium text-gray-900">
                                                 {r.ruleName || "(unnamed rule)"}
                                               </div>
-                            
+
                                               <div className="text-xs text-gray-600 mt-0.5">
                                                 Category: {r.category || "Unknown"}
                                               </div>
-                            
-                                              {/* only show subcategory when it's NOT "None" */}
+
                                               {(r as any).subCategory &&
                                                 (r as any).subCategory !== "None" && (
                                                   <div className="text-xs text-gray-600">
                                                     Subcategory: {(r as any).subCategory}
                                                   </div>
                                                 )}
-                            
+
                                               <div className="text-xs text-gray-600 mt-0.5">
                                                 booleanEquationValue: {String(r.booleanEquationValue)}
                                               </div>
-                            
+
                                               <div className="text-xs text-gray-500 mt-1">
                                                 <span className="font-medium">Path:</span>{" "}
                                                 <code className="px-1 py-0.5 bg-white border border-gray-300 rounded text-[11px]">
                                                   $.data.results[x].ruleResults[]
                                                 </code>
                                               </div>
-                            
-                                              <details className="mt-2 text-xs">
+
+                                              <details className="text-xs mt-2">
                                                 <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
                                                   Show raw rule JSON
                                                 </summary>
@@ -1173,9 +1115,10 @@ PRICE vs NET PRICE BREAKDOWN (DISABLED)
                                   })}
                                 </div>
                               );
-                            })()                            
+                            })()
                           )}
-                        </details>
+                        </div>
+
                       </>
                     );
                   })()}
