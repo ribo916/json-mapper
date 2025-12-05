@@ -43,12 +43,12 @@ function PriceMathBreakdown({
   if (!breakdown) return null;
 
   return (
-    <div className="mt-3 p-2 border rounded-md bg-white shadow-sm text-[12px] w-[85%] mx-auto">
-      <div className="text-[12px] font-semibold text-gray-900 mb-2">
+    <div className="mt-3 p-2 border rounded-md bg-white shadow-sm text-xs w-[85%] mx-auto">
+      <div className="text-xs font-semibold text-gray-900 mb-2">
         Price Construction Breakdown
       </div>
-  
-      <table className="w-full text-[11px]">
+
+      <table className="w-full text-xs">
         <tbody className="divide-y divide-gray-200">
   
           <tr>
@@ -56,7 +56,7 @@ function PriceMathBreakdown({
             <td className="py-1 text-gray-900">
               {breakdown.pba !== null ? breakdown.pba.toFixed(4) : "—"}
             </td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               $.data.results[x].prices[y].priceBeforeAdjustments
               <br/>Raw price before any adjustments
             </td>
@@ -65,7 +65,7 @@ function PriceMathBreakdown({
           <tr>
             <td className="py-1 font-medium text-gray-700">Base After Base Adj (paba)</td>
             <td className="py-1 text-gray-900">{breakdown.paba.toFixed(4)}</td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               $.data.results[x].prices[y].priceAfterBaseAdjustments
               <br/>Used as starting base price
             </td>
@@ -74,7 +74,7 @@ function PriceMathBreakdown({
           <tr>
             <td className="py-1 font-medium text-gray-700">Base Price</td>
             <td className="py-1 text-gray-900">{breakdown.basePrice.toFixed(4)}</td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               paba + hidden adjustments (product + row)
               <br/>ruleResults[*].isHiddenAdjustment = true
             </td>
@@ -83,8 +83,8 @@ function PriceMathBreakdown({
           <tr>
             <td className="py-1 font-medium text-gray-700">Visible Adjustments (Product)</td>
             <td className="py-1 text-gray-900">{breakdown.visibleResultAdj.toFixed(4)}</td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
-              Logic: visible, target=Price, categories=[Margin, SRP, Adjustment]
+            <td className="py-1 text-[11px] text-gray-500 text-right">
+              visible, target=Price, categories=[Margin, SRP, Adjustment]
               <br/>$.data.results[x].ruleResults[]
             </td>
           </tr>
@@ -92,7 +92,7 @@ function PriceMathBreakdown({
           <tr>
             <td className="py-1 font-medium text-gray-700">Visible Adjustments (Row)</td>
             <td className="py-1 text-gray-900">{breakdown.visibleRowAdj.toFixed(4)}</td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               $.data.results[x].prices[y].ruleResults[]
             </td>
           </tr>
@@ -102,7 +102,7 @@ function PriceMathBreakdown({
             <td className="py-1 font-semibold text-gray-900">
               {breakdown.totalVisiblePriceAdj.toFixed(4)}
             </td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               product + row visible adjustments
             </td>
           </tr>
@@ -110,7 +110,7 @@ function PriceMathBreakdown({
           <tr>
             <td className="py-1 font-medium text-gray-700">Clamp Adjustments</td>
             <td className="py-1 text-gray-900">-{breakdown.clampAdj.toFixed(4)}</td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               $.data.results[x].prices[y].clampResults[]
               <br/>sum(unclamped - clamped)
             </td>
@@ -121,7 +121,7 @@ function PriceMathBreakdown({
             <td className="py-1 font-semibold text-gray-900">
               {breakdown.reconstructedPrice.toFixed(4)}
             </td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               BasePrice + VisibleAdj - ClampAdj
               <br/>Should equal: prices[y].price
             </td>
@@ -130,7 +130,7 @@ function PriceMathBreakdown({
           <tr>
             <td className="py-1 font-medium text-gray-700">Engine Price</td>
             <td className="py-1 text-gray-900">{breakdown.enginePrice.toFixed(4)}</td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               $.data.results[x].prices[y].price
             </td>
           </tr>
@@ -140,7 +140,7 @@ function PriceMathBreakdown({
             <td className="py-1 text-gray-900">
               {breakdown.brokerCompField.toFixed(4)}
             </td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               $.data.brokerCompPlan.calculatedAdjustment
             </td>
           </tr>
@@ -150,7 +150,7 @@ function PriceMathBreakdown({
             <td className="py-1 font-semibold text-gray-900">
               {breakdown.netPrice.toFixed(4)}
             </td>
-            <td className="py-1 text-[10px] text-gray-500 text-right">
+            <td className="py-1 text-[11px] text-gray-500 text-right">
               EnginePrice + BrokerComp
             </td>
           </tr>
@@ -158,7 +158,7 @@ function PriceMathBreakdown({
         </tbody>
       </table>
   
-      <div className="mt-1 text-[10px] text-gray-500">
+      <div className="mt-1 text-[11px] text-gray-500">
         Final Price = Base Price + Visible Adjustments − Clamp Adjustments
       </div>
     </div>
@@ -965,33 +965,93 @@ export default function PricingInspector() {
                             Rate / Price Stack Summary &amp; Table
                           </h3>
 
-                          <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">Total Price Rows</div>
-                              <div>{prices.length}</div>
-                            </div>
 
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">Min / Max Rate</div>
-                              <div>
-                                {minRate} → {maxRate}
-                              </div>
-                            </div>
 
-                            <div className="p-3 border rounded bg-white shadow-sm">
-                              <div className="font-medium text-gray-700">
-                                Best / Worst Net Price
-                              </div>
-                              <div>
-                                {bestPrice} → {worstPrice}
-                              </div>
-                            </div>
 
-                            <div className="p-3 border rounded bg-white shadow-sm md:col-span-3">
-                              <div className="font-medium text-gray-700">Par-ish Rate</div>
-                              <div>{parRate ?? "(none)"}</div>
-                            </div>
-                          </div>
+
+{/* JSON Path Legend */}
+<div className="text-xs text-gray-500 mb-2 space-y-1 leading-relaxed">
+
+  <div>
+    <strong>Rate:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].rate
+    </code>
+  </div>
+
+  <div>
+    <strong>Est APR:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].apr
+    </code>
+  </div>
+
+  <div>
+    <strong>Price (Net):</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].netPrice
+    </code>{" "}
+    <span className="text-gray-400">
+      (If missing, falls back to <code>price</code>)
+    </span>
+  </div>
+
+  <div>
+    <strong>Engine Price:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].price
+    </code>
+    <div className="ml-2 text-gray-400">
+      Shown only when <strong>Engine ≠ Net</strong>.  
+      When they match, the pricing engine produced the same value and Net = Engine.
+    </div>
+  </div>
+
+  <div>
+    <strong>P&amp;I:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].principalAndInterest
+    </code>
+  </div>
+
+  <div>
+    <strong>Credit/Cost:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      netPrice − 100
+    </code>
+
+    {/* Perfect indentation: match Engine description */}
+    <div className="ml-2 text-gray-400 leading-relaxed">
+      • Produces the price adjustment in points (positive = cost, negative = credit).  
+      <br />
+      • Dollar amount = <code>(loanAmount × (netPrice − 100)) ÷ 100</code>  
+      <br />
+      • Example: Net 102.000 → +2.000 points → (loanAmount × 0.02)  
+      <br />
+      • Example: Net 98.500 → −1.500 points → (loanAmount × −0.015)
+    </div>
+  </div>
+
+  <div>
+    <strong>Lock Period:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].lockPeriod
+    </code>
+  </div>
+
+  <div>
+    <strong>Investor:</strong>{" "}
+    <code className="bg-gray-100 px-1 rounded">
+      $.data.results[x].prices[y].investor
+    </code>
+  </div>
+
+</div>
+
+
+
+
+
 
                           {/* =============================== */}
                           {/* PRICE TABLE                     */}
