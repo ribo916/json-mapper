@@ -617,52 +617,6 @@ export default function PricingInspector() {
 
           {selectedProduct && (
             <div className="space-y-8 text-sm text-gray-800">
-              {/* COMMON SUMMARY */}
-              <div className="border border-gray-200 rounded-lg bg-white p-4 space-y-2">
-                <div className="font-semibold text-gray-900">
-                  Product Summary
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="font-medium">Code:</span>{" "}
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      {selectedProduct.code ?? "(missing)"}
-                    </code>
-                  </div>
-                  <div>
-                    <span className="font-medium">Name:</span>{" "}
-                    {selectedProduct.name ?? "(missing)"}
-                  </div>
-                  <div>
-                    <span className="font-medium">Prices count:</span>{" "}
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      {pricesCount}
-                    </code>{" "}
-                    <span className="text-gray-500">
-                      (from{" "}
-                      <code className="bg-gray-100 px-1 rounded text-[11px]">
-                        $.data.results[x].prices[]
-                      </code>
-                      )
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium">
-                      Excluded investors count:
-                    </span>{" "}
-                    <code className="bg-gray-100 px-1 rounded text-xs">
-                      {excludedInvestorsCount}
-                    </code>{" "}
-                    <span className="text-gray-500">
-                      (from{" "}
-                      <code className="bg-gray-100 px-1 rounded text-[11px]">
-                        $.data.results[x].excludedInvestors[]
-                      </code>
-                      )
-                    </span>
-                  </div>
-                </div>
-              </div>
 
               {/* ================================================================== */}
               {/* ELIGIBLE VIEW                                                     */}
@@ -738,10 +692,27 @@ export default function PricingInspector() {
                     return (
                       <>
                         {/* ========================================================== */}
-                        {/* ADJUSTMENT SUMMARY (PRODUCT-LEVEL – NOT COLLAPSIBLE)      */}
+                        {/*  SUMMARY (PRODUCT-LEVEL – NOT COLLAPSIBLE)                 */}
                         {/* ========================================================== */}
                         <div>
     
+                          {/* PRODUCT IDENTIFIERS — SIMPLE, CLEAN, 2 BOXES */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-2">
+                            <div className="p-3 border rounded bg-white shadow-sm">
+                              <div className="font-medium text-gray-700">Product Code</div>
+                              <div className="text-gray-900">
+                                {selectedProduct.code ?? "(missing)"}
+                              </div>
+                            </div>
+
+                            <div className="p-3 border rounded bg-white shadow-sm">
+                              <div className="font-medium text-gray-700">Product Name</div>
+                              <div className="text-gray-900">
+                                {selectedProduct.name ?? "(missing)"}
+                              </div>
+                            </div>
+                          </div>
+
                           <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                             <div className="p-3 border rounded bg-white shadow-sm">
                               <div className="font-medium text-gray-700">
