@@ -12,7 +12,7 @@ import {
 import DevConsole from "./DevConsole";
 import PriceAdjustmentsPanel from "./PriceAdjustmentsPanel";
 import InfoIconWithModal from "./InfoIconWithModal"; 
-
+import CollapseIcon from "./CollapseIcon"; 
 
 // ===============================================
 // PRICE BREAKDOWN TYPE
@@ -585,6 +585,13 @@ export default function PricingInspector() {
     useState<string>("");
   const [selectedInvalidCode, setSelectedInvalidCode] = useState<string>("");
   const [selectedPriceIndex, setSelectedPriceIndex] = useState<number>(-1);
+  
+  const [showOverview, setShowOverview] = useState(false);
+  const [showRateTable, setShowRateTable] = useState(false);
+  const [showFees, setShowFees] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
+  const [showRuleBuckets, setShowRuleBuckets] = useState(false);
+
 
   /* ------------------------------------------------------------------------ */
   /* FILE UPLOAD                                                              */
@@ -1008,344 +1015,390 @@ export default function PricingInspector() {
 
                     return (
                       <>
-                        {/* PRODUCT OVERVIEW + ADJUSTMENT TOTALS (COMPACT + JSON PATHS) */}
-                        <div className="mt-3 p-5 rounded-lg bg-gray-50 shadow-md text-sm">
-                          <div className="font-semibold text-gray-900 mb-3">
-                            Product Overview &amp; Adjustment Totals
-                          </div>
+                        {/* ========================================================== */}
+                        {/* PRODUCT OVERVIEW + ADJUSTMENT TOTALS (COLLAPSIBLE CARD)     */}
+                        {/* ========================================================== */}
+                        <div className="mt-8">
+                          <button
+                            onClick={() => setShowOverview((v) => !v)}
+                            className="flex items-center justify-between w-full mb-2"
+                          >
+                            <div className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                              Product Overview &amp; Adjustment Totals
+                            </div>
 
-                          <table className="w-full text-sm">
-                            <tbody className="divide-y divide-gray-200">
-                              {/* Product Code */}
-                              <tr>
-                                <td className="py-2 font-medium text-gray-700 w-1/3">
-                                  Product Code
-                                </td>
-                                <td className="py-2 text-gray-900">
-                                  {selectedProduct.code ?? "(missing)"}
-                                </td>
-                                <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    $.data.results[x].code
-                                  </code>
-                                </td>
-                              </tr>
-
-                              {/* Product Name */}
-                              <tr>
-                                <td className="py-2 font-medium text-gray-700">
-                                  Product Name
-                                </td>
-                                <td className="py-2 text-gray-900">
-                                  {selectedProduct.name ?? "(missing)"}
-                                </td>
-                                <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    $.data.results[x].name
-                                  </code>
-                                </td>
-                              </tr>
-
-                              {/* Base Price Adj */}
-                              <tr>
-                                <td className="py-2 font-medium text-gray-700">
-                                  Base Price Adj
-                                </td>
-                                <td className="py-2 text-gray-900">
-                                  {totalBasePriceAdjustments.toFixed(4)}
-                                </td>
-                                <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    $.data.results[x].totalBasePriceAdjustments
-                                  </code>
-                                </td>
-                              </tr>
-
-                              {/* SRP Adjustments */}
-                              <tr>
-                                <td className="py-2 font-medium text-gray-700">
-                                  SRP Adjustments
-                                </td>
-                                <td className="py-2 text-gray-900">
-                                  {totalSRPAdjustments.toFixed(4)}
-                                </td>
-                                <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    $.data.results[x].totalSRPAdjustments
-                                  </code>
-                                </td>
-                              </tr>
-
-                              {/* Rate Adjustments */}
-                              <tr>
-                                <td className="py-2 font-medium text-gray-700">
-                                  Rate Adjustments
-                                </td>
-                                <td className="py-2 text-gray-900">
-                                  {totalRateAdjustments.toFixed(4)}
-                                </td>
-                                <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    $.data.results[x].totalRateAdjustments
-                                  </code>
-                                </td>
-                              </tr>
-
-                              {/* All Price Adjustments (totalAdjustments) */}
-                              <tr className="bg-gray-50">
-                                <td className="py-2 font-semibold text-gray-900">
-                                  All Price Adjustments
-                                </td>
-                                <td className="py-2 font-semibold text-gray-900">
-                                  {totalAdjustments.toFixed(4)}
-                                </td>
-                                <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    $.data.results[x].totalAdjustments
-                                  </code>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
-
-                          <div className="mt-2 text-xs text-gray-500">
-                            Note: These values are taken directly from the PPE product-level totals.
-                            <span className="block">
-                              <code>totalAdjustments</code> may not equal a simple sum of the
-                              base / SRP / rate rows above; it can include additional categories
-                              and rounding logic.
+                            <span className="text-gray-600 hover:text-gray-800">
+                              <CollapseIcon open={showOverview} />
                             </span>
-                          </div>
+                          </button>
+
+                          {showOverview && (
+                            <div className="mt-3 p-5 rounded-lg bg-gray-50 shadow-md text-sm space-y-4">
+
+                              <table className="w-full text-sm">
+                                <tbody className="divide-y divide-gray-100">
+
+                                  {/* Product Code */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700 w-1/3">
+                                      Product Code
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {selectedProduct.code ?? "(missing)"}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.results[x].code
+                                      </code>
+                                    </td>
+                                  </tr>
+
+                                  {/* Product Name */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700">
+                                      Product Name
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {selectedProduct.name ?? "(missing)"}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.results[x].name
+                                      </code>
+                                    </td>
+                                  </tr>
+
+                                  {/* Base Price Adj */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700">
+                                      Base Price Adj
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {totalBasePriceAdjustments.toFixed(4)}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.results[x].totalBasePriceAdjustments
+                                      </code>
+                                    </td>
+                                  </tr>
+
+                                  {/* SRP Adjustments */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700">
+                                      SRP Adjustments
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {totalSRPAdjustments.toFixed(4)}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.results[x].totalSRPAdjustments
+                                      </code>
+                                    </td>
+                                  </tr>
+
+                                  {/* Rate Adjustments */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700">
+                                      Rate Adjustments
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {totalRateAdjustments.toFixed(4)}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.results[x].totalRateAdjustments
+                                      </code>
+                                    </td>
+                                  </tr>
+
+                                  {/* All Price Adjustments */}
+                                  <tr className="bg-gray-100">
+                                    <td className="py-2 font-semibold text-gray-900">
+                                      All Price Adjustments
+                                    </td>
+                                    <td className="py-2 font-semibold text-gray-900">
+                                      {totalAdjustments.toFixed(4)}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.results[x].totalAdjustments
+                                      </code>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
+                              <div className="text-xs text-gray-500">
+                                Note: These values are sourced from PPE product-level totals.
+                                <span className="block">
+                                  <code>totalAdjustments</code> may include rounding and categories not
+                                  shown individually above.
+                                </span>
+                              </div>
+
+                            </div>
+                          )}
                         </div>
 
                         {/* ========================================================== */}
-                        {/* RATE / PRICE STACK SUMMARY & TABLE (NO TOP ACCORDION)      */}
+                        {/* RATE / PRICE STACK SUMMARY & TABLE (COLLAPSABLE)           */}
                         {/* ========================================================== */}
                         <div className="mt-6">
 
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-1">
-                          Rate / Price Stack Summary &amp; Table
+                          {/* HEADER + COLLAPSE TOGGLE (div, not button!) */}
+                          <div
+                            onClick={() => setShowRateTable((v) => !v)}
+                            role="button"
+                            tabIndex={0}
+                            className="flex items-center justify-between w-full mb-2 cursor-pointer select-none"
+                          >
+                            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-1">
+                              Rate / Price Stack Summary &amp; Table
 
-                          <InfoIconWithModal title="Rate / Price Table Header Logic">
-                          <div className="space-y-4 text-sm text-gray-700">
+                              {/* INFO ICON */}
+                              <InfoIconWithModal title="Rate / Price Table Header Logic">
+                                <div className="space-y-4 text-sm text-gray-700">
 
-                            {/* RATE */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Rate</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].rate
-                              </code>
-                            </div>
+                                  {/* RATE */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Rate</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].rate
+                                    </code>
+                                  </div>
 
-                            {/* APR */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Estimated APR</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].apr
-                              </code>
-                            </div>
+                                  {/* APR */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Estimated APR</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].apr
+                                    </code>
+                                  </div>
 
-                            {/* NET PRICE */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Price (Net)</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].netPrice
-                              </code>
-                              <div className="text-xs text-gray-500 mt-1">
-                                Falls back to <code>price</code> when <code>netPrice</code> is missing.
-                              </div>
-                            </div>
+                                  {/* NET PRICE */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Price (Net)</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].netPrice
+                                    </code>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Falls back to <code>price</code> when <code>netPrice</code> is missing.
+                                    </div>
+                                  </div>
 
-                            {/* ENGINE PRICE */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Engine Price</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].price
-                              </code>
-                              <div className="text-xs text-gray-500 mt-1">
-                                Only shown separately when <strong>Engine ≠ Net</strong>.
-                              </div>
-                            </div>
+                                  {/* ENGINE PRICE */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Engine Price</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].price
+                                    </code>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Only shown separately when <strong>Engine ≠ Net</strong>.
+                                    </div>
+                                  </div>
 
-                            {/* P&I */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Principal &amp; Interest (P&amp;I)</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].principalAndInterest
-                              </code>
-                            </div>
+                                  {/* P&I */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">
+                                      Principal &amp; Interest (P&amp;I)
+                                    </div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].principalAndInterest
+                                    </code>
+                                  </div>
 
-                            {/* CREDIT / COST */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Credit / Cost</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                netPrice − 100
-                              </code>
+                                  {/* CREDIT / COST */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Credit / Cost</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      netPrice − 100
+                                    </code>
 
-                              <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
-                                <li>Positive = cost to borrower</li>
-                                <li>Negative = credit to borrower</li>
-                                <li>
-                                  Dollar amount:{" "}
-                                  <code className="bg-gray-100 px-1 rounded">
-                                    (loanAmount × (netPrice − 100)) ÷ 100
-                                  </code>
-                                </li>
-                                <li>Example: Net 102.000 → +2.000 points → loanAmount × 0.02</li>
-                                <li>Example: Net 98.500 → −1.500 points → loanAmount × −0.015</li>
-                              </ul>
-                            </div>
+                                    <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+                                      <li>Positive = cost to borrower</li>
+                                      <li>Negative = credit to borrower</li>
+                                      <li>
+                                        Dollar amount:{" "}
+                                        <code className="bg-gray-100 px-1 rounded">
+                                          (loanAmount × (netPrice − 100)) ÷ 100
+                                        </code>
+                                      </li>
+                                      <li>Example: Net 102.000 → +2.000 points → loanAmount × 0.02</li>
+                                      <li>Example: Net 98.500 → −1.500 points → loanAmount × −0.015</li>
+                                    </ul>
+                                  </div>
 
-                            {/* LOCK PERIOD */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Lock Period</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].lockPeriod
-                              </code>
-                            </div>
+                                  {/* LOCK PERIOD */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Lock Period</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].lockPeriod
+                                    </code>
+                                  </div>
 
-                            {/* INVESTOR */}
-                            <div>
-                              <div className="font-semibold text-gray-900">Investor</div>
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                $.data.results[x].prices[y].investor
-                              </code>
-                            </div>
+                                  {/* INVESTOR */}
+                                  <div>
+                                    <div className="font-semibold text-gray-900">Investor</div>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">
+                                      $.data.results[x].prices[y].investor
+                                    </code>
+                                  </div>
 
+                                </div>
+                              </InfoIconWithModal>
+                            </h3>
+
+                            {/* Collapse Icon */}
+                            <CollapseIcon open={showRateTable} />
                           </div>
-                          </InfoIconWithModal>
 
-                        </h3>
+                          {/* COLLAPSABLE CONTENT */}
+                          {showRateTable && (
+                            <div className="mt-4 overflow-x-auto">
+                              <table className="min-w-full text-xs border-collapse">
+                                <thead>
+                                  <tr className="bg-gray-100 text-[11px] uppercase tracking-wide text-gray-600">
+                                    <th className="border px-2 py-1 text-left">Rate</th>
+                                    <th className="border px-2 py-1 text-left">Est APR</th>
+                                    <th className="border px-2 py-1 text-left">Price (Net)</th>
+                                    <th className="border px-2 py-1 text-left">P&amp;I</th>
+                                    <th className="border px-2 py-1 text-left">Credit/Cost</th>
+                                    <th className="border px-2 py-1 text-left">Lock Period</th>
+                                    <th className="border px-2 py-1 text-left">Investor</th>
+                                  </tr>
+                                </thead>
 
-                          {/* =============================== */}
-                          {/* PRICE TABLE                     */}
-                          {/* =============================== */}
-                          <div className="mt-4 overflow-x-auto">
-                            <table className="min-w-full text-xs border-collapse">
-                              <thead>
-                                <tr className="bg-gray-100 text-[11px] uppercase tracking-wide text-gray-600">
-                                  <th className="border px-2 py-1 text-left">Rate</th>
-                                  <th className="border px-2 py-1 text-left">Est APR</th>
-                                  <th className="border px-2 py-1 text-left">Price (Net)</th>
-                                  <th className="border px-2 py-1 text-left">P&amp;I</th>
-                                  <th className="border px-2 py-1 text-left">Credit/Cost</th>
-                                  <th className="border px-2 py-1 text-left">Lock Period</th>
-                                  <th className="border px-2 py-1 text-left">Investor</th>
-                                </tr>
-                              </thead>
+                                <tbody>
+                                  {[...prices]
+                                    .slice()
+                                    .sort((a, b) => toNumberSafe(a.rate) - toNumberSafe(b.rate))
+                                    .map((row, idx) => {
+                                      const rate = toNumberSafe(row.rate);
+                                      const apr = toNumberSafe(row.apr);
+                                      const priceEngine = toNumberSafe(row.price);
+                                      const netPrice = toNumberSafe(
+                                        (row as { netPrice?: unknown }).netPrice ?? row.price
+                                      );
+                                      const pni = toNumberSafe(row.principalAndInterest);
 
-                              <tbody>
-                                {[...prices]
-                                  .slice()
-                                  .sort((a, b) => toNumberSafe(a.rate) - toNumberSafe(b.rate))
-                                  .map((row, idx) => {
-                                    const rate = toNumberSafe(row.rate);
-                                    const apr = toNumberSafe(row.apr);
-                                    const priceEngine = toNumberSafe(row.price);
-                                    const netPrice = toNumberSafe(
-                                      (row as { netPrice?: unknown }).netPrice ?? row.price
-                                    );
-                                    const pni = toNumberSafe(row.principalAndInterest);
+                                      const effLoanAmount =
+                                        loanAmount && loanAmount !== 0 ? loanAmount : null;
 
-                                    const effLoanAmount =
-                                      loanAmount && loanAmount !== 0 ? loanAmount : null;
-                                    let creditPts = 0;
-                                    let creditDollars = 0;
+                                      let creditPts = 0;
+                                      let creditDollars = 0;
 
-                                    if (effLoanAmount) {
-                                      creditPts = netPrice - 100;
-                                      creditDollars = (effLoanAmount * creditPts) / 100;
-                                    }
+                                      if (effLoanAmount) {
+                                        creditPts = netPrice - 100;
+                                        creditDollars = (effLoanAmount * creditPts) / 100;
+                                      }
 
-                                    const lock =
-                                      toNumberSafe(row.lockPeriod ?? desiredLockPeriod) || null;
+                                      const lock =
+                                        toNumberSafe(row.lockPeriod ?? desiredLockPeriod) || null;
 
-                                    const investor =
-                                      (row.investor as string | undefined) ?? "(unknown)";
+                                      const investor =
+                                        (row.investor as string | undefined) ?? "(unknown)";
 
-                                    const isSelected = idx === selectedPriceIndex;
+                                      const isSelected = idx === selectedPriceIndex;
 
-                                    return (
-                                      <React.Fragment key={idx}>
-                                        <tr
-                                          className={`cursor-pointer transition-colors ${
-                                            isSelected
-                                              ? "bg-blue-50/70 hover:bg-blue-100"
-                                              : "hover:bg-gray-100"
-                                          }`}
-                                          onClick={() =>
-                                            setSelectedPriceIndex((prev) =>
-                                              prev === idx ? -1 : idx
-                                            )
-                                          }
-                                        >
-                                          <td className="border px-2 py-1">
-                                            {rate.toFixed(3)}
-                                          </td>
-                                          <td className="border px-2 py-1">
-                                            {apr ? apr.toFixed(6) : "—"}
-                                          </td>
-                                          <td className="border px-2 py-1">
-                                            {netPrice.toFixed(3)}
-                                            <div className="text-[10px] text-gray-500">
-                                              Engine: {priceEngine.toFixed(3)}
-                                            </div>
-                                          </td>
-                                          <td className="border px-2 py-1">
-                                            {pni ? pni.toFixed(2) : "—"}
-                                          </td>
-                                          <td className="border px-2 py-1">
-                                            {effLoanAmount
-                                              ? creditPts > 0
-                                                ? `-${creditPts.toFixed(3)} (-$${Math.abs(
-                                                    creditDollars
-                                                  ).toFixed(0)})`
-                                                : creditPts < 0
-                                                ? `+${Math.abs(creditPts).toFixed(
-                                                    3
-                                                  )} (+$${Math.abs(creditDollars).toFixed(
-                                                    0
-                                                  )})`
-                                                : "0.000 ($0)"
-                                              : "n/a"}
-                                          </td>
-                                          <td className="border px-2 py-1">{lock ?? "—"}</td>
-                                          <td className="border px-2 py-1">{investor}</td>
-                                        </tr>
-
-                                        {isSelected && (
-                                          <tr className="bg-gray-50">
-                                            <td colSpan={7} className="p-3">
-                                              <PriceAdjustmentsPanel
-                                                ruleResultsProduct={
-                                                  selectedProduct.ruleResults ?? []
-                                                }
-                                                ruleResultsRow={row.ruleResults ?? []}
-                                              />
+                                      return (
+                                        <React.Fragment key={idx}>
+                                          <tr
+                                            className={`cursor-pointer transition-colors ${
+                                              isSelected
+                                                ? "bg-blue-50/70 hover:bg-blue-100"
+                                                : "hover:bg-gray-100"
+                                            }`}
+                                            onClick={() =>
+                                              setSelectedPriceIndex((prev) =>
+                                                prev === idx ? -1 : idx
+                                              )
+                                            }
+                                          >
+                                            <td className="border px-2 py-1">
+                                              {rate.toFixed(3)}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                              {apr ? apr.toFixed(6) : "—"}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                              {netPrice.toFixed(3)}
+                                              <div className="text-[10px] text-gray-500">
+                                                Engine: {priceEngine.toFixed(3)}
+                                              </div>
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                              {pni ? pni.toFixed(2) : "—"}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                              {effLoanAmount
+                                                ? creditPts > 0
+                                                  ? `-${creditPts.toFixed(3)} (-$${Math.abs(
+                                                      creditDollars
+                                                    ).toFixed(0)})`
+                                                  : creditPts < 0
+                                                  ? `+${Math.abs(creditPts).toFixed(
+                                                      3
+                                                    )} (+$${Math.abs(creditDollars).toFixed(0)})`
+                                                  : "0.000 ($0)"
+                                                : "n/a"}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                              {lock ?? "—"}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                              {investor}
                                             </td>
                                           </tr>
-                                        )}
-                                      </React.Fragment>
-                                    );
-                                  })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
 
+                                          {isSelected && (
+                                            <tr className="bg-gray-50">
+                                              <td colSpan={7} className="p-3">
+                                                <PriceAdjustmentsPanel
+                                                  ruleResultsProduct={
+                                                    selectedProduct.ruleResults ?? []
+                                                  }
+                                                  ruleResultsRow={row.ruleResults ?? []}
+                                                />
+                                              </td>
+                                            </tr>
+                                          )}
+                                        </React.Fragment>
+                                      );
+                                    })}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
 
                         {/* ========================================================== */}
                         {/* PRICE CONSTRUCTION BREAKDOWN (GLOBAL, SELECTED ROW)        */}
                         {/* ========================================================== */}
-                        <hr className="my-1 border-gray-300" />
-
                         {selectedPriceRow && priceBreakdown && (
                           <div className="mt-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                              Price Construction Breakdown (Selected Rate)
-                            </h3>
 
-                            <PriceMathBreakdown breakdown={priceBreakdown} />
+                            {/* COLLAPSABLE HEADER (div, NOT button) */}
+                            <div
+                              onClick={() => setShowBreakdown((v) => !v)}
+                              role="button"
+                              tabIndex={0}
+                              className="flex items-center justify-between w-full mb-2 cursor-pointer select-none"
+                            >
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                Price Construction Breakdown (Selected Rate)
+                              </h3>
+
+                              <CollapseIcon open={showBreakdown} />
+                            </div>
+
+                            {/* CONTENT */}
+                            {showBreakdown && (
+                              <div>
+                                <PriceMathBreakdown breakdown={priceBreakdown} />
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -1353,211 +1406,247 @@ export default function PricingInspector() {
                         {/* FEE SUMMARY (APPLIED ONLY)                                */}
                         {/* ========================================================== */}
                         <div className="mt-6">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            Fees
-                          </h3>
-                          <div className="mt-6 p-5 rounded-lg bg-gray-50 shadow-md text-sm">
-                            {(() => {
-                              const appliedFees = (feeResults ?? []).filter(
-                                (f: any) => f?.booleanEquationValue === true
-                              );
 
-                              const totalAppliedFees = appliedFees.reduce((sum: number, f: any) => {
-                                const val = toNumberSafe(
-                                  f?.resultEquationValue ??
-                                  f?.resultEquationValueUnclamped ??
-                                  0
+                          {/* COLLAPSABLE HEADER */}
+                          <div
+                            onClick={() => setShowFees((v) => !v)}
+                            role="button"
+                            tabIndex={0}
+                            className="flex items-center justify-between w-full mb-2 cursor-pointer select-none"
+                          >
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Fees
+                            </h3>
+
+                            <CollapseIcon open={showFees} />
+                          </div>
+
+                          {/* COLLAPSABLE CONTENT */}
+                          {showFees && (
+                            <div className="mt-6 p-5 rounded-lg bg-gray-50 shadow-md text-sm">
+                              {(() => {
+                                const appliedFees = (feeResults ?? []).filter(
+                                  (f: any) => f?.booleanEquationValue === true
                                 );
-                                return sum + val;
-                              }, 0);
 
-                              return (
-                                <>
+                                const totalAppliedFees = appliedFees.reduce((sum: number, f: any) => {
+                                  const val = toNumberSafe(
+                                    f?.resultEquationValue ??
+                                      f?.resultEquationValueUnclamped ??
+                                      0
+                                  );
+                                  return sum + val;
+                                }, 0);
 
-                                  {/* Summary Table */}
-                                  <table className="w-full text-sm">
-                                    <tbody className="divide-y divide-gray-200">
+                                return (
+                                  <>
+                                    {/* Summary Table */}
+                                    <table className="w-full text-sm">
+                                      <tbody className="divide-y divide-gray-200">
 
-                                      {/* Total Fees */}
-                                      <tr className="bg-gray-50">
-                                        <td className="py-2 font-semibold text-gray-900 w-1/3">
-                                          Total Applied Fees
-                                        </td>
-                                        <td className="py-2 font-semibold text-gray-900">
-                                          {totalAppliedFees.toFixed(2)}
-                                        </td>
-                                        <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                          <code className="bg-gray-100 px-1 rounded">
-                                            $.data.results[x].feeResults[*].resultEquationValue
-                                          </code>
-                                        </td>
-                                      </tr>
-
-                                      {/* No Fees */}
-                                      {appliedFees.length === 0 && (
-                                        <tr>
-                                          <td colSpan={3} className="py-2 text-xs text-gray-500 italic">
-                                            No applied fees for this scenario.
+                                        {/* Total Fees */}
+                                        <tr className="bg-gray-50">
+                                          <td className="py-2 font-semibold text-gray-900 w-1/3">
+                                            Total Applied Fees
+                                          </td>
+                                          <td className="py-2 font-semibold text-gray-900">
+                                            {totalAppliedFees.toFixed(2)}
+                                          </td>
+                                          <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                            <code className="bg-gray-100 px-1 rounded">
+                                              $.data.results[x].feeResults[*].resultEquationValue
+                                            </code>
                                           </td>
                                         </tr>
-                                      )}
 
-                                      {/* Individual Fees */}
-                                      {appliedFees.map((f: any, i: number) => {
-                                        const amount = toNumberSafe(
-                                          f?.resultEquationValue ??
-                                          f?.resultEquationValueUnclamped ??
-                                          0
-                                        );
-
-                                        return (
-                                          <tr key={i}>
-                                            <td className="py-2 font-medium text-gray-700">
-                                              {f?.ruleName || "(unnamed fee)"}
-                                              <div className="text-xs text-gray-500">
-                                                Paid By: {f?.paidBy || "—"} · Paid To: {f?.paidTo || "—"}
-                                              </div>
-                                            </td>
-
-                                            <td className="py-2 text-gray-900">
-                                              {amount.toFixed(2)}
-                                            </td>
-
-                                            <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                              <code className="bg-gray-100 px-1 rounded">
-                                                $.data.results[x].feeResults[{i}]
-                                              </code>
+                                        {/* No Fees */}
+                                        {appliedFees.length === 0 && (
+                                          <tr>
+                                            <td
+                                              colSpan={3}
+                                              className="py-2 text-xs text-gray-500 italic"
+                                            >
+                                              No applied fees for this scenario.
                                             </td>
                                           </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
+                                        )}
 
-                                  <div className="mt-2 text-xs text-gray-500">
-                                    Fees are shown only when <code>booleanEquationValue = true</code>.
-                                  </div>
-                                </>
-                              );
-                            })()}
-                          </div>
+                                        {/* Individual Fees */}
+                                        {appliedFees.map((f: any, i: number) => {
+                                          const amount = toNumberSafe(
+                                            f?.resultEquationValue ??
+                                              f?.resultEquationValueUnclamped ??
+                                              0
+                                          );
+
+                                          return (
+                                            <tr key={i}>
+                                              <td className="py-2 font-medium text-gray-700">
+                                                {f?.ruleName || "(unnamed fee)"}
+                                                <div className="text-xs text-gray-500">
+                                                  Paid By: {f?.paidBy || "—"} · Paid To:{" "}
+                                                  {f?.paidTo || "—"}
+                                                </div>
+                                              </td>
+
+                                              <td className="py-2 text-gray-900">
+                                                {amount.toFixed(2)}
+                                              </td>
+
+                                              <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                                <code className="bg-gray-100 px-1 rounded">
+                                                  $.data.results[x].feeResults[{i}]
+                                                </code>
+                                              </td>
+                                            </tr>
+                                          );
+                                        })}
+                                      </tbody>
+                                    </table>
+
+                                    <div className="mt-2 text-xs text-gray-500">
+                                      Fees are shown only when{" "}
+                                      <code>booleanEquationValue = true</code>.
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          )}
                         </div>
 
                         {/* ========================================================== */}
-                        {/* RULE BUCKETS — TOP SECTION (NO OUTER ACCORDION)            */}
+                        {/* RULE BUCKETS — TOP SECTION (COLLAPSABLE)                   */}
                         {/* ========================================================== */}
                         <div className="mt-6">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                            Rule Buckets Used for Pricing
-                          </h3>
 
-                          <div className="text-sm text-gray-600 mb-4 leading-relaxed">
-                            These are <strong>product-level ruleResults</strong> from 
-                            <code className="bg-gray-100 px-1 mx-1 rounded text-xs">
-                              $.data.results[x].ruleResults[]
-                            </code>
-                            grouped by <em>Category</em> and <em>Subcategory</em>.  
-                            These rules fire before rate-level pricing and determine 
-                            <strong>base price, adjustments, eligibility, and LLPA/SRP logic</strong>.  
-                            This section does <strong>not</strong> include rate-specific ruleResults from 
-                            <code className="bg-gray-100 px-1 mx-1 rounded text-xs">
-                              $.data.results[x].prices[y].ruleResults[]
-                            </code>.
+                          {/* HEADER — collapsable, NOT a button */}
+                          <div
+                            onClick={() => setShowRuleBuckets(v => !v)}
+                            role="button"
+                            tabIndex={0}
+                            className="flex items-center justify-between w-full mb-2 cursor-pointer select-none"
+                          >
+                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                              Rule Buckets Used for Pricing
+                            </h3>
+
+                            <CollapseIcon open={showRuleBuckets} />
                           </div>
 
-                          {usedRules.length === 0 ? (
-                            <div className="mt-3 text-sm text-gray-600 italic">
-                              No rule buckets fired for this product.
-                            </div>
-                          ) : (
-                            (() => {
-                              // Group rules by Category :: Subcategory (same as before)
-                              const grouped = usedRules.reduce<Record<string, RuleResult[]>>((acc, r) => {
-                                const cat = r.category || "Unknown";
+                          {/* COLLAPSABLE CONTENT */}
+                          {showRuleBuckets && (
+                            <div>
 
-                                let sub = (r as any)?.subCategory || "";
-                                if (sub === "None") sub = "";
+                              <div className="text-sm text-gray-600 mb-4 leading-relaxed">
+                                These are <strong>product-level ruleResults</strong> from 
+                                <code className="bg-gray-100 px-1 mx-1 rounded text-xs">
+                                  $.data.results[x].ruleResults[]
+                                </code>
+                                grouped by <em>Category</em> and <em>Subcategory</em>.
+                                These rules fire before rate-level pricing and determine
+                                <strong> base price, adjustments, eligibility, and LLPA/SRP logic</strong>.
+                                This section does <strong>not</strong> include rate-specific ruleResults from
+                                <code className="bg-gray-100 px-1 mx-1 rounded text-xs">
+                                  $.data.results[x].prices[y].ruleResults[]
+                                </code>.
+                              </div>
 
-                                const key = sub ? `${cat} :: ${sub}` : cat;
-
-                                if (!acc[key]) acc[key] = [];
-                                acc[key].push(r);
-                                return acc;
-                              }, {});
-
-                              const entries = Object.entries(grouped).sort(([a], [b]) =>
-                                a.localeCompare(b)
-                              );
-
-                              return (
-                                <div className="mt-3 space-y-3">
-                                  {entries.map(([key, list]) => {
-                                    const [cat, maybeSub] = key.split(" :: ");
-
-                                    return (
-                                      <details
-                                        key={key}
-                                        className="border border-gray-200 rounded-lg bg-white shadow-sm"
-                                      >
-                                        <summary className="px-3 py-2 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-800">
-                                          <span>
-                                            {cat}
-                                            {maybeSub ? ` · ${maybeSub}` : ""}
-                                          </span>
-                                          <span className="text-xs text-gray-500">
-                                            {list.length} rule{list.length === 1 ? "" : "s"}
-                                          </span>
-                                        </summary>
-
-                                        <div className="px-3 py-3 border-t border-gray-200 space-y-2 text-sm">
-                                          {list.map((r, idx) => (
-                                            <div
-                                              key={idx}
-                                              className="p-2 rounded border border-gray-200 bg-gray-50"
-                                            >
-                                              <div className="font-medium text-gray-900">
-                                                {r.ruleName || "(unnamed rule)"}
-                                              </div>
-
-                                              <div className="text-xs text-gray-600 mt-0.5">
-                                                Category: {r.category || "Unknown"}
-                                              </div>
-
-                                              {(r as any).subCategory &&
-                                                (r as any).subCategory !== "None" && (
-                                                  <div className="text-xs text-gray-600">
-                                                    Subcategory: {(r as any).subCategory}
-                                                  </div>
-                                                )}
-
-                                              <div className="text-xs text-gray-600 mt-0.5">
-                                                booleanEquationValue: {String(r.booleanEquationValue)}
-                                              </div>
-
-                                              <div className="text-xs text-gray-500 mt-1">
-                                                <span className="font-medium">Path:</span>{" "}
-                                                <code className="px-1 py-0.5 bg-white border border-gray-300 rounded text-[11px]">
-                                                  $.data.results[x].ruleResults[]
-                                                </code>
-                                              </div>
-
-                                              <details className="text-xs mt-2">
-                                                <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
-                                                  Show raw rule JSON
-                                                </summary>
-                                                <pre className="mt-2 p-2 bg-white border rounded text-[11px] overflow-x-auto">
-                                                  {JSON.stringify(r, null, 2)}
-                                                </pre>
-                                              </details>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </details>
-                                    );
-                                  })}
+                              {usedRules.length === 0 ? (
+                                <div className="mt-3 text-sm text-gray-600 italic">
+                                  No rule buckets fired for this product.
                                 </div>
-                              );
-                            })()
+                              ) : (
+                                (() => {
+                                  // GROUP RULES
+                                  const grouped = usedRules.reduce<Record<string, RuleResult[]>>((acc, r) => {
+                                    const cat = r.category || "Unknown";
+                                    let sub = (r as any)?.subCategory || "";
+                                    if (sub === "None") sub = "";
+
+                                    const key = sub ? `${cat} :: ${sub}` : cat;
+
+                                    if (!acc[key]) acc[key] = [];
+                                    acc[key].push(r);
+                                    return acc;
+                                  }, {});
+
+                                  const entries = Object.entries(grouped).sort(([a], [b]) =>
+                                    a.localeCompare(b)
+                                  );
+
+                                  return (
+                                    <div className="mt-3 space-y-3">
+                                      {entries.map(([key, list]) => {
+                                        const [cat, maybeSub] = key.split(" :: ");
+
+                                        return (
+                                          <details
+                                            key={key}
+                                            className="border border-gray-200 rounded-lg bg-white shadow-sm"
+                                          >
+                                            <summary className="px-3 py-2 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-800">
+                                              <span>
+                                                {cat}
+                                                {maybeSub ? ` · ${maybeSub}` : ""}
+                                              </span>
+                                              <span className="text-xs text-gray-500">
+                                                {list.length} rule{list.length === 1 ? "" : "s"}
+                                              </span>
+                                            </summary>
+
+                                            <div className="px-3 py-3 border-t border-gray-200 space-y-2 text-sm">
+                                              {list.map((r, idx) => (
+                                                <div
+                                                  key={idx}
+                                                  className="p-2 rounded border border-gray-200 bg-gray-50"
+                                                >
+                                                  <div className="font-medium text-gray-900">
+                                                    {r.ruleName || "(unnamed rule)"}
+                                                  </div>
+
+                                                  <div className="text-xs text-gray-600 mt-0.5">
+                                                    Category: {r.category || "Unknown"}
+                                                  </div>
+
+                                                  {(r as any).subCategory &&
+                                                    (r as any).subCategory !== "None" && (
+                                                      <div className="text-xs text-gray-600">
+                                                        Subcategory: {(r as any).subCategory}
+                                                      </div>
+                                                    )}
+
+                                                  <div className="text-xs text-gray-600 mt-0.5">
+                                                    booleanEquationValue: {String(r.booleanEquationValue)}
+                                                  </div>
+
+                                                  <div className="text-xs text-gray-500 mt-1">
+                                                    <span className="font-medium">Path:</span>{" "}
+                                                    <code className="px-1 py-0.5 bg-white border border-gray-300 rounded text-[11px]">
+                                                      $.data.results[x].ruleResults[]
+                                                    </code>
+                                                  </div>
+
+                                                  <details className="text-xs mt-2">
+                                                    <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                                                      Show raw rule JSON
+                                                    </summary>
+                                                    <pre className="mt-2 p-2 bg-white border rounded text-[11px] overflow-x-auto">
+                                                      {JSON.stringify(r, null, 2)}
+                                                    </pre>
+                                                  </details>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </details>
+                                        );
+                                      })}
+                                    </div>
+                                  );
+                                })()
+                              )}
+
+                            </div>
                           )}
                         </div>
 
