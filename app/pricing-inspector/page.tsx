@@ -827,7 +827,6 @@ export default function PricingInspector() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                 {/* Eligible */}
                 <div>
-                  <div className="font-semibold mb-1">Eligible Results</div>
                   <div className="text-xs text-gray-600 mb-2 h-[42px] flex flex-col justify-between">
                     <code className="bg-gray-100 px-1 rounded text-[11px]">
                       $.data.results[x].isEligible == true
@@ -837,7 +836,11 @@ export default function PricingInspector() {
                     </code>
                   </div>
                   <select
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                    className={`w-full rounded px-2 py-1 text-sm border ${
+                      selectedEligibleCode
+                        ? "bg-green-50 border-green-400 text-green-800"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
                     value={selectedEligibleCode}
                     onChange={(e) => {
                       setSelectedEligibleCode(e.target.value);
@@ -857,7 +860,6 @@ export default function PricingInspector() {
 
                 {/* Ineligible */}
                 <div>
-                  <div className="font-semibold mb-1">Ineligible Results</div>
                   <div className="text-xs text-gray-600 mb-2 h-[42px] flex flex-col justify-between">
                     <code className="bg-gray-100 px-1 rounded text-[11px]">
                       $.data.results[x].isEligible == false
@@ -867,7 +869,11 @@ export default function PricingInspector() {
                     </code>
                   </div>
                   <select
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                    className={`w-full rounded px-2 py-1 text-sm border ${
+                      selectedIneligibleCode
+                        ? "bg-yellow-50 border-yellow-400 text-yellow-800"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
                     value={selectedIneligibleCode}
                     onChange={(e) => {
                       setSelectedIneligibleCode(e.target.value);
@@ -887,7 +893,6 @@ export default function PricingInspector() {
 
                 {/* Invalid */}
                 <div>
-                  <div className="font-semibold mb-1">Invalid Results</div>
                   <div className="text-xs text-gray-600 mb-2 h-[42px] flex flex-col justify-between">
                     <code className="bg-gray-100 px-1 rounded text-[11px]">
                       $.data.results[x].isValidResult == false
@@ -895,7 +900,11 @@ export default function PricingInspector() {
                     <span />
                   </div>
                   <select
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm bg-white"
+                    className={`w-full rounded px-2 py-1 text-sm border ${
+                      selectedInvalidCode
+                        ? "bg-red-50 border-red-400 text-red-800"
+                        : "bg-white border-gray-300 text-gray-900"
+                    }`}
                     value={selectedInvalidCode}
                     onChange={(e) => {
                       setSelectedInvalidCode(e.target.value);
@@ -911,6 +920,7 @@ export default function PricingInspector() {
                       </option>
                     ))}
                   </select>
+
                 </div>
               </div>
             </div>
@@ -925,11 +935,11 @@ export default function PricingInspector() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">
             {selectedIsEligible
-              ? "Eligible Results"
+              ? ""
               : selectedIsIneligible
-              ? "Ineligible Results"
+              ? ""
               : selectedIsInvalid
-              ? "Invalid Results"
+              ? ""
               : "Detailed Results"}
           </h2>
 

@@ -126,7 +126,9 @@ function Bucket({
   const showUnknown = includeUnknownEntry;
 
   return (
-    <div className="border border-gray-200 rounded-md bg-gray-50 p-2 w-[70%] mb-2">
+    <div className="border border-gray-200 rounded-lg bg-gray-50 p-3 shadow-sm w-full mb-2">
+
+
       {/* Header */}
       <div className="flex justify-between items-center mb-1">
         <div className="text-[11px] font-semibold text-gray-800 uppercase tracking-wide">
@@ -147,7 +149,7 @@ function Bucket({
           {items.map((r, idx) => (
             <div
               key={idx}
-              className="flex justify-between text-[11px] text-gray-700"
+              className="grid grid-cols-[1fr_auto] gap-x-2 text-[11px] text-gray-700"
             >
               <span className="truncate">
                 {r.ruleName || "(unnamed rule)"}
@@ -218,92 +220,92 @@ export default function PriceAdjustmentsPanel({
     ) || 0;
 
   return (
-    <div className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm space-y-3 text-xs w-[80%]">
+    <div className="relative border border-gray-300 rounded-md bg-gray-100 p-2 pl-3 w-full max-w-md mb-2 shadow-inner">
+      <div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-md"></div>
+      <div className="text-sm font-semibold text-gray-900 flex items-center gap-1">
+        Pricing Adjustments
+        <InfoIconWithModal title="How Pricing Adjustments Are Selected">
+          <div className="space-y-4 text-sm text-gray-700">
 
-    <div className="text-sm font-semibold text-gray-900 flex items-center gap-1">
-      Pricing Adjustments
-      <InfoIconWithModal title="How Pricing Adjustments Are Selected">
-        <div className="space-y-4 text-sm text-gray-700">
+            {/* PRODUCT + ROW RULES */}
+            <div>
+              <div className="font-semibold text-gray-900">Rule Sources</div>
+              <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+                <li>
+                  Product-level rules:{" "}
+                  <code className="bg-gray-100 px-1 rounded">$.data.results[x].ruleResults[]</code>
+                </li>
+                <li>
+                  Row-level rules:{" "}
+                  <code className="bg-gray-100 px-1 rounded">$.data.results[x].prices[y].ruleResults[]</code>
+                </li>
+                <li>These are merged to create the full rule set evaluated for pricing.</li>
+              </ul>
+            </div>
 
-          {/* PRODUCT + ROW RULES */}
-          <div>
-            <div className="font-semibold text-gray-900">Rule Sources</div>
-            <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
-              <li>
-                Product-level rules:{" "}
-                <code className="bg-gray-100 px-1 rounded">$.data.results[x].ruleResults[]</code>
-              </li>
-              <li>
-                Row-level rules:{" "}
-                <code className="bg-gray-100 px-1 rounded">$.data.results[x].prices[y].ruleResults[]</code>
-              </li>
-              <li>These are merged to create the full rule set evaluated for pricing.</li>
-            </ul>
-          </div>
+            {/* PRICE IMPACTING LOGIC */}
+            <div>
+              <div className="font-semibold text-gray-900">Price-Impacting Rules</div>
+              <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+                <li><code>booleanEquationValue === true</code> (the rule fired)</li>
+                <li>Numeric result is non-zero</li>
+                <li>
+                  <code>target === "Price"</code> or target missing/null (affects price-level values)
+                </li>
+              </ul>
+            </div>
 
-          {/* PRICE IMPACTING LOGIC */}
-          <div>
-            <div className="font-semibold text-gray-900">Price-Impacting Rules</div>
-            <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
-              <li><code>booleanEquationValue === true</code> (the rule fired)</li>
-              <li>Numeric result is non-zero</li>
-              <li>
-                <code>target === "Price"</code> or target missing/null (affects price-level values)
-              </li>
-            </ul>
-          </div>
+            {/* BUCKET TYPES */}
+            <div>
+              <div className="font-semibold text-gray-900">Adjustment Buckets</div>
 
-          {/* BUCKET TYPES */}
-          <div>
-            <div className="font-semibold text-gray-900">Adjustment Buckets</div>
-
-            <div className="mt-1 text-xs text-gray-600 space-y-2">
-              <div>
-                <span className="font-medium text-gray-800">Margin</span>
-                <div className="ml-4">
-                  category:{" "}
-                  <code className="bg-gray-100 px-1 rounded">"Margin"</code>
+              <div className="mt-1 text-xs text-gray-600 space-y-2">
+                <div>
+                  <span className="font-medium text-gray-800">Margin</span>
+                  <div className="ml-4">
+                    category:{" "}
+                    <code className="bg-gray-100 px-1 rounded">"Margin"</code>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <span className="font-medium text-gray-800">SRP</span>
-                <div className="ml-4">
-                  category:{" "}
-                  <code className="bg-gray-100 px-1 rounded">"SRP"</code>
+                <div>
+                  <span className="font-medium text-gray-800">SRP</span>
+                  <div className="ml-4">
+                    category:{" "}
+                    <code className="bg-gray-100 px-1 rounded">"SRP"</code>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <span className="font-medium text-gray-800">LLPA</span>
-                <ul className="ml-4 list-disc list-inside space-y-1">
-                  <li><code>subCategory === "LLPA"</code></li>
-                  <li>Rule name contains “LLPA”</li>
-                  <li>
-                    category === "Adjustment" AND ruleName does NOT contain “SRP”
-                  </li>
-                </ul>
+                <div>
+                  <span className="font-medium text-gray-800">LLPA</span>
+                  <ul className="ml-4 list-disc list-inside space-y-1">
+                    <li><code>subCategory === "LLPA"</code></li>
+                    <li>Rule name contains “LLPA”</li>
+                    <li>
+                      category === "Adjustment" AND ruleName does NOT contain “SRP”
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
+
+            {/* ROUNDING */}
+            <div>
+              <div className="font-semibold text-gray-900">Rounding Rules</div>
+              <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+                <li><code>category === "Rounding"</code></li>
+                <li><code>booleanEquationValue === true</code></li>
+                <li><code>target === "Price"</code> or target missing</li>
+                <li className="text-gray-500">
+                  PPE does NOT expose the numeric rounding delta — only that rounding occurred.
+                </li>
+              </ul>
+            </div>
+
           </div>
+        </InfoIconWithModal>
 
-          {/* ROUNDING */}
-          <div>
-            <div className="font-semibold text-gray-900">Rounding Rules</div>
-            <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
-              <li><code>category === "Rounding"</code></li>
-              <li><code>booleanEquationValue === true</code></li>
-              <li><code>target === "Price"</code> or target missing</li>
-              <li className="text-gray-500">
-                PPE does NOT expose the numeric rounding delta — only that rounding occurred.
-              </li>
-            </ul>
-          </div>
-
-        </div>
-      </InfoIconWithModal>
-
-    </div>
+      </div>
 
       {/* Margin */}
       <Bucket
