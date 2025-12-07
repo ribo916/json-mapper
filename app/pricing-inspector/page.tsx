@@ -15,6 +15,119 @@ import InfoIconWithModal from "./InfoIconWithModal";
 import CollapseIcon from "./CollapseIcon"; 
 
 // ===============================================
+// HYBRID PRODUCT PICKER (with contextual styling)
+// ===============================================
+function HybridProductPicker({
+  products,
+  selectedValue,
+  setSelectedValue,
+  placeholder = "Select product…",
+  color = "gray",
+}: {
+  products: PpeResult[];
+  selectedValue: string;
+  setSelectedValue: (v: string) => void;
+  placeholder?: string;
+  color?: "gray" | "green" | "yellow" | "red";
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+
+  const filtered = React.useMemo(() => {
+    const q = query.toLowerCase();
+    return products.filter((p) =>
+      (p.name ?? "").toLowerCase().includes(q) ||
+      (p.code ?? "").toLowerCase().includes(q) ||
+      (p.id ?? "").toLowerCase().includes(q)
+    );
+  }, [products, query]);
+
+  const selectedLabel = (() => {
+    const p = products.find((p) => p.code === selectedValue);
+    if (!p) return placeholder;
+    return `${p.name ?? "(no name)"} – ${p.code ?? "(no code)"}`;
+  })();
+
+  // dynamic section color mapping
+  const theme = {
+    gray: {
+      selectedBg: "bg-white",
+      selectedBorder: "border-gray-300",
+      selectedText: "text-gray-900",
+    },
+    green: {
+      selectedBg: selectedValue ? "bg-green-50" : "bg-white",
+      selectedBorder: selectedValue ? "border-green-400" : "border-gray-300",
+      selectedText: selectedValue ? "text-green-800" : "text-gray-900",
+    },
+    yellow: {
+      selectedBg: selectedValue ? "bg-yellow-50" : "bg-white",
+      selectedBorder: selectedValue ? "border-yellow-400" : "border-gray-300",
+      selectedText: selectedValue ? "text-yellow-800" : "text-gray-900",
+    },
+    red: {
+      selectedBg: selectedValue ? "bg-red-50" : "bg-white",
+      selectedBorder: selectedValue ? "border-red-400" : "border-gray-300",
+      selectedText: selectedValue ? "text-red-800" : "text-gray-900",
+    },
+  }[color];
+
+  return (
+    <div className="relative text-sm">
+      {/* SELECTED DISPLAY BAR */}
+      <div
+        className={`
+          w-full rounded px-2 py-1 border cursor-pointer
+          ${theme.selectedBg} ${theme.selectedBorder} ${theme.selectedText}
+        `}
+        onClick={() => {
+          setOpen(!open);
+          setQuery("");
+        }}
+      >
+        {selectedLabel}
+      </div>
+
+      {/* DROPDOWN PANEL */}
+      {open && (
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg p-2">
+          <input
+            autoFocus
+            type="text"
+            placeholder="Search name, code, or ID…"
+            className="w-full mb-2 px-2 py-1 border border-gray-300 rounded text-sm"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+
+          <div className="max-h-64 overflow-y-auto">
+            {filtered.length === 0 && (
+              <div className="text-xs text-gray-500 px-2 py-2">No matches</div>
+            )}
+
+            {filtered.map((p) => (
+              <div
+                key={p.id}
+                className="px-2 py-1 cursor-pointer rounded hover:bg-gray-100"
+                onClick={() => {
+                  setSelectedValue(p.code ?? "");
+                  setOpen(false);
+                }}
+              >
+                <div className="font-medium text-gray-900 text-sm">
+                  {p.name} – {p.code}
+                </div>
+                <div className="text-[11px] text-gray-500">ID: {p.id}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===============================================
 // PRICE BREAKDOWN TYPE
 // ===============================================
 interface PriceBreakdown {
@@ -809,18 +922,25 @@ export default function PricingInspector() {
             <div className="space-y-4">
               {/* Summary counts */}
               <div className="flex flex-wrap gap-4 text-sm">
-                <div className="px-3 py-2 rounded bg-green-50 border border-green-200">
+
+                {/* Eligible */}
+                <div className="px-3 py-2 rounded bg-green-50 border border-green-400 text-green-800">
                   <span className="font-semibold">{eligible.length}</span>{" "}
                   eligible products
                 </div>
-                <div className="px-3 py-2 rounded bg-yellow-50 border border-yellow-200">
+
+                {/* Ineligible */}
+                <div className="px-3 py-2 rounded bg-yellow-50 border border-yellow-400 text-yellow-800">
                   <span className="font-semibold">{ineligible.length}</span>{" "}
                   ineligible products
                 </div>
-                <div className="px-3 py-2 rounded bg-red-50 border border-red-200">
+
+                {/* Invalid */}
+                <div className="px-3 py-2 rounded bg-red-50 border border-red-400 text-red-800">
                   <span className="font-semibold">{invalid.length}</span>{" "}
                   invalid products
                 </div>
+
               </div>
 
               {/* Selectors */}
@@ -835,27 +955,18 @@ export default function PricingInspector() {
                       $.data.results[x].isValidResult == true
                     </code>
                   </div>
-                  <select
-                    className={`w-full rounded px-2 py-1 text-sm border ${
-                      selectedEligibleCode
-                        ? "bg-green-50 border-green-400 text-green-800"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
-                    value={selectedEligibleCode}
-                    onChange={(e) => {
-                      setSelectedEligibleCode(e.target.value);
+                  <HybridProductPicker
+                    products={eligible}
+                    selectedValue={selectedEligibleCode}
+                    setSelectedValue={(v) => {
+                      setSelectedEligibleCode(v);
                       setSelectedIneligibleCode("");
                       setSelectedInvalidCode("");
                       setSelectedPriceIndex(-1);
                     }}
-                  >
-                    <option value="">Select eligible product</option>
-                    {eligible.map((p) => (
-                      <option key={p.code ?? ""} value={p.code ?? ""}>
-                        {p.code ?? "(no code)"}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select eligible product"
+                    color="green"
+                  />
                 </div>
 
                 {/* Ineligible */}
@@ -868,27 +979,18 @@ export default function PricingInspector() {
                       $.data.results[x].isValidResult == true
                     </code>
                   </div>
-                  <select
-                    className={`w-full rounded px-2 py-1 text-sm border ${
-                      selectedIneligibleCode
-                        ? "bg-yellow-50 border-yellow-400 text-yellow-800"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
-                    value={selectedIneligibleCode}
-                    onChange={(e) => {
-                      setSelectedIneligibleCode(e.target.value);
+                  <HybridProductPicker
+                    products={ineligible}
+                    selectedValue={selectedIneligibleCode}
+                    setSelectedValue={(v) => {
+                      setSelectedIneligibleCode(v);
                       setSelectedEligibleCode("");
                       setSelectedInvalidCode("");
                       setSelectedPriceIndex(-1);
                     }}
-                  >
-                    <option value="">Select ineligible product</option>
-                    {ineligible.map((p) => (
-                      <option key={p.code ?? ""} value={p.code ?? ""}>
-                        {p.code ?? "(no code)"}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select ineligible product"
+                    color="yellow"
+                  />
                 </div>
 
                 {/* Invalid */}
@@ -899,28 +1001,18 @@ export default function PricingInspector() {
                     </code>
                     <span />
                   </div>
-                  <select
-                    className={`w-full rounded px-2 py-1 text-sm border ${
-                      selectedInvalidCode
-                        ? "bg-red-50 border-red-400 text-red-800"
-                        : "bg-white border-gray-300 text-gray-900"
-                    }`}
-                    value={selectedInvalidCode}
-                    onChange={(e) => {
-                      setSelectedInvalidCode(e.target.value);
+                  <HybridProductPicker
+                    products={invalid}
+                    selectedValue={selectedInvalidCode}
+                    setSelectedValue={(v) => {
+                      setSelectedInvalidCode(v);
                       setSelectedEligibleCode("");
                       setSelectedIneligibleCode("");
                       setSelectedPriceIndex(-1);
                     }}
-                  >
-                    <option value="">Select invalid product</option>
-                    {invalid.map((p) => (
-                      <option key={p.code ?? ""} value={p.code ?? ""}>
-                        {p.code ?? "(no code)"}
-                      </option>
-                    ))}
-                  </select>
-
+                    placeholder="Select invalid product"
+                    color="red"
+                  />
                 </div>
               </div>
             </div>
@@ -1048,33 +1140,42 @@ export default function PricingInspector() {
                               <table className="w-full text-sm">
                                 <tbody className="divide-y divide-gray-100">
 
-                                  {/* Product Code */}
-                                  <tr>
-                                    <td className="py-2 font-medium text-gray-700 w-1/3">
-                                      Product Code
-                                    </td>
-                                    <td className="py-2 text-gray-900">
-                                      {selectedProduct.code ?? "(missing)"}
-                                    </td>
-                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                      <code className="bg-gray-100 px-1 rounded">
-                                        $.data.results[x].code
-                                      </code>
-                                    </td>
-                                  </tr>
-
                                   {/* Product Name */}
                                   <tr>
-                                    <td className="py-2 font-medium text-gray-700">
+                                    <td className="py-2 font-medium text-gray-700 w-1/3">
                                       Product Name
                                     </td>
                                     <td className="py-2 text-gray-900">
                                       {selectedProduct.name ?? "(missing)"}
                                     </td>
                                     <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                      <code className="bg-gray-100 px-1 rounded">
-                                        $.data.results[x].name
-                                      </code>
+                                      <code className="bg-gray-100 px-1 rounded">$.data.results[x].name</code>
+                                    </td>
+                                  </tr>
+
+                                  {/* Product ID */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700">
+                                      Product ID
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {selectedProduct.id ?? "(missing)"}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">$.data.results[x].id</code>
+                                    </td>
+                                  </tr>
+
+                                  {/* Product Code */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700">
+                                      Product Code
+                                    </td>
+                                    <td className="py-2 text-gray-900">
+                                      {selectedProduct.code ?? "(missing)"}
+                                    </td>
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">$.data.results[x].code</code>
                                     </td>
                                   </tr>
 
@@ -2049,82 +2150,84 @@ export default function PricingInspector() {
                 </section>
               )}
 
-              {/* ================================================================== */}
-              {/* INVALID VIEW                                                      */}
-              {/* ================================================================== */}
-              {selectedIsInvalid && (
-                <section className="space-y-4">
-                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 shadow-sm">
+{/* ================================================================== */}
+{/* INVALID VIEW                                                      */}
+{/* ================================================================== */}
+{selectedIsInvalid && (
+  <section className="space-y-4">
+    <div className="rounded-lg border border-red-200 bg-red-50 p-4 shadow-sm">
 
-                    {/* Header */}
-                    <h3 className="text-lg font-semibold text-red-800 flex items-center gap-2 mb-3">
-                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                      Invalid Product
-                    </h3>
+      {/* Header */}
+      <h3 className="text-lg font-semibold text-red-800 flex items-center gap-2 mb-3">
+        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+        Invalid Product
+      </h3>
 
-                    {/* Structured table (mirrors Product Overview visuals) */}
-                    <div className="rounded-lg bg-white border border-gray-200 p-4">
-                      <table className="w-full text-sm">
-                        <tbody className="divide-y divide-gray-100">
+      {/* Structured table (mirrors Product Overview visuals) */}
+      <div className="rounded-lg bg-white border border-gray-200 p-4">
+        <table className="w-full text-sm">
+          <tbody className="divide-y divide-gray-100">
 
-                          {/* Reason */}
-                          <tr>
-                            <td className="py-2 font-medium text-gray-700 w-1/3">
-                              Reason
-                              <div className="text-xs text-gray-500">
-                                JSON:{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  data.results[].invalidResultReason
-                                </code>
-                              </div>
-                            </td>
-                            <td className="py-2 text-gray-900">
-                              {selectedProduct.invalidResultReason ?? "(none)"}
-                            </td>
-                          </tr>
+            {/* Reason */}
+            <tr>
+              <td className="py-2 font-medium text-gray-700 w-1/3">
+                Reason
+                <div className="text-xs text-gray-500">
+                  JSON:{" "}
+                  <code className="bg-gray-100 px-1 rounded text-[11px]">
+                    data.results[].invalidResultReason
+                  </code>
+                </div>
+              </td>
+              <td className="py-2 text-gray-900">
+                {selectedProduct.invalidResultReason ?? "(none)"}
+              </td>
+            </tr>
 
-                          {/* Unique Investors */}
-                          <tr>
-                            <td className="py-2 font-medium text-gray-700">
-                              Unique Investors
-                              <div className="text-xs text-gray-500">
-                                JSON:{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  data.results[].uniqueInvestorCount
-                                </code>
-                              </div>
-                            </td>
-                            <td className="py-2 text-gray-900">
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                {selectedProduct.uniqueInvestorCount ?? 0}
-                              </code>
-                            </td>
-                          </tr>
+            {/* Unique Investors */}
+            <tr>
+              <td className="py-2 font-medium text-gray-700">
+                Unique Investors
+                <div className="text-xs text-gray-500">
+                  JSON:{" "}
+                  <code className="bg-gray-100 px-1 rounded text-[11px]">
+                    data.results[].uniqueInvestorCount
+                  </code>
+                </div>
+              </td>
+              <td className="py-2 text-gray-900">
+                <code className="bg-gray-100 px-1 rounded text-xs">
+                  {selectedProduct.uniqueInvestorCount ?? 0}
+                </code>
+              </td>
+            </tr>
 
-                          {/* Prices Count */}
-                          <tr>
-                            <td className="py-2 font-medium text-gray-700">
-                              Prices Returned
-                              <div className="text-xs text-gray-500">
-                                JSON:{" "}
-                                <code className="bg-gray-100 px-1 rounded text-[11px]">
-                                  data.results[].prices
-                                </code>
-                              </div>
-                            </td>
-                            <td className="py-2 text-gray-900">
-                              <code className="bg-gray-100 px-1 rounded text-xs">
-                                {pricesCount}
-                              </code>
-                            </td>
-                          </tr>
+            {/* Prices Count */}
+            <tr>
+              <td className="py-2 font-medium text-gray-700">
+                Prices Returned
+                <div className="text-xs text-gray-500">
+                  JSON:{" "}
+                  <code className="bg-gray-100 px-1 rounded text-[11px]">
+                    data.results[].prices
+                  </code>
+                </div>
+              </td>
+              <td className="py-2 text-gray-900">
+                <code className="bg-gray-100 px-1 rounded text-xs">
+                  {pricesCount}
+                </code>
+              </td>
+            </tr>
 
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </section>
-              )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+)}
+
+
 
             </div>
           )}
