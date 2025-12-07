@@ -11,6 +11,7 @@ import {
 } from "../utils/ruleExplanation";
 import DevConsole from "./DevConsole";
 import PriceAdjustmentsPanel from "./PriceAdjustmentsPanel";
+import InfoIconWithModal from "./InfoIconWithModal"; 
 
 
 // ===============================================
@@ -43,115 +44,275 @@ function PriceMathBreakdown({
   if (!breakdown) return null;
 
   return (
-    <div className="mt-3 p-2 border rounded-md bg-white shadow-sm text-xs w-[85%] mx-auto">
-      <div className="text-xs font-semibold text-gray-900 mb-2">
+<div className="mt-3 p-5 rounded-lg bg-gray-50 shadow-md text-xs w-full space-y-4">
+
+<div className="text-xs font-semibold text-gray-900 mb-2">
         Price Construction Breakdown
       </div>
-
-      <table className="w-full text-xs">
-        <tbody className="divide-y divide-gray-200">
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Price Before Adj</td>
-            <td className="py-1 text-gray-900">
+      <table className="w-full text-xs">
+        <tbody className="divide-y divide-gray-300">
+  
+          {/* =============================================================== */}
+          {/* PRICE BEFORE ADJUSTMENTS                                       */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700 w-1/3">Price Before Adj</td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
               {breakdown.pba !== null ? breakdown.pba.toFixed(4) : "—"}
             </td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              $.data.results[x].prices[y].priceBeforeAdjustments
-              <br/>Raw price before any adjustments
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Raw engine price for this rate row before any base, visible, hidden, or clamp adjustments.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].prices[y].priceBeforeAdjustments</code>
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Parse:</strong> pick product <code>results[x]</code>, then row{" "}
+                <code>prices[y]</code>, and read <code>priceBeforeAdjustments</code>.
+              </span>
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Base After Base Adj (paba)</td>
-            <td className="py-1 text-gray-900">{breakdown.paba.toFixed(4)}</td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              $.data.results[x].prices[y].priceAfterBaseAdjustments
-              <br/>Used as starting base price
+          {/* =============================================================== */}
+          {/* BASE AFTER BASE ADJUSTMENTS (PABA)                             */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">
+              Base After Base Adj (paba)
+            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {breakdown.paba.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Base price after only base adjustments are applied (no visible ruleResults yet).
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].prices[y].priceAfterBaseAdjustments</code>
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Parse:</strong> from the same price row <code>prices[y]</code>, use{" "}
+                <code>priceAfterBaseAdjustments</code> as the starting base price.
+              </span>
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Base Price</td>
-            <td className="py-1 text-gray-900">{breakdown.basePrice.toFixed(4)}</td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              paba + hidden adjustments (product + row)
-              <br/>ruleResults[*].isHiddenAdjustment = true
+          {/* =============================================================== */}
+          {/* BASE PRICE                                                      */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">Base Price</td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {breakdown.basePrice.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Concept:</strong> paba plus all hidden price adjustments that fired.
+              <br />
+              Hidden adjustments are rules that change price but are not shown to users.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON sources:</strong>
+                <br />
+                • <code>data.results[x].ruleResults[]</code> (product-level)
+                <br />
+                • <code>data.results[x].prices[y].ruleResults[]</code> (row-level)
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Filter for hidden:</strong> include rules where:
+                <br />
+                • <code>booleanEquationValue === true</code>
+                <br />
+                • <code>isHiddenAdjustment === true</code>
+                <br />
+                • <code>target === "Price"</code> or target is missing
+              </span>
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Visible Adjustments (Product)</td>
-            <td className="py-1 text-gray-900">{breakdown.visibleResultAdj.toFixed(4)}</td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              visible, target=Price, categories=[Margin, SRP, Adjustment]
-              <br/>$.data.results[x].ruleResults[]
+          {/* =============================================================== */}
+          {/* VISIBLE ADJUSTMENTS (PRODUCT LEVEL)                            */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">
+              Visible Adjustments (Product)
+            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {breakdown.visibleResultAdj.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Product-level price adjustments that are visible in the UI and impact price.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].ruleResults[]</code>
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Include rule when:</strong>
+                <br />
+                • <code>booleanEquationValue === true</code> (rule fired)
+                <br />
+                • <code>isHiddenAdjustment !== true</code> (not hidden)
+                <br />
+                • <code>target === "Price"</code> or target is missing
+                <br />
+                • <code>Number(resultEquationValue ?? resultEquationValueUnclamped) !== 0</code>
+              </span>
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Visible Adjustments (Row)</td>
-            <td className="py-1 text-gray-900">{breakdown.visibleRowAdj.toFixed(4)}</td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              $.data.results[x].prices[y].ruleResults[]
+          {/* =============================================================== */}
+          {/* VISIBLE ADJUSTMENTS (ROW LEVEL)                                */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">
+              Visible Adjustments (Row)
+            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {breakdown.visibleRowAdj.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Rate-row–specific visible price adjustments for this rate / price combination.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].prices[y].ruleResults[]</code>
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Include rule when:</strong> same filters as product-level visible:
+                <br />
+                • fired (<code>booleanEquationValue === true</code>)
+                <br />
+                • non-zero numeric result
+                <br />
+                • not hidden
+                <br />
+                • target is price (or missing)
+              </span>
             </td>
           </tr>
   
-          <tr className="bg-gray-50">
-            <td className="py-1 font-semibold text-gray-900">Total Visible Adjustments</td>
-            <td className="py-1 font-semibold text-gray-900">
+          {/* =============================================================== */}
+          {/* TOTAL VISIBLE ADJUSTMENTS                                      */}
+          {/* =============================================================== */}
+          <tr className="bg-gray-50 align-top">
+            <td className="py-2 font-semibold text-gray-900">
+              Total Visible Adjustments
+            </td>
+            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
               {breakdown.totalVisiblePriceAdj.toFixed(4)}
             </td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              product + row visible adjustments
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Formula:</strong> productVisible + rowVisible
+              <br />
+              Sum of all product-level and row-level visible price adjustments that passed
+              the filters above.
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Clamp Adjustments</td>
-            <td className="py-1 text-gray-900">-{breakdown.clampAdj.toFixed(4)}</td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              $.data.results[x].prices[y].clampResults[]
-              <br/>sum(unclamped - clamped)
+          {/* =============================================================== */}
+          {/* CLAMP ADJUSTMENTS                                               */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">Clamp Adjustments</td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              -{breakdown.clampAdj.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Engine corrections when a price is forced back inside allowed ranges.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].prices[y].clampResults[]</code>
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Formula per clamp entry:</strong>{" "}
+                <code>unclampedValue - clampedValue</code>, then sum across all clamp results.
+              </span>
             </td>
           </tr>
   
-          <tr className="bg-gray-50">
-            <td className="py-1 font-semibold text-gray-900">Reconstructed Engine Price</td>
-            <td className="py-1 font-semibold text-gray-900">
+          {/* =============================================================== */}
+          {/* RECONSTRUCTED ENGINE PRICE                                     */}
+          {/* =============================================================== */}
+          <tr className="bg-gray-50 align-top">
+            <td className="py-2 font-semibold text-gray-900">
+              Reconstructed Engine Price
+            </td>
+            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
               {breakdown.reconstructedPrice.toFixed(4)}
             </td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              BasePrice + VisibleAdj - ClampAdj
-              <br/>Should equal: prices[y].price
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Formula:</strong>{" "}
+              <code>BasePrice + TotalVisibleAdjustments - ClampAdjustments</code>
+              <br />
+              This is how we rebuild the engine price from its components.
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Compare to:</strong>{" "}
+                <code>data.results[x].prices[y].price</code> (Engine Price below).
+              </span>
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Engine Price</td>
-            <td className="py-1 text-gray-900">{breakdown.enginePrice.toFixed(4)}</td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              $.data.results[x].prices[y].price
+          {/* =============================================================== */}
+          {/* ENGINE PRICE                                                    */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">Engine Price</td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {breakdown.enginePrice.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Final engine-computed price for this row before broker comp.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].prices[y].price</code>
+              </span>
             </td>
           </tr>
   
-          <tr>
-            <td className="py-1 font-medium text-gray-700">Broker Comp Applied</td>
-            <td className="py-1 text-gray-900">
+          {/* =============================================================== */}
+          {/* BROKER COMP                                                     */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">Broker Comp Applied</td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
               {breakdown.brokerCompField.toFixed(4)}
             </td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              $.data.brokerCompPlan.calculatedAdjustment
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              Broker compensation adjustment applied on top of engine price.
+              <br />
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].brokerCompPlan.calculatedAdjustment</code>
+              </span>
+              <br />
+              Positive values typically represent additional cost; negative values, credit.
             </td>
           </tr>
   
-          <tr className="bg-gray-50">
-            <td className="py-1 font-semibold text-gray-900">Net Price</td>
-            <td className="py-1 font-semibold text-gray-900">
+          {/* =============================================================== */}
+          {/* NET PRICE                                                       */}
+          {/* =============================================================== */}
+          <tr className="bg-gray-50 align-top">
+            <td className="py-2 font-semibold text-gray-900">Net Price</td>
+            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
               {breakdown.netPrice.toFixed(4)}
             </td>
-            <td className="py-1 text-[11px] text-gray-500 text-right">
-              EnginePrice + BrokerComp
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Formula:</strong>{" "}
+              <code>EnginePrice + BrokerComp</code>
+              <br />
+              This is the final net price after broker compensation.
             </td>
           </tr>
   
@@ -163,6 +324,7 @@ function PriceMathBreakdown({
       </div>
     </div>
   );
+  
   
 }
 
@@ -847,7 +1009,7 @@ export default function PricingInspector() {
                     return (
                       <>
                         {/* PRODUCT OVERVIEW + ADJUSTMENT TOTALS (COMPACT + JSON PATHS) */}
-                        <div className="mt-3 p-4 border rounded-lg bg-white shadow-sm text-sm">
+                        <div className="mt-3 p-5 rounded-lg bg-gray-50 shadow-md text-sm">
                           <div className="font-semibold text-gray-900 mb-3">
                             Product Overview &amp; Adjustment Totals
                           </div>
@@ -959,99 +1121,101 @@ export default function PricingInspector() {
                         {/* ========================================================== */}
                         {/* RATE / PRICE STACK SUMMARY & TABLE (NO TOP ACCORDION)      */}
                         {/* ========================================================== */}
-
                         <div className="mt-6">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            Rate / Price Stack Summary &amp; Table
-                          </h3>
 
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-1">
+                          Rate / Price Stack Summary &amp; Table
 
+                          <InfoIconWithModal title="Rate / Price Table Header Logic">
+                          <div className="space-y-4 text-sm text-gray-700">
 
+                            {/* RATE */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Rate</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].rate
+                              </code>
+                            </div>
 
+                            {/* APR */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Estimated APR</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].apr
+                              </code>
+                            </div>
 
-{/* JSON Path Legend */}
-<div className="text-xs text-gray-500 mb-2 space-y-1 leading-relaxed">
+                            {/* NET PRICE */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Price (Net)</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].netPrice
+                              </code>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Falls back to <code>price</code> when <code>netPrice</code> is missing.
+                              </div>
+                            </div>
 
-  <div>
-    <strong>Rate:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].rate
-    </code>
-  </div>
+                            {/* ENGINE PRICE */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Engine Price</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].price
+                              </code>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Only shown separately when <strong>Engine ≠ Net</strong>.
+                              </div>
+                            </div>
 
-  <div>
-    <strong>Est APR:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].apr
-    </code>
-  </div>
+                            {/* P&I */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Principal &amp; Interest (P&amp;I)</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].principalAndInterest
+                              </code>
+                            </div>
 
-  <div>
-    <strong>Price (Net):</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].netPrice
-    </code>{" "}
-    <span className="text-gray-400">
-      (If missing, falls back to <code>price</code>)
-    </span>
-  </div>
+                            {/* CREDIT / COST */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Credit / Cost</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                netPrice − 100
+                              </code>
 
-  <div>
-    <strong>Engine Price:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].price
-    </code>
-    <div className="ml-2 text-gray-400">
-      Shown only when <strong>Engine ≠ Net</strong>.  
-      When they match, the pricing engine produced the same value and Net = Engine.
-    </div>
-  </div>
+                              <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+                                <li>Positive = cost to borrower</li>
+                                <li>Negative = credit to borrower</li>
+                                <li>
+                                  Dollar amount:{" "}
+                                  <code className="bg-gray-100 px-1 rounded">
+                                    (loanAmount × (netPrice − 100)) ÷ 100
+                                  </code>
+                                </li>
+                                <li>Example: Net 102.000 → +2.000 points → loanAmount × 0.02</li>
+                                <li>Example: Net 98.500 → −1.500 points → loanAmount × −0.015</li>
+                              </ul>
+                            </div>
 
-  <div>
-    <strong>P&amp;I:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].principalAndInterest
-    </code>
-  </div>
+                            {/* LOCK PERIOD */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Lock Period</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].lockPeriod
+                              </code>
+                            </div>
 
-  <div>
-    <strong>Credit/Cost:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      netPrice − 100
-    </code>
+                            {/* INVESTOR */}
+                            <div>
+                              <div className="font-semibold text-gray-900">Investor</div>
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                $.data.results[x].prices[y].investor
+                              </code>
+                            </div>
 
-    {/* Perfect indentation: match Engine description */}
-    <div className="ml-2 text-gray-400 leading-relaxed">
-      • Produces the price adjustment in points (positive = cost, negative = credit).  
-      <br />
-      • Dollar amount = <code>(loanAmount × (netPrice − 100)) ÷ 100</code>  
-      <br />
-      • Example: Net 102.000 → +2.000 points → (loanAmount × 0.02)  
-      <br />
-      • Example: Net 98.500 → −1.500 points → (loanAmount × −0.015)
-    </div>
-  </div>
+                          </div>
+                          </InfoIconWithModal>
 
-  <div>
-    <strong>Lock Period:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].lockPeriod
-    </code>
-  </div>
-
-  <div>
-    <strong>Investor:</strong>{" "}
-    <code className="bg-gray-100 px-1 rounded">
-      $.data.results[x].prices[y].investor
-    </code>
-  </div>
-
-</div>
-
-
-
-
-
+                        </h3>
 
                           {/* =============================== */}
                           {/* PRICE TABLE                     */}
@@ -1158,8 +1322,6 @@ export default function PricingInspector() {
                                                 }
                                                 ruleResultsRow={row.ruleResults ?? []}
                                               />
-                                                    <PriceMathBreakdown breakdown={priceBreakdown} />
-
                                             </td>
                                           </tr>
                                         )}
@@ -1171,15 +1333,30 @@ export default function PricingInspector() {
                           </div>
                         </div>
 
+
+                        {/* ========================================================== */}
+                        {/* PRICE CONSTRUCTION BREAKDOWN (GLOBAL, SELECTED ROW)        */}
+                        {/* ========================================================== */}
+                        <hr className="my-1 border-gray-300" />
+
+                        {selectedPriceRow && priceBreakdown && (
+                          <div className="mt-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                              Price Construction Breakdown (Selected Rate)
+                            </h3>
+
+                            <PriceMathBreakdown breakdown={priceBreakdown} />
+                          </div>
+                        )}
+
                         {/* ========================================================== */}
                         {/* FEE SUMMARY (APPLIED ONLY)                                */}
                         {/* ========================================================== */}
-
                         <div className="mt-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-2">
                             Fees
                           </h3>
-                          <div className="mt-6 p-4 border rounded-lg bg-white shadow-sm text-sm">
+                          <div className="mt-6 p-5 rounded-lg bg-gray-50 shadow-md text-sm">
                             {(() => {
                               const appliedFees = (feeResults ?? []).filter(
                                 (f: any) => f?.booleanEquationValue === true
@@ -1269,11 +1446,24 @@ export default function PricingInspector() {
                         {/* ========================================================== */}
                         {/* RULE BUCKETS — TOP SECTION (NO OUTER ACCORDION)            */}
                         {/* ========================================================== */}
-
                         <div className="mt-6">
                           <h3 className="text-lg font-semibold text-gray-900 mb-3">
                             Rule Buckets Used for Pricing
                           </h3>
+
+                          <div className="text-sm text-gray-600 mb-4 leading-relaxed">
+                            These are <strong>product-level ruleResults</strong> from 
+                            <code className="bg-gray-100 px-1 mx-1 rounded text-xs">
+                              $.data.results[x].ruleResults[]
+                            </code>
+                            grouped by <em>Category</em> and <em>Subcategory</em>.  
+                            These rules fire before rate-level pricing and determine 
+                            <strong>base price, adjustments, eligibility, and LLPA/SRP logic</strong>.  
+                            This section does <strong>not</strong> include rate-specific ruleResults from 
+                            <code className="bg-gray-100 px-1 mx-1 rounded text-xs">
+                              $.data.results[x].prices[y].ruleResults[]
+                            </code>.
+                          </div>
 
                           {usedRules.length === 0 ? (
                             <div className="mt-3 text-sm text-gray-600 italic">
@@ -1371,6 +1561,7 @@ export default function PricingInspector() {
                           )}
                         </div>
 
+                        <hr className="my-1 border-gray-300" />
                       </>
                     );
                   })()}

@@ -3,6 +3,7 @@
 
 import React, { useMemo } from "react";
 import { RuleResult } from "../utils/ruleExplanation";
+import InfoIconWithModal from "./InfoIconWithModal"; 
 
 interface Props {
   ruleResultsProduct: RuleResult[];
@@ -167,7 +168,7 @@ function Bucket({
       {showUnknown && (
         <div className="flex justify-between text-[11px] text-gray-500 italic mt-1">
           <span>{unknownLabel}</span>
-          <span>—</span>
+          <span>??</span>
         </div>
       )}
     </div>
@@ -218,16 +219,98 @@ export default function PriceAdjustmentsPanel({
 
   return (
     <div className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm space-y-3 text-xs w-[80%]">
-      <div className="text-sm font-semibold text-gray-900">
-        Pricing Adjustments
-      </div>
+
+    <div className="text-sm font-semibold text-gray-900 flex items-center gap-1">
+      Pricing Adjustments
+      <InfoIconWithModal title="How Pricing Adjustments Are Selected">
+        <div className="space-y-4 text-sm text-gray-700">
+
+          {/* PRODUCT + ROW RULES */}
+          <div>
+            <div className="font-semibold text-gray-900">Rule Sources</div>
+            <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+              <li>
+                Product-level rules:{" "}
+                <code className="bg-gray-100 px-1 rounded">$.data.results[x].ruleResults[]</code>
+              </li>
+              <li>
+                Row-level rules:{" "}
+                <code className="bg-gray-100 px-1 rounded">$.data.results[x].prices[y].ruleResults[]</code>
+              </li>
+              <li>These are merged to create the full rule set evaluated for pricing.</li>
+            </ul>
+          </div>
+
+          {/* PRICE IMPACTING LOGIC */}
+          <div>
+            <div className="font-semibold text-gray-900">Price-Impacting Rules</div>
+            <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+              <li><code>booleanEquationValue === true</code> (the rule fired)</li>
+              <li>Numeric result is non-zero</li>
+              <li>
+                <code>target === "Price"</code> or target missing/null (affects price-level values)
+              </li>
+            </ul>
+          </div>
+
+          {/* BUCKET TYPES */}
+          <div>
+            <div className="font-semibold text-gray-900">Adjustment Buckets</div>
+
+            <div className="mt-1 text-xs text-gray-600 space-y-2">
+              <div>
+                <span className="font-medium text-gray-800">Margin</span>
+                <div className="ml-4">
+                  category:{" "}
+                  <code className="bg-gray-100 px-1 rounded">"Margin"</code>
+                </div>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-800">SRP</span>
+                <div className="ml-4">
+                  category:{" "}
+                  <code className="bg-gray-100 px-1 rounded">"SRP"</code>
+                </div>
+              </div>
+
+              <div>
+                <span className="font-medium text-gray-800">LLPA</span>
+                <ul className="ml-4 list-disc list-inside space-y-1">
+                  <li><code>subCategory === "LLPA"</code></li>
+                  <li>Rule name contains “LLPA”</li>
+                  <li>
+                    category === "Adjustment" AND ruleName does NOT contain “SRP”
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* ROUNDING */}
+          <div>
+            <div className="font-semibold text-gray-900">Rounding Rules</div>
+            <ul className="list-disc list-inside text-xs text-gray-600 mt-1 space-y-1">
+              <li><code>category === "Rounding"</code></li>
+              <li><code>booleanEquationValue === true</code></li>
+              <li><code>target === "Price"</code> or target missing</li>
+              <li className="text-gray-500">
+                PPE does NOT expose the numeric rounding delta — only that rounding occurred.
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </InfoIconWithModal>
+
+    </div>
 
       {/* Margin */}
       <Bucket
         title="Margin Adjustments"
         items={margin}
         includeUnknownEntry={roundingFired}
-        unknownLabel="Corporate Rounding Applied"
+        unknownLabel="Corporate Rounding Applied (unknown)"
       />
 
       {/* SRP */}
@@ -242,49 +325,6 @@ export default function PriceAdjustmentsPanel({
         <div>{totalAll.toFixed(3)}</div>
       </div>
 
-      {/* ================================================================== */}
-      {/*  DEBUG / PSEUDOCODE DOC SECTION                                   */}
-      {/* ================================================================== */}
-
-      <div className="mt-2 text-gray-500 leading-relaxed text-[10px]">
-        <div className="font-semibold text-gray-700 mb-1">
-          How this panel selects adjustments from the PPE JSON:
-        </div>
-
-        <pre className="bg-gray-100 p-2 rounded text-[10px] whitespace-pre-wrap">
-{`productRules = $.data.results[x].ruleResults[]
-rowRules     = $.data.results[x].prices[y].ruleResults[]
-
-all = productRules + rowRules
-
-// 1) A rule is considered PRICE-IMPACTING if:
-//    - it fired: booleanEquationValue === true
-//    - it has a non-zero numeric result:
-//        Number(resultEquationValue ?? resultEquationValueUnclamped) !== 0
-//    - it affects price-level values:
-//        target === "Price" OR target is missing/null
-priceRules = all.filter(r =>
-  r.booleanEquationValue === true &&
-  Number(r.resultEquationValue ?? r.resultEquationValueUnclamped) !== 0 &&
-  (r.target === "Price" || r.target == null)
-)
-
-// 2) Buckets:
-// Margin: category === "Margin"
-// SRP:    category === "SRP"
-// LLPA:   (subCategory === "LLPA"
-//        OR ruleName contains "LLPA"
-//        OR (category === "Adjustment" and ruleName does not contain "SRP"))
-
-// 3) Rounding:
-// A rounding rule has:
-//   category === "Rounding"
-//   booleanEquationValue === true
-//   target === "Price" OR target is missing
-// PPE does NOT expose the numeric rounding delta in this payload,
-// so this panel only shows that rounding was applied, not its amount.`}
-        </pre>
-      </div>
     </div>
   );
 }
