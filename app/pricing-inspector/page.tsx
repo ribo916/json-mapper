@@ -1775,73 +1775,73 @@ export default function PricingInspector() {
 
                     return (
                       <>
-                        {/* ======================================================== */}
-                        {/* DEVELOPER SUMMARY (ALWAYS FIRST)                        */}
-                        {/* ======================================================== */}
-                        <div className="border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 text-xs space-y-2">
-                          <div className="font-semibold text-yellow-900">
-                            Developer Summary: How this product became ineligible
-                          </div>
+{/* ======================================================== */}
+{/* DEVELOPER SUMMARY (ALWAYS FIRST)                        */}
+{/* ======================================================== */}
+<div className="border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 text-xs space-y-2">
+  <div className="font-semibold text-yellow-900">
+    Developer Summary: How this product became ineligible
+  </div>
 
-                          <div className="text-[11px] text-yellow-900 space-y-1 leading-relaxed">
-                            <ul className="list-disc ml-4 space-y-0.5">
-                              <li>
-                                <strong>Prices returned:</strong> {pricesCount}
-                              </li>
-                              <li>
-                                <strong>Unique investors:</strong>{" "}
-                                {uniqueInvestorCount}
-                              </li>
-                              <li>
-                                <strong>All investors excluded:</strong>{" "}
-                                {String(allInvestorsExcluded)}
-                              </li>
-                              <li>
-                                <strong>Matrix groups:</strong>{" "}
-                                {totalMatrixGroups}
-                              </li>
-                              <li>
-                                <strong>Fully failed matrices:</strong>{" "}
-                                {fullyFailedMatrices}
-                              </li>
-                              <li>
-                                <strong>Partially passing matrices:</strong>{" "}
-                                {partiallyPassingMatrices}
-                              </li>
-                              <li>
-                                <strong>/ineligible-matrices:</strong>{" "}
-                                {matrixApiSupported ? (
-                                  <span className="text-green-700 font-semibold">
-                                    Supported — at least one matrix fully failed
-                                  </span>
-                                ) : (
-                                  <span className="text-red-700 font-semibold">
-                                    Not useful — no matrix groups fully failed
-                                  </span>
-                                )}
-                              </li>
-                            </ul>
+  <div className="text-[11px] text-yellow-900 space-y-1 leading-relaxed">
+    <ul className="list-disc ml-4 space-y-0.5">
+      <li><strong>Prices returned:</strong> {pricesCount}</li>
+      <li><strong>Unique investors:</strong> {uniqueInvestorCount}</li>
+      <li><strong>All investors excluded:</strong> {String(allInvestorsExcluded)}</li>
+      <li><strong>Matrix groups:</strong> {totalMatrixGroups}</li>
+      <li><strong>Fully failed matrices:</strong> {fullyFailedMatrices}</li>
+      <li><strong>Partially passing matrices:</strong> {partiallyPassingMatrices}</li>
+      <li>
+        <strong>/ineligible-matrices:</strong>{" "}
+        {matrixApiSupported ? (
+          <span className="text-green-700 font-semibold">
+            Supported — at least one matrix group fully failed
+          </span>
+        ) : (
+          <span className="text-red-700 font-semibold">
+            Not useful — at least one matrix group had a passing row
+          </span>
+        )}
+      </li>
+    </ul>
 
-                            <p className="mt-1">
-                              PPE marks a product ineligible when no eligibility
-                              path remains. For matrix-driven products, this usually
-                              means{" "}
-                              <strong>
-                                at least one eligibility matrix group has no
-                                passing rows
-                              </strong>
-                              .
-                            </p>
+    {/* Explanation */}
+    <p className="mt-1">
+      <strong>PPE determines eligibility using two layers of evaluation:</strong><br />
+      1) <strong>Static eligibility rules</strong> must all pass.<br />
+      2) <strong>At least one Eligibility Matrix</strong> must contain 
+      <strong> at least one row where all conditions pass</strong>.
+    </p>
 
-                            <p>
-                              Without <code>/ineligible-matrices</code>, we only
-                              know that a row evaluated <code>true/false</code>.
-                              We <strong>do not</strong> see which individual
-                              expressions (LTV, Occupancy, PropertyType, etc.)
-                              failed inside each row.
-                            </p>
-                          </div>
-                        </div>
+    <p>
+      A product is marked <strong>ineligible</strong> when 
+      <strong> no eligibility path remains</strong>. This happens when:
+    </p>
+
+    <ul className="list-disc ml-4 space-y-0.5">
+      <li><strong>Any static eligibility rule fails</strong>, OR</li>
+      <li>
+        <strong>Every row in every Eligibility Matrix fails</strong> —
+        meaning no matrix produced a passing row.
+      </li>
+    </ul>
+
+    <p className="mt-1">
+      When a matrix group <strong>fully fails</strong> (all its rows evaluate false),
+      PPE can provide <code>/ineligible-matrices</code> details containing the 
+      <em>exact reasons</em> why each row failed its conditions.
+      If even one row passes in any matrix group, the endpoint returns nothing.
+    </p>
+
+    <p>
+      Without <code>/ineligible-matrices</code>, we only know which rules evaluated 
+      <code>true/false</code>. We <strong>cannot</strong> see the internal expressions 
+      (LTV, DTI, Occupancy, PropertyType, etc.) that caused each row to fail.
+    </p>
+  </div>
+</div>
+
+
 
                         {/* ======================================================== */}
                         {/* NON-MATRIX RULES                                         */}
