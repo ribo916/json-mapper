@@ -2080,19 +2080,75 @@ export default function PricingInspector() {
           )}
         </section>
 
-        {selectedProduct && selectedPriceRow && (
-          <DevConsole
-            raw={selectedProduct}
-            product={selectedProduct}
-            priceRow={selectedPriceRow}
-            breakdown={buildPriceBreakdown(
-              selectedProduct,
-              selectedPriceRow,
-              brokerCompBps || 0
-            )}
-            ruleResults={selectedProduct.ruleResults}
-          />
-        )}
+{/* ============================================================= */}
+{/* DEV CONSOLE DRAWER                                            */}
+{/* ============================================================= */}
+{(() => {
+  // local state for this component
+  const [consoleOpen, setConsoleOpen] = React.useState(false);
+
+  return (
+    <>
+      {selectedProduct && (
+  <>
+<button
+  onClick={() => setConsoleOpen((v) => !v)}
+  className="
+    fixed bottom-4 right-4 z-50
+    bg-gray-800 hover:bg-gray-700
+    text-yellow-400 border border-yellow-500
+    p-3 rounded-full shadow-lg
+    flex items-center justify-center
+  "
+  aria-label="Toggle Developer Console"
+>
+  {consoleOpen ? (
+    // Icon when console is open (chevron down)
+    <svg xmlns="http://www.w3.org/2000/svg"
+         className="h-6 w-6" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor"
+         strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round"
+            d="M19 9l-7 7-7-7" />
+    </svg>
+  ) : (
+    // Icon when console is closed (terminal icon)
+    <svg xmlns="http://www.w3.org/2000/svg"
+         className="h-6 w-6" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor"
+         strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round"
+        d="M8 9l3 3-3 3m5 0h3M4 7h16v10H4z" />
+    </svg>
+  )}
+</button>
+
+
+    <div
+      className={`
+        fixed left-0 right-0 bottom-0 z-40
+        bg-[#1a1a1a] border-t border-yellow-500
+        transition-transform duration-300
+        h-[60vh] overflow-y-auto
+        ${consoleOpen ? "translate-y-0" : "translate-y-full"}
+      `}
+    >
+      <DevConsole
+        raw={selectedProduct}
+        product={selectedProduct}
+        priceRow={selectedPriceRow}
+        ruleResults={selectedProduct.ruleResults ?? []}
+        isEligible={selectedIsEligible}
+      />
+    </div>
+  </>
+)}
+
+    </>
+  );
+})()}
+
+
 
       </main>
 
