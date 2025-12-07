@@ -1672,98 +1672,382 @@ export default function PricingInspector() {
               {/* ================================================================== */}
               {selectedIsIneligible && (
                 <section className="space-y-6">
-                  {/* GROUPED RULES */}
-                  <div className="space-y-4">
-                    <h3 className="text-base font-semibold text-gray-900">
-                      Disqualifying Eligibility Rules (Grouped)
-                    </h3>
+                  {(() => {
+                    const ruleResults = (selectedProduct.ruleResults ??
+                      []) as RuleResult[];
 
-                    {(() => {
-                      const rules = buildDisqualifyingRuleExplanations(
-                        selectedProduct.ruleResults ?? null
-                      );
+                    const prices = Array.isArray(
+                      (selectedProduct as any)?.prices
+                    )
+                      ? ((selectedProduct as any).prices as any[])
+                      : [];
 
-                      if (rules.length === 0) {
-                        return (
-                          <div className="text-sm text-gray-600 italic">
-                            No explicit eligibility rules disqualified this
-                            product. It may be ineligible because no priceable
-                            matrix or investor rows exist for this scenario.
+                    const pricesCount = prices.length;
+                    const uniqueInvestorCount =
+                      (selectedProduct as any)?.uniqueInvestorCount ?? 0;
+                    const allInvestorsExcluded = Boolean(
+                      (selectedProduct as any)?.allInvestorsExcluded
+                    );
+
+                    // ------------------------------------------------------------
+                    // MATRIX GROUPING (REAL MATRIX STRUCTURE)
+                    // Group by prefix before " - Rule"
+                    // e.g. "MH Advantage Conf: Eligibility Matrix - Rule 00"
+                    //  => matrixKey = "MH Advantage Conf: Eligibility Matrix"
+                    // ------------------------------------------------------------
+                    const matrixRows = ruleResults
+                      .map((r, i) => ({ ...r, index: i }))
+                      .filter((r) => r.category === "EligibilityMatrix");
+
+                    const matrixGroups = matrixRows.reduce(
+                      (acc, row) => {
+                        const sourceName =
+                          row.ruleInheritedName ?? row.ruleName ?? "";
+
+                        const parts = sourceName.split("- Rule");
+                        const matrixKey =
+                          (parts[0]?.trim() || "Eligibility Matrix").trim();
+
+                        if (!acc[matrixKey]) acc[matrixKey] = [];
+                        acc[matrixKey].push(row);
+                        return acc;
+                      },
+                      {} as Record<string, RuleResult[]>
+                    );
+
+                    type MatrixGroupMeta = {
+                      matrixName: string;
+                      rows: RuleResult[];
+                      rowCount: number;
+                      passedCount: number;
+                      failedCount: number;
+                      allRowsFailed: boolean;
+                      someRowsPassed: boolean;
+                    };
+
+                    const matrixMeta: MatrixGroupMeta[] = Object.entries(
+                      matrixGroups
+                    ).map(([matrixName, rows]) => {
+                      const passedCount = rows.filter(
+                        (r) => r.booleanEquationValue === true
+                      ).length;
+                      const failedCount = rows.filter(
+                        (r) => r.booleanEquationValue === false
+                      ).length;
+
+                      return {
+                        matrixName,
+                        rows,
+                        rowCount: rows.length,
+                        passedCount,
+                        failedCount,
+                        allRowsFailed: passedCount === 0 && failedCount > 0,
+                        someRowsPassed: passedCount > 0,
+                      };
+                    });
+
+                    const totalMatrixGroups = matrixMeta.length;
+                    const fullyFailedMatrices = matrixMeta.filter(
+                      (g) => g.allRowsFailed
+                    ).length;
+                    const partiallyPassingMatrices = matrixMeta.filter(
+                      (g) => g.someRowsPassed
+                    ).length;
+
+                    const anyEligibilityMatrix = matrixRows.length > 0;
+                    const anyMatrixFullyFailed = matrixMeta.some(
+                      (g) => g.allRowsFailed
+                    );
+
+                    // If at least one matrix group fully failed, /ineligible-matrices will help
+                    const matrixApiSupported =
+                      anyEligibilityMatrix && anyMatrixFullyFailed;
+
+                    // ------------------------------------------------------------
+                    // NON-MATRIX RULES (use helper, filter out matrix)
+                    // ------------------------------------------------------------
+                    const allDisqualifying =
+                      buildDisqualifyingRuleExplanations(ruleResults);
+
+                    const nonMatrixRules = allDisqualifying.filter(
+                      (r) => r.categoryLabel !== "EligibilityMatrix"
+                    );
+
+                    return (
+                      <>
+                        {/* ======================================================== */}
+                        {/* DEVELOPER SUMMARY (ALWAYS FIRST)                        */}
+                        {/* ======================================================== */}
+                        <div className="border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 text-xs space-y-2">
+                          <div className="font-semibold text-yellow-900">
+                            Developer Summary: How this product became ineligible
                           </div>
-                        );
-                      }
 
-                      const grouped: Record<string, RuleExplanation[]> = {};
-                      for (const rule of rules) {
-                        const key = rule.categoryLabel;
-                        if (!grouped[key]) grouped[key] = [];
-                        grouped[key].push(rule);
-                      }
+                          <div className="text-[11px] text-yellow-900 space-y-1 leading-relaxed">
+                            <ul className="list-disc ml-4 space-y-0.5">
+                              <li>
+                                <strong>Prices returned:</strong> {pricesCount}
+                              </li>
+                              <li>
+                                <strong>Unique investors:</strong>{" "}
+                                {uniqueInvestorCount}
+                              </li>
+                              <li>
+                                <strong>All investors excluded:</strong>{" "}
+                                {String(allInvestorsExcluded)}
+                              </li>
+                              <li>
+                                <strong>Matrix groups:</strong>{" "}
+                                {totalMatrixGroups}
+                              </li>
+                              <li>
+                                <strong>Fully failed matrices:</strong>{" "}
+                                {fullyFailedMatrices}
+                              </li>
+                              <li>
+                                <strong>Partially passing matrices:</strong>{" "}
+                                {partiallyPassingMatrices}
+                              </li>
+                              <li>
+                                <strong>/ineligible-matrices:</strong>{" "}
+                                {matrixApiSupported ? (
+                                  <span className="text-green-700 font-semibold">
+                                    Supported — at least one matrix fully failed
+                                  </span>
+                                ) : (
+                                  <span className="text-red-700 font-semibold">
+                                    Not useful — no matrix groups fully failed
+                                  </span>
+                                )}
+                              </li>
+                            </ul>
 
-                      const categoryKeys = Object.keys(grouped).sort();
+                            <p className="mt-1">
+                              PPE marks a product ineligible when no eligibility
+                              path remains. For matrix-driven products, this usually
+                              means{" "}
+                              <strong>
+                                at least one eligibility matrix group has no
+                                passing rows
+                              </strong>
+                              .
+                            </p>
 
-                      return (
-                        <div className="space-y-5">
-                          {categoryKeys.map((category) => (
-                            <div key={category} className="space-y-3">
-                              <div className="text-sm font-semibold text-gray-800 border-l-4 border-gray-300 pl-3">
-                                {category}
-                              </div>
-
-                              <div className="space-y-3">
-                                {grouped[category].map((rule, index) => (
-                                  <div
-                                    key={`${category}-${index}`}
-                                    className="border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
-                                  >
-                                    <div className="font-medium text-gray-900 mb-1">
-                                      {rule.ruleName}
-                                    </div>
-
-                                    <div className="text-sm text-gray-700 mb-2 leading-snug">
-                                      {rule.explanation}
-                                    </div>
-
-                                    <div className="text-xs text-gray-500 space-y-1 mb-2">
-                                      <div>
-                                        <span className="font-medium">
-                                          Category:
-                                        </span>{" "}
-                                        {rule.categoryLabel}
-                                      </div>
-                                      <div>
-                                        <span className="font-medium">
-                                          Inherited Category:
-                                        </span>{" "}
-                                        {rule.ruleInheritedName || "(none)"}
-                                      </div>
-                                      <div>
-                                        <span className="font-medium">
-                                          Source Path:
-                                        </span>{" "}
-                                        <code className="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs">
-                                          {rule.jsonPath}
-                                        </code>
-                                      </div>
-                                    </div>
-
-                                    <details className="text-xs mt-1">
-                                      <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
-                                        Show rule explanation JSON
-                                      </summary>
-                                      <pre className="mt-2 p-2 bg-gray-100 border rounded text-[11px] overflow-x-auto">
-                                        {JSON.stringify(rule, null, 2)}
-                                      </pre>
-                                    </details>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
+                            <p>
+                              Without <code>/ineligible-matrices</code>, we only
+                              know that a row evaluated <code>true/false</code>.
+                              We <strong>do not</strong> see which individual
+                              expressions (LTV, Occupancy, PropertyType, etc.)
+                              failed inside each row.
+                            </p>
+                          </div>
                         </div>
-                      );
-                    })()}
-                  </div>
+
+                        {/* ======================================================== */}
+                        {/* NON-MATRIX RULES                                         */}
+                        {/* ======================================================== */}
+                        <details className="border border-gray-200 rounded-lg bg-white shadow-sm">
+                          <summary className="px-3 py-2 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-800">
+                            <span>Disqualifying Eligibility Rules (Non-Matrix)</span>
+                            <span className="text-xs text-gray-500">
+                              {nonMatrixRules.length} rule
+                              {nonMatrixRules.length === 1 ? "" : "s"}
+                            </span>
+                          </summary>
+
+                          <div className="px-3 py-3 border-t border-gray-200">
+                            {nonMatrixRules.length === 0 ? (
+                              <div className="text-sm text-gray-600 italic">
+                                No explicit non-matrix eligibility rules disqualified
+                                this product.
+                              </div>
+                            ) : (
+                              (() => {
+                                const grouped: Record<
+                                  string,
+                                  RuleExplanation[]
+                                > = {};
+
+                                for (const rule of nonMatrixRules) {
+                                  const key = rule.categoryLabel;
+                                  if (!grouped[key]) grouped[key] = [];
+                                  grouped[key].push(rule);
+                                }
+
+                                const categoryKeys = Object.keys(grouped).sort();
+
+                                return (
+                                  <div className="space-y-5">
+                                    {categoryKeys.map((category) => (
+                                      <div
+                                        key={category}
+                                        className="space-y-3"
+                                      >
+                                        <div className="text-sm font-semibold text-gray-800 border-l-4 border-gray-300 pl-3">
+                                          {category}
+                                        </div>
+
+                                        <div className="space-y-3">
+                                          {grouped[category].map(
+                                            (rule, index) => (
+                                              <div
+                                                key={`${category}-${index}`}
+                                                className="border border-gray-200 rounded-lg p-3 bg-white shadow-sm"
+                                              >
+                                                <div className="font-medium text-gray-900 mb-1">
+                                                  {rule.ruleName}
+                                                </div>
+
+                                                <div className="text-sm text-gray-700 mb-2 leading-snug">
+                                                  {rule.explanation}
+                                                </div>
+
+                                                <div className="text-xs text-gray-500 space-y-1 mb-2">
+                                                  <div>
+                                                    <span className="font-medium">
+                                                      Category:
+                                                    </span>{" "}
+                                                    {rule.categoryLabel}
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium">
+                                                      Inherited Category:
+                                                    </span>{" "}
+                                                    {rule.ruleInheritedName ||
+                                                      "(none)"}
+                                                  </div>
+                                                  <div>
+                                                    <span className="font-medium">
+                                                      Source Path:
+                                                    </span>{" "}
+                                                      <code className="px-1 py-0.5 bg-gray-50 border border-gray-200 rounded text-xs">
+                                                        {rule.jsonPath}
+                                                      </code>
+                                                  </div>
+                                                </div>
+
+                                                <details className="text-xs mt-1">
+                                                  <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                                                    Show rule explanation JSON
+                                                  </summary>
+                                                  <pre className="mt-2 p-2 bg-gray-100 border rounded text-[11px] overflow-x-auto">
+                                                    {JSON.stringify(
+                                                      rule,
+                                                      null,
+                                                      2
+                                                    )}
+                                                  </pre>
+                                                </details>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              })()
+                            )}
+                          </div>
+                        </details>
+
+                        {/* ======================================================== */}
+                        {/* MATRIX GROUPS (OPTION C – ONE ACCORDION PER MATRIX)     */}
+                        {/* ======================================================== */}
+                        <details className="border border-blue-200 bg-blue-50 rounded-lg shadow-sm">
+                          <summary className="px-4 py-3 cursor-pointer text-sm font-semibold text-blue-900">
+                            Eligibility Matrices
+                          </summary>
+
+                          <div className="px-4 py-3 text-xs space-y-4 text-blue-900">
+                            {totalMatrixGroups === 0 ? (
+                              <div className="text-[12px] italic">
+                                No EligibilityMatrix groups found for this product.
+                              </div>
+                            ) : (
+                              matrixMeta.map((group, groupIndex) => (
+                                <details
+                                  key={groupIndex}
+                                  className="border border-blue-200 bg-white rounded-lg shadow-sm"
+                                >
+                                  <summary className="px-3 py-2 cursor-pointer text-sm font-semibold text-blue-800 flex items-center justify-between">
+                                    <span>{group.matrixName}</span>
+                                    <span className="text-xs text-blue-600">
+                                      {group.rowCount} row
+                                      {group.rowCount === 1 ? "" : "s"}
+                                    </span>
+                                  </summary>
+
+                                  <div className="px-3 py-3 border-t border-blue-200 space-y-4">
+                                    <div className="text-[11px] pb-1">
+                                      <span className="font-semibold">
+                                        Matrix Status:
+                                      </span>{" "}
+                                      {group.allRowsFailed ? (
+                                        <span className="text-red-700 font-semibold">
+                                          ALL ROWS FAILED — this matrix
+                                          disqualified the product
+                                        </span>
+                                      ) : group.passedCount > 0 ? (
+                                        <span className="text-green-700 font-semibold">
+                                          {group.passedCount} row
+                                          {group.passedCount === 1 ? "" : "s"}{" "}
+                                          passed
+                                        </span>
+                                      ) : (
+                                        <span className="text-gray-700">
+                                          No passing rows
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {group.rows.map((row, i) => (
+                                      <div
+                                        key={i}
+                                        className="border border-gray-200 rounded-lg p-3 bg-gray-50 shadow-sm"
+                                      >
+                                        <div className="flex justify-between items-center mb-1">
+                                          <div className="font-medium text-gray-900">
+                                            {row.ruleName}
+                                          </div>
+
+                                          <div
+                                            className={`text-xs font-semibold ${
+                                              row.booleanEquationValue
+                                                ? "text-green-700"
+                                                : "text-red-700"
+                                            }`}
+                                          >
+                                            {row.booleanEquationValue
+                                              ? "PASS"
+                                              : "FAIL"}
+                                          </div>
+                                        </div>
+
+                                        <div className="text-xs text-gray-600 mb-1">
+                                          Inherited Category:{" "}
+                                          {row.ruleInheritedName ?? "(none)"}
+                                        </div>
+
+                                        <details className="text-xs">
+                                          <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+                                            Show row JSON
+                                          </summary>
+                                          <pre className="mt-2 p-2 bg-white border rounded text-[11px] overflow-x-auto">
+                                            {JSON.stringify(row, null, 2)}
+                                          </pre>
+                                        </details>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </details>
+                              ))
+                            )}
+                          </div>
+                        </details>
+                      </>
+                    );
+                  })()}
                 </section>
               )}
 

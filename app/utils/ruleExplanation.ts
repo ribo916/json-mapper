@@ -50,26 +50,59 @@ export function buildDisqualifyingRuleExplanations(
 ): RuleExplanation[] {
   if (!ruleResults || !Array.isArray(ruleResults)) return [];
 
-  // failing = eligibility failure → booleanEquationValue == true
+  // ----------------------------------------
+  // 1) Normal failing rules (unchanged)
+  // ----------------------------------------
   const failingRules = ruleResults
     .map((r, i) => ({ ...r, index: i }))
     .filter((r) => r.booleanEquationValue === true);
 
-  return failingRules.map((rule) => {
+  const explanations: RuleExplanation[] = failingRules.map((rule) => {
     const ruleName = rule.ruleName ?? "(unnamed rule)";
     const ruleInheritedName = rule.ruleInheritedName ?? "(none)";
     const explanation = buildExplanation(rule);
     const categoryLabel = normalizeCategory(rule.category);
     const jsonPath = `$.data.results[x].ruleResults[${rule.index}]`;
 
-    const result: RuleExplanation = {
+    return {
       ruleName,
       ruleInheritedName,
       explanation,
       categoryLabel,
       jsonPath,
     };
-
-    return result;
   });
+
+  // ----------------------------------------
+  // 2) EligibilityMatrix special handling
+  // ----------------------------------------
+  const matrixRows = ruleResults
+    .map((r, i) => ({ ...r, index: i }))
+    .filter((r) => r.category === "EligibilityMatrix");
+
+  if (matrixRows.length > 0) {
+    const anyPassed = matrixRows.some((r) => r.booleanEquationValue === true);
+
+    // If NO matrix rows passed → the matrix caused ineligibility
+    if (!anyPassed) {
+      for (const rule of matrixRows) {
+        const ruleName = rule.ruleName ?? "(unnamed rule)";
+        const ruleInheritedName = rule.ruleInheritedName ?? "(none)";
+        const explanation = `This eligibility matrix condition did not match the scenario: ${ruleName}.`;
+        const categoryLabel = normalizeCategory(rule.category);
+        const jsonPath = `$.data.results[x].ruleResults[${rule.index}]`;
+
+        explanations.push({
+          ruleName,
+          ruleInheritedName,
+          explanation,
+          categoryLabel,
+          jsonPath,
+        });
+      }
+    }
+  }
+
+  return explanations;
 }
+
