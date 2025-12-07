@@ -1775,73 +1775,71 @@ export default function PricingInspector() {
 
                     return (
                       <>
-{/* ======================================================== */}
-{/* DEVELOPER SUMMARY (ALWAYS FIRST)                        */}
-{/* ======================================================== */}
-<div className="border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 text-xs space-y-2">
-  <div className="font-semibold text-yellow-900">
-    Developer Summary: How this product became ineligible
-  </div>
+                        {/* ======================================================== */}
+                        {/* DEVELOPER SUMMARY (ALWAYS FIRST)                        */}
+                        {/* ======================================================== */}
+                        <div className="border border-yellow-200 bg-yellow-50 rounded-lg px-4 py-3 text-xs space-y-2">
+                          <div className="font-semibold text-yellow-900">
+                            Developer Summary: How this product became ineligible
+                          </div>
 
-  <div className="text-[11px] text-yellow-900 space-y-1 leading-relaxed">
-    <ul className="list-disc ml-4 space-y-0.5">
-      <li><strong>Prices returned:</strong> {pricesCount}</li>
-      <li><strong>Unique investors:</strong> {uniqueInvestorCount}</li>
-      <li><strong>All investors excluded:</strong> {String(allInvestorsExcluded)}</li>
-      <li><strong>Matrix groups:</strong> {totalMatrixGroups}</li>
-      <li><strong>Fully failed matrices:</strong> {fullyFailedMatrices}</li>
-      <li><strong>Partially passing matrices:</strong> {partiallyPassingMatrices}</li>
-      <li>
-        <strong>/ineligible-matrices:</strong>{" "}
-        {matrixApiSupported ? (
-          <span className="text-green-700 font-semibold">
-            Supported — at least one matrix group fully failed
-          </span>
-        ) : (
-          <span className="text-red-700 font-semibold">
-            Not useful — at least one matrix group had a passing row
-          </span>
-        )}
-      </li>
-    </ul>
+                          <div className="text-[11px] text-yellow-900 space-y-1 leading-relaxed">
+                            <ul className="list-disc ml-4 space-y-0.5">
+                              <li><strong>Prices returned:</strong> {pricesCount}</li>
+                              <li><strong>Unique investors:</strong> {uniqueInvestorCount}</li>
+                              <li><strong>All investors excluded:</strong> {String(allInvestorsExcluded)}</li>
+                              <li><strong>Matrix groups:</strong> {totalMatrixGroups}</li>
+                              <li><strong>Fully failed matrices:</strong> {fullyFailedMatrices}</li>
+                              <li><strong>Partially passing matrices:</strong> {partiallyPassingMatrices}</li>
+                              <li>
+                                <strong>/ineligible-matrices:</strong>{" "}
+                                {matrixApiSupported ? (
+                                  <span className="text-green-700 font-semibold">
+                                    Supported — at least one matrix group fully failed
+                                  </span>
+                                ) : (
+                                  <span className="text-red-700 font-semibold">
+                                    Not useful — at least one matrix group had a passing row
+                                  </span>
+                                )}
+                              </li>
+                            </ul>
 
-    {/* Explanation */}
-    <p className="mt-1">
-      <strong>PPE determines eligibility using two layers of evaluation:</strong><br />
-      1) <strong>Static eligibility rules</strong> must all pass.<br />
-      2) <strong>At least one Eligibility Matrix</strong> must contain 
-      <strong> at least one row where all conditions pass</strong>.
-    </p>
+                            {/* Explanation */}
+                            <p className="mt-1">
+                              <strong>PPE determines eligibility using two layers of evaluation:</strong><br />
+                              1) <strong>Static eligibility rules</strong> must all pass.<br />
+                              2) <strong>At least one Eligibility Matrix</strong> must contain 
+                              <strong> at least one row where all conditions pass</strong>.
+                            </p>
 
-    <p>
-      A product is marked <strong>ineligible</strong> when 
-      <strong> no eligibility path remains</strong>. This happens when:
-    </p>
+                            <p>
+                              A product is marked <strong>ineligible</strong> when 
+                              <strong> no eligibility path remains</strong>. This happens when:
+                            </p>
 
-    <ul className="list-disc ml-4 space-y-0.5">
-      <li><strong>Any static eligibility rule fails</strong>, OR</li>
-      <li>
-        <strong>Every row in every Eligibility Matrix fails</strong> —
-        meaning no matrix produced a passing row.
-      </li>
-    </ul>
+                            <ul className="list-disc ml-4 space-y-0.5">
+                              <li><strong>Any static eligibility rule fails</strong>, OR</li>
+                              <li>
+                                <strong>Every row in every Eligibility Matrix fails</strong> —
+                                meaning no matrix produced a passing row.
+                              </li>
+                            </ul>
 
-    <p className="mt-1">
-      When a matrix group <strong>fully fails</strong> (all its rows evaluate false),
-      PPE can provide <code>/ineligible-matrices</code> details containing the 
-      <em>exact reasons</em> why each row failed its conditions.
-      If even one row passes in any matrix group, the endpoint returns nothing.
-    </p>
+                            <p className="mt-1">
+                              When a matrix group <strong>fully fails</strong> (all its rows evaluate false),
+                              PPE can provide <code>/ineligible-matrices</code> details containing the 
+                              <em>exact reasons</em> why each row failed its conditions.
+                              If even one row passes in any matrix group, the endpoint returns nothing.
+                            </p>
 
-    <p>
-      Without <code>/ineligible-matrices</code>, we only know which rules evaluated 
-      <code>true/false</code>. We <strong>cannot</strong> see the internal expressions 
-      (LTV, DTI, Occupancy, PropertyType, etc.) that caused each row to fail.
-    </p>
-  </div>
-</div>
-
-
+                            <p>
+                              Without <code>/ineligible-matrices</code>, we only know which rules evaluated 
+                              <code>true/false</code>. We <strong>cannot</strong> see the internal expressions 
+                              (LTV, DTI, Occupancy, PropertyType, etc.) that caused each row to fail.
+                            </p>
+                          </div>
+                        </div>
 
                         {/* ======================================================== */}
                         {/* NON-MATRIX RULES                                         */}
@@ -2056,99 +2054,149 @@ export default function PricingInspector() {
               {/* ================================================================== */}
               {selectedIsInvalid && (
                 <section className="space-y-4">
-                  <div className="border border-gray-200 rounded-lg bg-white p-4 space-y-2 text-sm text-gray-800">
-                    <div>
-                      <span className="font-medium">invalidResultReason:</span>{" "}
-                      {selectedProduct.invalidResultReason ?? "(none)"}
-                    </div>
-                    <div>
-                      <span className="font-medium">uniqueInvestorCount:</span>{" "}
-                      <code className="bg-gray-100 px-1 rounded text-xs">
-                        {selectedProduct.uniqueInvestorCount ?? 0}
-                      </code>
-                    </div>
-                    <div>
-                      <span className="font-medium">Prices count:</span>{" "}
-                      <code className="bg-gray-100 px-1 rounded text-xs">
-                        {pricesCount}
-                      </code>
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 shadow-sm">
+
+                    {/* Header */}
+                    <h3 className="text-lg font-semibold text-red-800 flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      Invalid Product
+                    </h3>
+
+                    {/* Structured table (mirrors Product Overview visuals) */}
+                    <div className="rounded-lg bg-white border border-gray-200 p-4">
+                      <table className="w-full text-sm">
+                        <tbody className="divide-y divide-gray-100">
+
+                          {/* Reason */}
+                          <tr>
+                            <td className="py-2 font-medium text-gray-700 w-1/3">
+                              Reason
+                              <div className="text-xs text-gray-500">
+                                JSON:{" "}
+                                <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                  data.results[].invalidResultReason
+                                </code>
+                              </div>
+                            </td>
+                            <td className="py-2 text-gray-900">
+                              {selectedProduct.invalidResultReason ?? "(none)"}
+                            </td>
+                          </tr>
+
+                          {/* Unique Investors */}
+                          <tr>
+                            <td className="py-2 font-medium text-gray-700">
+                              Unique Investors
+                              <div className="text-xs text-gray-500">
+                                JSON:{" "}
+                                <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                  data.results[].uniqueInvestorCount
+                                </code>
+                              </div>
+                            </td>
+                            <td className="py-2 text-gray-900">
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                {selectedProduct.uniqueInvestorCount ?? 0}
+                              </code>
+                            </td>
+                          </tr>
+
+                          {/* Prices Count */}
+                          <tr>
+                            <td className="py-2 font-medium text-gray-700">
+                              Prices Returned
+                              <div className="text-xs text-gray-500">
+                                JSON:{" "}
+                                <code className="bg-gray-100 px-1 rounded text-[11px]">
+                                  data.results[].prices
+                                </code>
+                              </div>
+                            </td>
+                            <td className="py-2 text-gray-900">
+                              <code className="bg-gray-100 px-1 rounded text-xs">
+                                {pricesCount}
+                              </code>
+                            </td>
+                          </tr>
+
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </section>
               )}
+
             </div>
           )}
         </section>
 
-{/* ============================================================= */}
-{/* DEV CONSOLE DRAWER                                            */}
-{/* ============================================================= */}
-{(() => {
-  // local state for this component
-  const [consoleOpen, setConsoleOpen] = React.useState(false);
+        {/* ============================================================= */}
+        {/* DEV CONSOLE DRAWER                                            */}
+        {/* ============================================================= */}
+        {(() => {
+          // local state for this component
+          const [consoleOpen, setConsoleOpen] = React.useState(false);
 
-  return (
-    <>
-      {selectedProduct && (
-  <>
-<button
-  onClick={() => setConsoleOpen((v) => !v)}
-  className="
-    fixed bottom-4 right-4 z-50
-    bg-gray-800 hover:bg-gray-700
-    text-yellow-400 border border-yellow-500
-    p-3 rounded-full shadow-lg
-    flex items-center justify-center
-  "
-  aria-label="Toggle Developer Console"
->
-  {consoleOpen ? (
-    // Icon when console is open (chevron down)
-    <svg xmlns="http://www.w3.org/2000/svg"
-         className="h-6 w-6" fill="none"
-         viewBox="0 0 24 24" stroke="currentColor"
-         strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-            d="M19 9l-7 7-7-7" />
-    </svg>
-  ) : (
-    // Icon when console is closed (terminal icon)
-    <svg xmlns="http://www.w3.org/2000/svg"
-         className="h-6 w-6" fill="none"
-         viewBox="0 0 24 24" stroke="currentColor"
-         strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M8 9l3 3-3 3m5 0h3M4 7h16v10H4z" />
-    </svg>
-  )}
-</button>
-
-
-    <div
-      className={`
-        fixed left-0 right-0 bottom-0 z-40
-        bg-[#1a1a1a] border-t border-yellow-500
-        transition-transform duration-300
-        h-[60vh] overflow-y-auto
-        ${consoleOpen ? "translate-y-0" : "translate-y-full"}
-      `}
-    >
-      <DevConsole
-        raw={selectedProduct}
-        product={selectedProduct}
-        priceRow={selectedPriceRow}
-        ruleResults={selectedProduct.ruleResults ?? []}
-        isEligible={selectedIsEligible}
-      />
-    </div>
-  </>
-)}
-
-    </>
-  );
-})()}
+          return (
+            <>
+              {selectedProduct && (
+          <>
+        <button
+          onClick={() => setConsoleOpen((v) => !v)}
+          className="
+            fixed bottom-4 right-4 z-50
+            bg-gray-800 hover:bg-gray-700
+            text-yellow-400 border border-yellow-500
+            p-3 rounded-full shadow-lg
+            flex items-center justify-center
+          "
+          aria-label="Toggle Developer Console"
+        >
+          {consoleOpen ? (
+            // Icon when console is open (chevron down)
+            <svg xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor"
+                strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M19 9l-7 7-7-7" />
+            </svg>
+          ) : (
+            // Icon when console is closed (terminal icon)
+            <svg xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor"
+                strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M8 9l3 3-3 3m5 0h3M4 7h16v10H4z" />
+            </svg>
+          )}
+        </button>
 
 
+            <div
+              className={`
+                fixed left-0 right-0 bottom-0 z-40
+                bg-[#1a1a1a] border-t border-yellow-500
+                transition-transform duration-300
+                h-[60vh] overflow-y-auto
+                ${consoleOpen ? "translate-y-0" : "translate-y-full"}
+              `}
+            >
+              <DevConsole
+                raw={selectedProduct}
+                product={selectedProduct}
+                priceRow={selectedPriceRow}
+                ruleResults={selectedProduct.ruleResults ?? []}
+                isEligible={selectedIsEligible}
+              />
+            </div>
+          </>
+        )}
+
+            </>
+          );
+        })()}
 
       </main>
 
