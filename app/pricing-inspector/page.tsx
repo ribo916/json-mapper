@@ -564,35 +564,76 @@ function isPpeResponse(value: unknown): value is PpeResponse {
 /* PRICE BREAKDOWN HELPERS (mirror wiki logic)                               */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Select numeric price deltas from ruleResults, honoring:
+ * - fired rules only (booleanEquationValue === true)
+ * - target === "Price" OR target is missing/empty
+ * - hidden vs visible based on isHiddenAdjustment
+ * - resultEquationValue OR resultEquationValueUnclamped
+ */
 function pickRuleValues(
   rules: RuleResult[] | null | undefined,
   opts: { hidden: boolean }
 ): number[] {
   if (!Array.isArray(rules)) return [];
+
   return rules
     .filter((r) => {
-      const isPriceTarget = r.target === "Price";
-      const fired = r.booleanEquationValue === true;
-      const categoryOk =
-        typeof r.category === "string" &&
-        PRICE_RULE_CATEGORIES.includes(r.category as (typeof PRICE_RULE_CATEGORIES)[number]);
-      const hiddenFlag = r.isHiddenAdjustment === opts.hidden;
-      return isPriceTarget && fired && categoryOk && hiddenFlag;
+      if (!r) return false;
+
+      // Only fired rules
+      if (r.booleanEquationValue !== true) return false;
+
+      // Target: "Price" OR missing/null/empty (engine treats missing as price)
+      if (r.target && r.target !== "Price") return false;
+
+      // Numeric delta: use resultEquationValue or resultEquationValueUnclamped
+      const raw =
+        r.resultEquationValue !== undefined && r.resultEquationValue !== null
+          ? r.resultEquationValue
+          : (r as any).resultEquationValueUnclamped;
+
+      const val = toNumberSafe(raw);
+      if (val === 0) return false;
+
+      // Hidden vs visible:
+      //  - hidden: isHiddenAdjustment === true
+      //  - visible: anything that is NOT explicitly hidden
+      const isHidden = r.isHiddenAdjustment === true;
+      return opts.hidden ? isHidden : !isHidden;
     })
-    .map((r) => toNumberSafe(r.resultEquationValue));
+    .map((r) => {
+      const raw =
+        r.resultEquationValue !== undefined && r.resultEquationValue !== null
+          ? r.resultEquationValue
+          : (r as any).resultEquationValueUnclamped;
+      return toNumberSafe(raw);
+    });
 }
 
+/**
+ * Clamp adjustments:
+ * - Use unclampedValue - clampedValue
+ * - Include clamps where target is "Price" OR missing/empty
+ * - Do NOT filter by category; any price clamp applies.
+ */
 function pickClampRemovals(
   clamps: PriceClamp[] | null | undefined
 ): number[] {
   if (!Array.isArray(clamps)) return [];
+
   return clamps
     .filter((c) => {
-      const isPriceTarget = c.target === "Price";
-      const categoryOk =
-        typeof c.category === "string" &&
-        PRICE_RULE_CATEGORIES.includes(c.category as (typeof PRICE_RULE_CATEGORIES)[number]);
-      return isPriceTarget && categoryOk;
+      if (!c) return false;
+
+      // Clamp applies to price when target is "Price" OR missing/null/empty
+      if (c.target && c.target !== "Price") return false;
+
+      // If we have any unclamped/clamped pair, we consider it
+      const hasUnclamped =
+        c.unclamped !== undefined || c.clampedFrom !== undefined;
+      const hasClamped = c.clamped !== undefined || c.clampedTo !== undefined;
+      return hasUnclamped && hasClamped;
     })
     .map((c) => {
       // Support either (clamped/unclamped) or (clampedFrom/clampedTo)
@@ -620,11 +661,26 @@ interface PriceBreakdown {
   netDiff: number;
 }
 
+/**
+ * Rebuild the engine’s price math from JSON:
+ *
+ *  pba              = priceBeforeAdjustments
+ *  paba             = priceAfterBaseAdjustments
+ *  basePrice        = paba + ALL hidden price adjustments (product + row)
+ *  visibleResultAdj = visible product-level adjustments
+ *  visibleRowAdj    = visible row-level adjustments
+ *  totalVisible     = visibleResultAdj + visibleRowAdj
+ *  clampAdj         = sum(unclamped - clamped) over clampResults
+ *  reconstructed    = basePrice + totalVisible - clampAdj
+ *  enginePrice      = prices[y].price
+ *  netPrice         = prices[y].netPrice ?? prices[y].price
+ */
 function buildPriceBreakdown(
   product: PpeResult,
   priceRow: PriceRow,
   brokerCompField: number
 ): PriceBreakdown {
+  // Price before adjustments (may be missing in some responses)
   const pbaRaw = (priceRow as { priceBeforeAdjustments?: unknown })
     .priceBeforeAdjustments;
   const pba =
@@ -633,31 +689,44 @@ function buildPriceBreakdown(
       ? toNumberSafe(pbaRaw)
       : null;
 
+  // Price after base adjustments (paba)
   const paba = toNumberSafe(
     (priceRow as { priceAfterBaseAdjustments?: unknown })
       .priceAfterBaseAdjustments
   );
 
-  const rlHidden = sum(pickRuleValues(product.ruleResults, { hidden: true }));
-  const rlVisible = sum(pickRuleValues(product.ruleResults, { hidden: false }));
-  const plHidden = sum(pickRuleValues(priceRow.ruleResults, { hidden: true }));
-  const plVisible = sum(pickRuleValues(priceRow.ruleResults, { hidden: false }));
+  // Hidden / visible adjustments
+  const productHidden = sum(pickRuleValues(product.ruleResults, { hidden: true }));
+  const productVisible = sum(
+    pickRuleValues(product.ruleResults, { hidden: false })
+  );
 
-  const basePrice = paba + plHidden;
+  const rowHidden = sum(pickRuleValues(priceRow.ruleResults, { hidden: true }));
+  const rowVisible = sum(
+    pickRuleValues(priceRow.ruleResults, { hidden: false })
+  );
 
-  const visibleResultAdj = rlVisible;
-  const visibleRowAdj = plVisible;
+  // Base price = paba + ALL hidden (product + row)
+  const basePrice = paba + productHidden + rowHidden;
+
+  // Visible adjustments
+  const visibleResultAdj = productVisible;
+  const visibleRowAdj = rowVisible;
   const totalVisiblePriceAdj = visibleResultAdj + visibleRowAdj;
 
+  // Clamp adjustments (unclamped - clamped)
   const clampAdj = sum(pickClampRemovals(priceRow.clampResults));
 
+  // Reconstructed engine price from components
   const reconstructedPrice = basePrice + totalVisiblePriceAdj - clampAdj;
 
+  // Engine price + net price from payload
   const enginePrice = toNumberSafe(priceRow.price);
   const netPrice = toNumberSafe(
     (priceRow as { netPrice?: unknown }).netPrice ?? priceRow.price
   );
 
+  // Diffs (debugging / sanity checks)
   const priceDiff = +(enginePrice - reconstructedPrice).toFixed(3);
   const netDiff = +((enginePrice + brokerCompField) - netPrice).toFixed(3);
 
@@ -677,6 +746,7 @@ function buildPriceBreakdown(
     netDiff,
   };
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* COMPONENT                                                                 */
