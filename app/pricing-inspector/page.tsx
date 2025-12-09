@@ -37,8 +37,7 @@ function HybridProductPicker({
     const q = query.toLowerCase();
     return products.filter((p) =>
       (p.name ?? "").toLowerCase().includes(q) ||
-      (p.code ?? "").toLowerCase().includes(q) ||
-      (p.id ?? "").toLowerCase().includes(q)
+      (p.code ?? "").toLowerCase().includes(q)
     );
   }, [products, query]);
 
@@ -107,7 +106,7 @@ function HybridProductPicker({
 
             {filtered.map((p) => (
               <div
-                key={p.id}
+                key={p.code}
                 className="px-2 py-1 cursor-pointer rounded hover:bg-gray-100"
                 onClick={() => {
                   setSelectedValue(p.code ?? "");
@@ -117,7 +116,6 @@ function HybridProductPicker({
                 <div className="font-medium text-gray-900 text-sm">
                   {p.name} – {p.code}
                 </div>
-                <div className="text-[11px] text-gray-500">ID: {p.id}</div>
               </div>
             ))}
           </div>
@@ -1250,13 +1248,13 @@ export default function PricingInspector() {
                                   {/* Product ID */}
                                   <tr>
                                     <td className="py-2 font-medium text-gray-700">
-                                      Product ID
+                                      Product Code
                                     </td>
                                     <td className="py-2 text-gray-900">
-                                      {selectedProduct.id ?? "(missing)"}
+                                      {selectedProduct.code ?? "(missing)"}
                                     </td>
                                     <td className="py-2 text-xs text-gray-500 text-right align-top">
-                                      <code className="bg-gray-100 px-1 rounded">$.data.results[x].id</code>
+                                      <code className="bg-gray-100 px-1 rounded">$.data.results[x].code</code>
                                     </td>
                                   </tr>
 
