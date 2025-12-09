@@ -133,8 +133,11 @@ interface PriceBreakdown {
   pba: number | null;
   paba: number;
   basePrice: number;
+
+  // REQUIRED — these were missing and caused your TS errors
   visibleResultAdj: number;
   visibleRowAdj: number;
+
   totalVisiblePriceAdj: number;
   clampAdj: number;
   reconstructedPrice: number;
@@ -145,9 +148,6 @@ interface PriceBreakdown {
   netDiff: number;
 }
 
-// ===============================================
-// PRICE MATH BREAKDOWN COMPONENT
-// ===============================================
 // ===============================================
 // PRICE MATH BREAKDOWN COMPONENT (4 wiki steps)
 // ===============================================
@@ -319,7 +319,7 @@ function PriceMathBreakdown({
               <p className="mt-1">
                 <strong>Note:</strong> You will see entries where{" "}
                 <code>category = "TotalPrice"</code> and may wonder why that
-                isn&apos;t included. These represent the aggregate of all
+                isn't included. These represent the aggregate of all
                 price-related categories and serve as a summary reference, not a
                 separate clamp adjustment.
               </p>
@@ -386,6 +386,17 @@ function PriceMathBreakdown({
                     )
                   </span>
                 </div>
+
+                <div className="mt-1">
+                  <strong>Calculated Net Price (Engine + Broker Comp):</strong>{" "}
+                  <span className="font-mono">
+                    {(enginePrice + breakdown.brokerCompField).toFixed(4)}
+                  </span>
+                  <span className="ml-1 text-gray-500">
+                    (This is NOT authoritative — included for developer comparison only)
+                  </span>
+                </div>
+
               </div>
             </td>
           </tr>
@@ -395,6 +406,7 @@ function PriceMathBreakdown({
     </div>
   );
 }
+
 
 
 /* -------------------------------------------------------------------------- */
