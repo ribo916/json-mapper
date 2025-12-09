@@ -705,6 +705,10 @@ export default function PricingInspector() {
   const [showBreakdown, setShowBreakdown] = useState(false);
   const [showRuleBuckets, setShowRuleBuckets] = useState(false);
 
+  const [inputMode, setInputMode] = useState<"upload" | "paste">("upload");
+  const [pasteText, setPasteText] = useState<string>("");
+  const [showPastePanel, setShowPastePanel] = useState<boolean>(false);
+
 
   /* ------------------------------------------------------------------------ */
   /* FILE UPLOAD                                                              */
@@ -719,39 +723,7 @@ export default function PricingInspector() {
     try {
       const text = await file.text();
       const parsed: unknown = JSON.parse(text);
-
-      if (!isPpeResponse(parsed)) {
-        setError("Missing $.data.results[]");
-        setRawResults([]);
-        setFileName(file.name);
-        setLoanAmount(null);
-        setDesiredLockPeriod(null);
-        setBrokerCompBps(0);
-        return;
-      }
-
-      const results = parsed.data?.results ?? [];
-      setRawResults(results);
-      setError(null);
-      setFileName(file.name);
-
-      // Pull out shared scenario fields for UI calculations
-      const loanAmt = toNumberSafe(parsed.data?.loan?.amount);
-      setLoanAmount(loanAmt || null);
-
-      const lock = toNumberSafe(parsed.data?.search?.desiredLockPeriod);
-      setDesiredLockPeriod(lock || null);
-
-      const comp = toNumberSafe(
-        parsed.data?.brokerCompPlan?.calculatedAdjustment
-      );
-      setBrokerCompBps(comp || 0);
-
-      // Reset selections
-      setSelectedEligibleCode("");
-      setSelectedIneligibleCode("");
-      setSelectedInvalidCode("");
-      setSelectedPriceIndex(-1);
+      loadPpeJson(parsed, file.name);
     } catch {
       setError("Invalid JSON");
       setRawResults([]);
@@ -760,6 +732,55 @@ export default function PricingInspector() {
       setDesiredLockPeriod(null);
       setBrokerCompBps(0);
     }
+  };
+
+  const handlePaste = (): void => {
+    try {
+      const parsed: unknown = JSON.parse(pasteText);
+      loadPpeJson(parsed);
+    } catch {
+      setError("Invalid JSON");
+      setRawResults([]);
+      setFileName(null);
+      setLoanAmount(null);
+      setDesiredLockPeriod(null);
+      setBrokerCompBps(0);
+    }
+  };
+
+  const loadPpeJson = (parsed: unknown, fileName?: string): void => {
+    if (!isPpeResponse(parsed)) {
+      setError("Missing $.data.results[]");
+      setRawResults([]);
+      setFileName(fileName ?? null);
+      setLoanAmount(null);
+      setDesiredLockPeriod(null);
+      setBrokerCompBps(0);
+      return;
+    }
+
+    const results = parsed.data?.results ?? [];
+    setRawResults(results);
+    setError(null);
+    setFileName(fileName ?? null);
+
+    // Pull out shared scenario fields for UI calculations
+    const loanAmt = toNumberSafe(parsed.data?.loan?.amount);
+    setLoanAmount(loanAmt || null);
+
+    const lock = toNumberSafe(parsed.data?.search?.desiredLockPeriod);
+    setDesiredLockPeriod(lock || null);
+
+    const comp = toNumberSafe(
+      parsed.data?.brokerCompPlan?.calculatedAdjustment
+    );
+    setBrokerCompBps(comp || 0);
+
+    // Reset selections
+    setSelectedEligibleCode("");
+    setSelectedIneligibleCode("");
+    setSelectedInvalidCode("");
+    setSelectedPriceIndex(-1);
   };
 
   /* ------------------------------------------------------------------------ */
@@ -883,21 +904,90 @@ export default function PricingInspector() {
             </span>
           )}
 
-          <input
-            id="fileInput"
-            type="file"
-            accept=".json"
-            onChange={handleUpload}
-            className="hidden"
-          />
-          <label
-            htmlFor="fileInput"
-            className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
-          >
-            Upload JSON
-          </label>
+          <div className="flex items-center gap-1 border border-gray-300 rounded-md p-1">
+            <button
+              onClick={() => setInputMode("upload")}
+              className={`px-3 py-1 text-sm rounded ${
+                inputMode === "upload"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Upload
+            </button>
+            <button
+              onClick={() => setInputMode("paste")}
+              className={`px-3 py-1 text-sm rounded ${
+                inputMode === "paste"
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Paste JSON
+            </button>
+          </div>
+
+          {inputMode === "upload" && (
+            <>
+              <input
+                id="fileInput"
+                type="file"
+                accept=".json"
+                onChange={handleUpload}
+                className="hidden"
+              />
+              <label
+                htmlFor="fileInput"
+                className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
+              >
+                Choose File
+              </label>
+            </>
+          )}
+
+          {inputMode === "paste" && (
+            <button
+              onClick={() => setShowPastePanel(!showPastePanel)}
+              className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
+            >
+              {showPastePanel ? "Hide" : "Show"} Paste Panel
+            </button>
+          )}
         </div>
       </header>
+
+      {/* PASTE PANEL */}
+      {showPastePanel && (
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">
+                  Paste PPE JSON Response:
+                </label>
+                <span className="text-xs text-gray-500">
+                  {pasteText.length} characters
+                </span>
+              </div>
+              <textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder="Paste your PPE JSON response here..."
+                className="w-full h-48 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={handlePaste}
+                  disabled={!pasteText.trim()}
+                  className="inline-flex items-center px-4 py-2 rounded-md border border-transparent bg-blue-600 text-white text-sm font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Load JSON
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MAIN */}
       <main className="px-6 py-6 space-y-8 max-w-7xl mx-auto">
