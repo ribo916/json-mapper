@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
@@ -147,6 +148,9 @@ interface PriceBreakdown {
 // ===============================================
 // PRICE MATH BREAKDOWN COMPONENT
 // ===============================================
+// ===============================================
+// PRICE MATH BREAKDOWN COMPONENT (4 wiki steps)
+// ===============================================
 function PriceMathBreakdown({
   breakdown,
 }: {
@@ -154,221 +158,244 @@ function PriceMathBreakdown({
 }) {
   if (!breakdown) return null;
 
+  const {
+    basePrice,
+    totalVisiblePriceAdj,
+    clampAdj,
+    reconstructedPrice,
+    enginePrice,
+    netPrice,
+    priceDiff,
+    netDiff,
+  } = breakdown;
+
   return (
-<div className="relative border border-gray-300 rounded-md bg-gray-100 p-3 w-full max-w-md shadow-inner">
-      <div className="text-sm font-semibold text-gray-900 mb-4">
-        Price Construction Breakdown
+    <div className="mt-3 p-5 rounded-lg bg-gray-50 shadow-md text-xs w-full space-y-4">
+      <div className="text-xs font-semibold text-gray-900 mb-2">
+        Price Construction Breakdown (Wiki Steps 1–4)
       </div>
 
-      <div className="space-y-4">
+      <table className="w-full text-xs">
+        <tbody className="divide-y divide-gray-300">
 
-        {/* Pricing Breakdown Fields */}
-        <div className="space-y-3">
-          {/* Price Before Adjustments */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Price Before Adj</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].priceBeforeAdjustments</code>
+          {/* =============================================================== */}
+          {/* STEP 1 - CALCULATE BASE PRICE                                  */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700 w-1/3">
+              Step 1 – Base Price
+            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {basePrice.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>How to Calculate Base Price</strong>
+              <ol className="list-decimal list-inside mt-1 space-y-1">
+                <li>
+                  Start with{" "}
+                  <code>prices[i].priceAfterBaseAdjustments</code>.
+                </li>
+                <li>
+                  Add in <strong>hidden price-level adjustments</strong> (it
+                  already includes the hidden result-level adjustments):
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                    <li>
+                      Loop through{" "}
+                      <code>results[j].prices[i].ruleResults</code> and sum{" "}
+                      <code>resultEquationValue</code> where:
+                      <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                        <li>
+                          <code>isHiddenAdjustment == true</code>
+                        </li>
+                        <li>
+                          <code>target == "Price"</code>
+                        </li>
+                        <li>
+                          <code>
+                            category in ["Adjustment", "SRP", "Margin"]
+                          </code>
+                        </li>
+                        <li>
+                          <code>booleanEquationValue == true</code>{" "}
+                          (indicating the rule fired)
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ol>
+
+              <div className="mt-2 text-gray-500">
+                <strong>JSON anchors:</strong>{" "}
+                <code>data.results[x].prices[y].priceAfterBaseAdjustments</code>{" "}
+                + hidden price-level rules in{" "}
+                <code>data.results[x].prices[y].ruleResults[]</code>.
+              </div>
+            </td>
+          </tr>
+
+          {/* =============================================================== */}
+          {/* STEP 2 - VISIBLE PRICE ADJUSTMENTS                             */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">
+              Step 2 – VisiblePriceAdjustments
+            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {totalVisiblePriceAdj.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Step 2 – Calculate VisiblePriceAdjustments</strong>
+              <p className="mt-1">
+                Loop through both Result-Level and Price-Level rulesets to get
+                all <strong>visible</strong> price adjustments.
+              </p>
+              <ol className="list-decimal list-inside mt-1 space-y-1">
+                <li>
+                  Loop through <code>prices[i].ruleResults</code> and sum{" "}
+                  <code>resultEquationValue</code> where:
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                    <li>
+                      <code>isHiddenAdjustment == false</code>
+                    </li>
+                    <li>
+                      <code>booleanEquationValue == true</code>
+                    </li>
+                    <li>
+                      <code>target == "Price"</code>
+                    </li>
+                    <li>
+                      <code>
+                        category in ["Adjustments", "SRP", "Margin"]
+                      </code>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  Loop through <code>results[j].ruleResults</code> and sum{" "}
+                  <code>resultEquationValue</code> using the same logic.
+                </li>
+              </ol>
+
+              <div className="mt-2 text-gray-500">
+                <strong>JSON anchors:</strong>{" "}
+                <code>data.results[x].prices[y].ruleResults[]</code> and{" "}
+                <code>data.results[x].ruleResults[]</code>.
+              </div>
+            </td>
+          </tr>
+
+          {/* =============================================================== */}
+          {/* STEP 3 - PRICE CLAMP ADJUSTMENTS                               */}
+          {/* =============================================================== */}
+          <tr className="align-top">
+            <td className="py-2 font-medium text-gray-700">
+              Step 3 – PriceClampAdjustments
+            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">
+              {clampAdj.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Step 3 – Calculate PriceClampAdjustments</strong>
+              <ol className="list-decimal list-inside mt-1 space-y-1">
+                <li>
+                  Loop through <code>prices[i].clampResults[]</code> and sum{" "}
+                  <code>(unclamped - clamped)</code> where:
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                    <li>
+                      <code>target == "Price"</code>
+                    </li>
+                    <li>
+                      <code>
+                        category in ["Adjustments", "SRP", "Margin"]
+                      </code>
+                    </li>
+                  </ul>
+                </li>
+              </ol>
+              <p className="mt-1">
+                A delta indicates the clamp bit.
+              </p>
+              <p className="mt-1">
+                <strong>Note:</strong> You will see entries where{" "}
+                <code>category = "TotalPrice"</code> and may wonder why that
+                isn&apos;t included. These represent the aggregate of all
+                price-related categories and serve as a summary reference, not a
+                separate clamp adjustment.
+              </p>
+
+              <div className="mt-2 text-gray-500">
+                <strong>JSON anchor:</strong>{" "}
+                <code>data.results[x].prices[y].clampResults[]</code>.
+              </div>
+            </td>
+          </tr>
+
+          {/* =============================================================== */}
+          {/* STEP 4 - FINAL PRICE                                           */}
+          {/* =============================================================== */}
+          <tr className="bg-gray-50 align-top">
+            <td className="py-2 font-semibold text-gray-900">
+              Step 4 – Final Price (Calculated)
+            </td>
+            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
+              {reconstructedPrice.toFixed(4)}
+            </td>
+            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+              <strong>Step 4 – Calculate the Final Price</strong>
+              <p className="mt-1">
+                <code>
+                  Final Price = BasePrice + VisiblePriceAdjustments -
+                  PriceClampAdjustments
+                </code>
+              </p>
+              <p className="mt-1">
+                This price corresponds to <code>prices[i].price</code>, not{" "}
+                <code>prices[i].netPrice</code>, which requires rounding logic
+                and broker compensation.
+              </p>
+
+              <hr className="my-1 border-gray-300" />
+
+              <div className="text-gray-500 space-y-1">
+                <div>
+                  <strong>JSON Engine Price:</strong>{" "}
+                  <code>data.results[x].prices[y].price</code> ={" "}
+                  <span className="font-mono">
+                    {enginePrice.toFixed(4)}
+                  </span>
+                  <span className="ml-1">
+                    (Δ JSON − Calculated ={" "}
+                    <span className="font-mono">
+                      {priceDiff.toFixed(4)}
+                    </span>
+                    )
+                  </span>
+                </div>
+                <div>
+                  <strong>JSON Net Price:</strong>{" "}
+                  <code>data.results[x].prices[y].netPrice</code> ={" "}
+                  <span className="font-mono">
+                    {netPrice.toFixed(4)}
+                  </span>
+                  <span className="ml-1">
+                    (Δ Net − Engine ={" "}
+                    <span className="font-mono">
+                      {netDiff.toFixed(4)}
+                    </span>
+                    )
+                  </span>
                 </div>
               </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.pba !== null ? breakdown.pba.toFixed(4) : "—"}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Raw engine price for this rate row before any base, visible, hidden, or clamp adjustments.
-            </div>
-          </div>
+            </td>
+          </tr>
 
-          {/* Base After Base Adjustments */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Base After Base Adj</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].priceAfterBaseAdjustments</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.paba.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Price after the engine applies base + hidden adjustments (before visible price adjustments).
-            </div>
-          </div>
-
-          {/* Base Price */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Base Price</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <strong>Concept:</strong> Base Price = <code className="bg-gray-200 px-1 rounded text-[9px]">paba</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.basePrice.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Engine has already applied all base + hidden adjustments. Hidden ruleResults explain why PBA → PABA changed.
-            </div>
-          </div>
-
-          {/* Visible Adjustments (Product) */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Visible Adj (Product)</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].ruleResults[]</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.visibleResultAdj.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Product-level visible price adjustments (booleanEquationValue === true, non-zero result, isHiddenAdjustment !== true).
-            </div>
-          </div>
-
-          {/* Visible Adjustments (Row) */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Visible Adj (Row)</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].ruleResults[]</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.visibleRowAdj.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Row-level visible price adjustments (booleanEquationValue === true, non-zero result, not hidden, target === &quot;Price&quot;).
-            </div>
-          </div>
-
-          {/* Total Visible Adjustments */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Total Visible Adj</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <strong>Formula:</strong> productVisible + rowVisible
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.totalVisiblePriceAdj.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Sum of all visible price adjustments from product and row levels.
-            </div>
-          </div>
-
-          {/* Clamp Adjustments */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Clamp Adjustments</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].clampResults[]</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-red-600 ml-3">
-                -{breakdown.clampAdj.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Engine corrections when a price is forced into allowed ranges. Formula per entry: unclampedValue - clampedValue.
-            </div>
-          </div>
-
-          {/* Reconstructed Engine Price */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Reconstructed Price</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <strong>Formula:</strong> BasePrice + TotalVisibleAdj - ClampAdj
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.reconstructedPrice.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Matches the PPE engine pipeline.
-            </div>
-          </div>
-
-          {/* Engine Price */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Engine Price</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].price</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.enginePrice.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Final engine-computed price (before broker comp).
-            </div>
-          </div>
-
-          {/* Broker Comp */}
-          <div className="py-2 border-b border-gray-200">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Broker Comp</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].brokerCompPlan.calculatedAdjustment</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.brokerCompField.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Broker compensation returned by PPE.
-            </div>
-          </div>
-
-          {/* Net Price */}
-          <div className="py-2">
-            <div className="flex justify-between items-start mb-1">
-              <div className="flex-1">
-                <div className="text-[11px] font-bold text-gray-800">Net Price</div>
-                <div className="text-[10px] text-gray-600 mt-1">
-                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].netPrice</code>
-                </div>
-              </div>
-              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
-                {breakdown.netPrice.toFixed(4)}
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 leading-relaxed">
-              Final price value returned in the PPE payload.
-            </div>
-          </div>
-        </div>
-
-      </div>
+        </tbody>
+      </table>
     </div>
   );
-  
-  
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS + LIGHTWEIGHT TYPES                                               */
