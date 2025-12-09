@@ -163,7 +163,7 @@ function PriceMathBreakdown({
   
       <table className="w-full text-xs">
         <tbody className="divide-y divide-gray-300">
-  
+
           {/* =============================================================== */}
           {/* PRICE BEFORE ADJUSTMENTS                                       */}
           {/* =============================================================== */}
@@ -181,24 +181,20 @@ function PriceMathBreakdown({
               </span>
               <hr className="my-1 border-gray-300" />
               <span className="text-gray-500">
-                <strong>Parse:</strong> pick product <code>results[x]</code>, then row{" "}
-                <code>prices[y]</code>, and read <code>priceBeforeAdjustments</code>.
+                <strong>Parse:</strong> Read <code>priceBeforeAdjustments</code> from{" "}
+                <code>results[x].prices[y]</code>.
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* BASE AFTER BASE ADJUSTMENTS (PABA)                             */}
           {/* =============================================================== */}
           <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">
-              Base After Base Adj (paba)
-            </td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.paba.toFixed(4)}
-            </td>
+            <td className="py-2 font-medium text-gray-700">Base After Base Adj (paba)</td>
+            <td className="py-2 text-gray-900 min-w-[80px]">{breakdown.paba.toFixed(4)}</td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Base price after only base adjustments are applied (no visible ruleResults yet).
+              Price after the engine applies base + hidden adjustments (before visible price adjustments).
               <br />
               <span className="text-gray-500">
                 <strong>JSON:</strong>{" "}
@@ -206,109 +202,95 @@ function PriceMathBreakdown({
               </span>
               <hr className="my-1 border-gray-300" />
               <span className="text-gray-500">
-                <strong>Parse:</strong> from the same price row <code>prices[y]</code>, use{" "}
-                <code>priceAfterBaseAdjustments</code> as the starting base price.
+                <strong>Parse:</strong> Read <code>priceAfterBaseAdjustments</code> from{" "}
+                <code>results[x].prices[y]</code>.
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
-          {/* BASE PRICE                                                      */}
+          {/* BASE PRICE                                                     */}
           {/* =============================================================== */}
           <tr className="align-top">
             <td className="py-2 font-medium text-gray-700">Base Price</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.basePrice.toFixed(4)}
-            </td>
+            <td className="py-2 text-gray-900 min-w-[80px]">{breakdown.basePrice.toFixed(4)}</td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              <strong>Concept:</strong> paba plus all hidden price adjustments that fired.
+              <strong>Concept:</strong> Base Price = <code>paba</code>.
               <br />
-              Hidden adjustments are rules that change price but are not shown to users.
-              <br />
+              Engine has already applied all base + hidden adjustments before producing{" "}
+              <code>priceAfterBaseAdjustments</code>.
+              <br /><br />
+              Hidden ruleResults explain <em>why</em> PBA → PABA changed, but they are
+              <strong> not added again</strong> here.
+              <br /><br />
               <span className="text-gray-500">
-                <strong>JSON sources:</strong>
+                <strong>JSON references for hidden rule explanations:</strong>
                 <br />
                 • <code>data.results[x].ruleResults[]</code> (product-level)
                 <br />
                 • <code>data.results[x].prices[y].ruleResults[]</code> (row-level)
               </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Filter for hidden:</strong> include rules where:
-                <br />
-                • <code>booleanEquationValue === true</code>
-                <br />
-                • <code>isHiddenAdjustment === true</code>
-                <br />
-                • <code>target === "Price"</code> or target is missing
-              </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
-          {/* VISIBLE ADJUSTMENTS (PRODUCT LEVEL)                            */}
+          {/* VISIBLE ADJUSTMENTS (PRODUCT)                                  */}
           {/* =============================================================== */}
           <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">
-              Visible Adjustments (Product)
-            </td>
+            <td className="py-2 font-medium text-gray-700">Visible Adjustments (Product)</td>
             <td className="py-2 text-gray-900 min-w-[80px]">
               {breakdown.visibleResultAdj.toFixed(4)}
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Product-level price adjustments that are visible in the UI and impact price.
+              Product-level visible price adjustments.
               <br />
               <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].ruleResults[]</code>
+                <strong>JSON:</strong> <code>data.results[x].ruleResults[]</code>
               </span>
               <hr className="my-1 border-gray-300" />
               <span className="text-gray-500">
                 <strong>Include rule when:</strong>
                 <br />
-                • <code>booleanEquationValue === true</code> (rule fired)
+                • <code>booleanEquationValue === true</code>
                 <br />
-                • <code>isHiddenAdjustment !== true</code> (not hidden)
+                • <code>isHiddenAdjustment !== true</code>
                 <br />
-                • <code>target === "Price"</code> or target is missing
+                • <code>target === "Price"</code> or missing
                 <br />
-                • <code>Number(resultEquationValue ?? resultEquationValueUnclamped) !== 0</code>
+                • Non-zero numeric result
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
-          {/* VISIBLE ADJUSTMENTS (ROW LEVEL)                                */}
+          {/* VISIBLE ADJUSTMENTS (ROW)                                      */}
           {/* =============================================================== */}
           <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">
-              Visible Adjustments (Row)
-            </td>
+            <td className="py-2 font-medium text-gray-700">Visible Adjustments (Row)</td>
             <td className="py-2 text-gray-900 min-w-[80px]">
               {breakdown.visibleRowAdj.toFixed(4)}
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Rate-row–specific visible price adjustments for this rate / price combination.
+              Row-level visible price adjustments.
               <br />
               <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].prices[y].ruleResults[]</code>
+                <strong>JSON:</strong> <code>data.results[x].prices[y].ruleResults[]</code>
               </span>
               <hr className="my-1 border-gray-300" />
               <span className="text-gray-500">
-                <strong>Include rule when:</strong> same filters as product-level visible:
+                <strong>Include rule when:</strong>
                 <br />
-                • fired (<code>booleanEquationValue === true</code>)
+                • <code>booleanEquationValue === true</code>
                 <br />
                 • non-zero numeric result
                 <br />
                 • not hidden
                 <br />
-                • target is price (or missing)
+                • <code>target === "Price"</code> or missing
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* TOTAL VISIBLE ADJUSTMENTS                                      */}
           {/* =============================================================== */}
@@ -321,12 +303,9 @@ function PriceMathBreakdown({
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
               <strong>Formula:</strong> productVisible + rowVisible
-              <br />
-              Sum of all product-level and row-level visible price adjustments that passed
-              the filters above.
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* CLAMP ADJUSTMENTS                                               */}
           {/* =============================================================== */}
@@ -336,7 +315,7 @@ function PriceMathBreakdown({
               -{breakdown.clampAdj.toFixed(4)}
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Engine corrections when a price is forced back inside allowed ranges.
+              Engine corrections when a price is forced into allowed ranges.
               <br />
               <span className="text-gray-500">
                 <strong>JSON:</strong>{" "}
@@ -344,12 +323,12 @@ function PriceMathBreakdown({
               </span>
               <hr className="my-1 border-gray-300" />
               <span className="text-gray-500">
-                <strong>Formula per clamp entry:</strong>{" "}
-                <code>unclampedValue - clampedValue</code>, then sum across all clamp results.
+                <strong>Formula per entry:</strong>{" "}
+                <code>unclampedValue - clampedValue</code>
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* RECONSTRUCTED ENGINE PRICE                                     */}
           {/* =============================================================== */}
@@ -362,17 +341,17 @@ function PriceMathBreakdown({
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
               <strong>Formula:</strong>{" "}
-              <code>BasePrice + TotalVisibleAdjustments - ClampAdjustments</code>
+              <code>BasePrice (paba) + TotalVisibleAdjustments - ClampAdjustments</code>
               <br />
-              This is how we rebuild the engine price from its components.
+              Matches the PPE engine pipeline.
               <hr className="my-1 border-gray-300" />
               <span className="text-gray-500">
-                <strong>Compare to:</strong>{" "}
-                <code>data.results[x].prices[y].price</code> (Engine Price below).
+                <strong>Compare to JSON:</strong>{" "}
+                <code>data.results[x].prices[y].price</code>
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* ENGINE PRICE                                                    */}
           {/* =============================================================== */}
@@ -382,7 +361,7 @@ function PriceMathBreakdown({
               {breakdown.enginePrice.toFixed(4)}
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Final engine-computed price for this row before broker comp.
+              Final engine-computed price (before broker comp).
               <br />
               <span className="text-gray-500">
                 <strong>JSON:</strong>{" "}
@@ -390,7 +369,7 @@ function PriceMathBreakdown({
               </span>
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* BROKER COMP                                                     */}
           {/* =============================================================== */}
@@ -400,17 +379,15 @@ function PriceMathBreakdown({
               {breakdown.brokerCompField.toFixed(4)}
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Broker compensation adjustment applied on top of engine price.
+              Broker compensation returned by PPE.
               <br />
               <span className="text-gray-500">
                 <strong>JSON:</strong>{" "}
                 <code>data.results[x].brokerCompPlan.calculatedAdjustment</code>
               </span>
-              <br />
-              Positive values typically represent additional cost; negative values, credit.
             </td>
           </tr>
-  
+
           {/* =============================================================== */}
           {/* NET PRICE                                                       */}
           {/* =============================================================== */}
@@ -420,13 +397,19 @@ function PriceMathBreakdown({
               {breakdown.netPrice.toFixed(4)}
             </td>
             <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              <strong>Formula:</strong>{" "}
-              <code>EnginePrice + BrokerComp</code>
+              Final price value returned in the PPE payload.
               <br />
-              This is the final net price after broker compensation.
+              <span className="text-gray-500">
+                <strong>JSON:</strong>{" "}
+                <code>data.results[x].prices[y].netPrice</code>
+              </span>
+              <hr className="my-1 border-gray-300" />
+              <span className="text-gray-500">
+                <strong>Note:</strong> Taken directly from the payload—no additional calculations applied.
+              </span>
             </td>
           </tr>
-  
+
         </tbody>
       </table>
   
@@ -666,7 +649,7 @@ interface PriceBreakdown {
  *
  *  pba              = priceBeforeAdjustments
  *  paba             = priceAfterBaseAdjustments
- *  basePrice        = paba + ALL hidden price adjustments (product + row)
+ *  basePrice        = paba   // hidden adjustments already applied by engine
  *  visibleResultAdj = visible product-level adjustments
  *  visibleRowAdj    = visible row-level adjustments
  *  totalVisible     = visibleResultAdj + visibleRowAdj
@@ -695,7 +678,7 @@ function buildPriceBreakdown(
       .priceAfterBaseAdjustments
   );
 
-  // Hidden / visible adjustments
+  // Hidden / visible adjustments (display only—NOT used in basePrice calc)
   const productHidden = sum(pickRuleValues(product.ruleResults, { hidden: true }));
   const productVisible = sum(
     pickRuleValues(product.ruleResults, { hidden: false })
@@ -706,8 +689,10 @@ function buildPriceBreakdown(
     pickRuleValues(priceRow.ruleResults, { hidden: false })
   );
 
-  // Base price = paba + ALL hidden (product + row)
-  const basePrice = paba + productHidden + rowHidden;
+  // *** FIXED ***
+  // Base Price = paba. Engine has ALREADY applied base + hidden adjustments.
+  // Never add hidden again—doing so double-counts them.
+  const basePrice = paba;
 
   // Visible adjustments
   const visibleResultAdj = productVisible;
@@ -746,6 +731,7 @@ function buildPriceBreakdown(
     netDiff,
   };
 }
+
 
 
 /* -------------------------------------------------------------------------- */
@@ -1650,14 +1636,14 @@ export default function PricingInspector() {
                         {/* PRICE CONSTRUCTION BREAKDOWN (GLOBAL, SELECTED ROW)        */}
                         {/* ========================================================== */}
                         {selectedPriceRow && priceBreakdown && (
-                          <div className="mt-6">
+                          <section className="mt-6 space-y-2">
 
-                            {/* COLLAPSABLE HEADER (div, NOT button) */}
+                            {/* HEADER (Collapsible trigger) */}
                             <div
                               onClick={() => setShowBreakdown((v) => !v)}
                               role="button"
                               tabIndex={0}
-                              className="flex items-center justify-between w-full mb-2 cursor-pointer select-none"
+                              className="flex items-center justify-between w-full cursor-pointer select-none"
                             >
                               <h3 className="text-lg font-semibold text-gray-900">
                                 Price Construction Breakdown (Selected Rate)
@@ -1668,11 +1654,12 @@ export default function PricingInspector() {
 
                             {/* CONTENT */}
                             {showBreakdown && (
-                              <div>
+                              <div className="pt-2">
                                 <PriceMathBreakdown breakdown={priceBreakdown} />
                               </div>
                             )}
-                          </div>
+
+                          </section>
                         )}
 
                         {/* ========================================================== */}
