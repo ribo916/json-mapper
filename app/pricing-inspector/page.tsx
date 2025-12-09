@@ -847,8 +847,12 @@ export default function PricingInspector() {
   const excludedInvestorsCount = (selectedProduct?.excludedInvestors ?? [])
     .length;
 
-  const selectedPriceRow: PriceRow | undefined =
-    prices[selectedPriceIndex] ?? prices[0];
+  const selectedPriceRow: PriceRow | null =
+  selectedPriceIndex !== null &&
+  selectedPriceIndex >= 0 &&
+  selectedPriceIndex < prices.length
+    ? prices[selectedPriceIndex]
+    : null;
 
   /* ------------------------------------------------------------------------ */
   /* RENDER                                                                   */
@@ -2240,79 +2244,77 @@ export default function PricingInspector() {
                 </section>
               )}
 
-{/* ================================================================== */}
-{/* INVALID VIEW                                                      */}
-{/* ================================================================== */}
-{selectedIsInvalid && (
-  <section className="space-y-4">
-    <div className="border border-red-200 bg-red-50 rounded-lg px-4 py-3 shadow-sm">
-      {/* Header */}
-      <h3 className="text-lg font-semibold text-red-800 flex items-center gap-2 mb-3">
-        <span className="w-2 h-2 bg-red-500 rounded-full" />
-        Invalid Product
-      </h3>
+              {/* ================================================================== */}
+              {/* INVALID VIEW                                                      */}
+              {/* ================================================================== */}
+              {selectedIsInvalid && (
+                <section className="space-y-4">
+                  <div className="border border-red-200 bg-red-50 rounded-lg px-4 py-3 shadow-sm">
+                    {/* Header */}
+                    <h3 className="text-lg font-semibold text-red-800 flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 bg-red-500 rounded-full" />
+                      Invalid Product
+                    </h3>
 
-      {/* Structured table (same content, no white inner card) */}
-      <table className="w-full text-sm">
-        <tbody className="divide-y divide-red-100">
-          {/* Reason */}
-          <tr>
-            <td className="py-2 font-medium text-red-900 w-1/3 align-top">
-              Reason
-              <div className="text-xs text-red-800 mt-1">
-                JSON:{" "}
-                <code className="bg-red-100 px-1 rounded text-[11px]">
-                  data.results[].invalidResultReason
-                </code>
-              </div>
-            </td>
-            <td className="py-2 text-red-900">
-              {selectedProduct.invalidResultReason ?? "(none)"}
-            </td>
-          </tr>
+                    {/* Structured table (same content, no white inner card) */}
+                    <table className="w-full text-sm">
+                      <tbody className="divide-y divide-red-100">
+                        {/* Reason */}
+                        <tr>
+                          <td className="py-2 font-medium text-red-900 w-1/3 align-top">
+                            Reason
+                            <div className="text-xs text-red-800 mt-1">
+                              JSON:{" "}
+                              <code className="bg-red-100 px-1 rounded text-[11px]">
+                                data.results[].invalidResultReason
+                              </code>
+                            </div>
+                          </td>
+                          <td className="py-2 text-red-900">
+                            {selectedProduct.invalidResultReason ?? "(none)"}
+                          </td>
+                        </tr>
 
-          {/* Unique Investors */}
-          <tr>
-            <td className="py-2 font-medium text-red-900 align-top">
-              Unique Investors
-              <div className="text-xs text-red-800 mt-1">
-                JSON:{" "}
-                <code className="bg-red-100 px-1 rounded text-[11px]">
-                  data.results[].uniqueInvestorCount
-                </code>
-              </div>
-            </td>
-            <td className="py-2 text-red-900">
-              <code className="bg-red-100 px-1 rounded text-xs">
-                {selectedProduct.uniqueInvestorCount ?? 0}
-              </code>
-            </td>
-          </tr>
+                        {/* Unique Investors */}
+                        <tr>
+                          <td className="py-2 font-medium text-red-900 align-top">
+                            Unique Investors
+                            <div className="text-xs text-red-800 mt-1">
+                              JSON:{" "}
+                              <code className="bg-red-100 px-1 rounded text-[11px]">
+                                data.results[].uniqueInvestorCount
+                              </code>
+                            </div>
+                          </td>
+                          <td className="py-2 text-red-900">
+                            <code className="bg-red-100 px-1 rounded text-xs">
+                              {selectedProduct.uniqueInvestorCount ?? 0}
+                            </code>
+                          </td>
+                        </tr>
 
-          {/* Prices Count */}
-          <tr>
-            <td className="py-2 font-medium text-red-900 align-top">
-              Prices Returned
-              <div className="text-xs text-red-800 mt-1">
-                JSON:{" "}
-                <code className="bg-red-100 px-1 rounded text-[11px]">
-                  data.results[].prices
-                </code>
-              </div>
-            </td>
-            <td className="py-2 text-red-900">
-              <code className="bg-red-100 px-1 rounded text-xs">
-                {pricesCount}
-              </code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-)}
-
-
+                        {/* Prices Count */}
+                        <tr>
+                          <td className="py-2 font-medium text-red-900 align-top">
+                            Prices Returned
+                            <div className="text-xs text-red-800 mt-1">
+                              JSON:{" "}
+                              <code className="bg-red-100 px-1 rounded text-[11px]">
+                                data.results[].prices
+                              </code>
+                            </div>
+                          </td>
+                          <td className="py-2 text-red-900">
+                            <code className="bg-red-100 px-1 rounded text-xs">
+                              {pricesCount}
+                            </code>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
 
             </div>
           )}
