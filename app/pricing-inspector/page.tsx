@@ -1200,11 +1200,17 @@ export default function PricingInspector() {
                   {(() => {
                     const feeResults = (selectedProduct.feeResults ?? []) as FeeResultLite[];
 
-                    // Price stack stats
-                    const allRates = prices
+                    // *** FIX 1: Create sortedPrices (used everywhere consistently)
+                    const sortedPrices = prices
+                      .slice()
+                      .sort((a, b) => toNumberSafe(a.rate) - toNumberSafe(b.rate));
+
+                    // Price stack stats — now based on sortedPrices
+                    const allRates = sortedPrices
                       .map((p) => toNumberSafe(p.rate))
                       .filter((r) => !Number.isNaN(r));
-                    const allPrices = prices
+
+                    const allPrices = sortedPrices
                       .map((p) =>
                         toNumberSafe((p as { netPrice?: unknown }).netPrice ?? p.price)
                       )
@@ -1215,9 +1221,10 @@ export default function PricingInspector() {
                     const bestPrice = allPrices.length ? Math.max(...allPrices) : null;
                     const worstPrice = allPrices.length ? Math.min(...allPrices) : null;
 
+                    // Par logic — also must use sortedPrices
                     let parRate: number | null = null;
                     let parDelta = Infinity;
-                    for (const row of prices) {
+                    for (const row of sortedPrices) {
                       const r = toNumberSafe(row.rate);
                       const p = toNumberSafe(
                         (row as { netPrice?: unknown }).netPrice ?? row.price
@@ -1253,12 +1260,19 @@ export default function PricingInspector() {
                       (r) => r.booleanEquationValue === true
                     );
 
+                    // *** FIX 2: selectedPriceRow MUST come from sortedPrices, not prices
+                    const selectedPriceRow =
+                      selectedPriceIndex >= 0 &&
+                      selectedPriceIndex < sortedPrices.length
+                        ? sortedPrices[selectedPriceIndex]
+                        : null;
+
                     // Price breakdown for selected row
                     let priceBreakdown: PriceBreakdown | null = null;
                     if (selectedPriceRow) {
                       priceBreakdown = buildPriceBreakdown(
                         selectedProduct,
-                        selectedPriceRow,
+                        selectedPriceRow,   // ← now correct row every time
                         brokerCompBps
                       );
                     }
