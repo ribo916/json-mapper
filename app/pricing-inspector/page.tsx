@@ -155,266 +155,214 @@ function PriceMathBreakdown({
   if (!breakdown) return null;
 
   return (
-<div className="mt-3 p-5 rounded-lg bg-gray-50 shadow-md text-xs w-full space-y-4">
-
-<div className="text-xs font-semibold text-gray-900 mb-2">
+<div className="relative border border-gray-300 rounded-md bg-gray-100 p-3 w-full max-w-md shadow-inner">
+      <div className="text-sm font-semibold text-gray-900 mb-4">
         Price Construction Breakdown
       </div>
-  
-      <table className="w-full text-xs">
-        <tbody className="divide-y divide-gray-300">
 
-          {/* =============================================================== */}
-          {/* PRICE BEFORE ADJUSTMENTS                                       */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700 w-1/3">Price Before Adj</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.pba !== null ? breakdown.pba.toFixed(4) : "—"}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+      <div className="space-y-4">
+
+        {/* Pricing Breakdown Fields */}
+        <div className="space-y-3">
+          {/* Price Before Adjustments */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Price Before Adj</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].priceBeforeAdjustments</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.pba !== null ? breakdown.pba.toFixed(4) : "—"}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
               Raw engine price for this rate row before any base, visible, hidden, or clamp adjustments.
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].prices[y].priceBeforeAdjustments</code>
-              </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Parse:</strong> Read <code>priceBeforeAdjustments</code> from{" "}
-                <code>results[x].prices[y]</code>.
-              </span>
-            </td>
-          </tr>
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* BASE AFTER BASE ADJUSTMENTS (PABA)                             */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Base After Base Adj (paba)</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">{breakdown.paba.toFixed(4)}</td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+          {/* Base After Base Adjustments */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Base After Base Adj</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].priceAfterBaseAdjustments</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.paba.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
               Price after the engine applies base + hidden adjustments (before visible price adjustments).
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].prices[y].priceAfterBaseAdjustments</code>
-              </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Parse:</strong> Read <code>priceAfterBaseAdjustments</code> from{" "}
-                <code>results[x].prices[y]</code>.
-              </span>
-            </td>
-          </tr>
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* BASE PRICE                                                     */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Base Price</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">{breakdown.basePrice.toFixed(4)}</td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              <strong>Concept:</strong> Base Price = <code>paba</code>.
-              <br />
-              Engine has already applied all base + hidden adjustments before producing{" "}
-              <code>priceAfterBaseAdjustments</code>.
-              <br /><br />
-              Hidden ruleResults explain <em>why</em> PBA → PABA changed, but they are
-              <strong> not added again</strong> here.
-              <br /><br />
-              <span className="text-gray-500">
-                <strong>JSON references for hidden rule explanations:</strong>
-                <br />
-                • <code>data.results[x].ruleResults[]</code> (product-level)
-                <br />
-                • <code>data.results[x].prices[y].ruleResults[]</code> (row-level)
-              </span>
-            </td>
-          </tr>
+          {/* Base Price */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Base Price</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <strong>Concept:</strong> Base Price = <code className="bg-gray-200 px-1 rounded text-[9px]">paba</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.basePrice.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
+              Engine has already applied all base + hidden adjustments. Hidden ruleResults explain why PBA → PABA changed.
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* VISIBLE ADJUSTMENTS (PRODUCT)                                  */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Visible Adjustments (Product)</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.visibleResultAdj.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Product-level visible price adjustments.
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong> <code>data.results[x].ruleResults[]</code>
-              </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Include rule when:</strong>
-                <br />
-                • <code>booleanEquationValue === true</code>
-                <br />
-                • <code>isHiddenAdjustment !== true</code>
-                <br />
-                • <code>target === "Price"</code> or missing
-                <br />
-                • Non-zero numeric result
-              </span>
-            </td>
-          </tr>
+          {/* Visible Adjustments (Product) */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Visible Adj (Product)</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].ruleResults[]</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.visibleResultAdj.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
+              Product-level visible price adjustments (booleanEquationValue === true, non-zero result, isHiddenAdjustment !== true).
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* VISIBLE ADJUSTMENTS (ROW)                                      */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Visible Adjustments (Row)</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.visibleRowAdj.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Row-level visible price adjustments.
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong> <code>data.results[x].prices[y].ruleResults[]</code>
-              </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Include rule when:</strong>
-                <br />
-                • <code>booleanEquationValue === true</code>
-                <br />
-                • non-zero numeric result
-                <br />
-                • not hidden
-                <br />
-                • <code>target === "Price"</code> or missing
-              </span>
-            </td>
-          </tr>
+          {/* Visible Adjustments (Row) */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Visible Adj (Row)</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].ruleResults[]</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.visibleRowAdj.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
+              Row-level visible price adjustments (booleanEquationValue === true, non-zero result, not hidden, target === &quot;Price&quot;).
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* TOTAL VISIBLE ADJUSTMENTS                                      */}
-          {/* =============================================================== */}
-          <tr className="bg-gray-50 align-top">
-            <td className="py-2 font-semibold text-gray-900">
-              Total Visible Adjustments
-            </td>
-            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
-              {breakdown.totalVisiblePriceAdj.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              <strong>Formula:</strong> productVisible + rowVisible
-            </td>
-          </tr>
+          {/* Total Visible Adjustments */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Total Visible Adj</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <strong>Formula:</strong> productVisible + rowVisible
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.totalVisiblePriceAdj.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
+              Sum of all visible price adjustments from product and row levels.
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* CLAMP ADJUSTMENTS                                               */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Clamp Adjustments</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              -{breakdown.clampAdj.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              Engine corrections when a price is forced into allowed ranges.
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].prices[y].clampResults[]</code>
-              </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Formula per entry:</strong>{" "}
-                <code>unclampedValue - clampedValue</code>
-              </span>
-            </td>
-          </tr>
+          {/* Clamp Adjustments */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Clamp Adjustments</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].clampResults[]</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-red-600 ml-3">
+                -{breakdown.clampAdj.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
+              Engine corrections when a price is forced into allowed ranges. Formula per entry: unclampedValue - clampedValue.
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* RECONSTRUCTED ENGINE PRICE                                     */}
-          {/* =============================================================== */}
-          <tr className="bg-gray-50 align-top">
-            <td className="py-2 font-semibold text-gray-900">
-              Reconstructed Engine Price
-            </td>
-            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
-              {breakdown.reconstructedPrice.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
-              <strong>Formula:</strong>{" "}
-              <code>BasePrice (paba) + TotalVisibleAdjustments - ClampAdjustments</code>
-              <br />
+          {/* Reconstructed Engine Price */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Reconstructed Price</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <strong>Formula:</strong> BasePrice + TotalVisibleAdj - ClampAdj
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.reconstructedPrice.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
               Matches the PPE engine pipeline.
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Compare to JSON:</strong>{" "}
-                <code>data.results[x].prices[y].price</code>
-              </span>
-            </td>
-          </tr>
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* ENGINE PRICE                                                    */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Engine Price</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.enginePrice.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+          {/* Engine Price */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Engine Price</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].price</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.enginePrice.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
               Final engine-computed price (before broker comp).
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].prices[y].price</code>
-              </span>
-            </td>
-          </tr>
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* BROKER COMP                                                     */}
-          {/* =============================================================== */}
-          <tr className="align-top">
-            <td className="py-2 font-medium text-gray-700">Broker Comp Applied</td>
-            <td className="py-2 text-gray-900 min-w-[80px]">
-              {breakdown.brokerCompField.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+          {/* Broker Comp */}
+          <div className="py-2 border-b border-gray-200">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Broker Comp</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].brokerCompPlan.calculatedAdjustment</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.brokerCompField.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
               Broker compensation returned by PPE.
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].brokerCompPlan.calculatedAdjustment</code>
-              </span>
-            </td>
-          </tr>
+            </div>
+          </div>
 
-          {/* =============================================================== */}
-          {/* NET PRICE                                                       */}
-          {/* =============================================================== */}
-          <tr className="bg-gray-50 align-top">
-            <td className="py-2 font-semibold text-gray-900">Net Price</td>
-            <td className="py-2 font-semibold text-gray-900 min-w-[80px]">
-              {breakdown.netPrice.toFixed(4)}
-            </td>
-            <td className="py-2 text-[11px] text-gray-600 leading-relaxed pl-3">
+          {/* Net Price */}
+          <div className="py-2">
+            <div className="flex justify-between items-start mb-1">
+              <div className="flex-1">
+                <div className="text-[11px] font-bold text-gray-800">Net Price</div>
+                <div className="text-[10px] text-gray-600 mt-1">
+                  <code className="bg-gray-200 px-1 rounded text-[9px]">data.results[x].prices[y].netPrice</code>
+                </div>
+              </div>
+              <div className="text-[11px] font-mono font-bold text-gray-900 ml-3">
+                {breakdown.netPrice.toFixed(4)}
+              </div>
+            </div>
+            <div className="text-[10px] text-gray-500 leading-relaxed">
               Final price value returned in the PPE payload.
-              <br />
-              <span className="text-gray-500">
-                <strong>JSON:</strong>{" "}
-                <code>data.results[x].prices[y].netPrice</code>
-              </span>
-              <hr className="my-1 border-gray-300" />
-              <span className="text-gray-500">
-                <strong>Note:</strong> Taken directly from the payload—no additional calculations applied.
-              </span>
-            </td>
-          </tr>
+            </div>
+          </div>
+        </div>
 
-        </tbody>
-      </table>
-  
-      <div className="mt-1 text-[11px] text-gray-500">
-        Final Price = Base Price + Visible Adjustments − Clamp Adjustments
       </div>
     </div>
   );
@@ -748,15 +696,14 @@ export default function PricingInspector() {
   const [brokerCompBps, setBrokerCompBps] = useState<number>(0);
 
   const [selectedEligibleCode, setSelectedEligibleCode] = useState<string>("");
-  const [selectedIneligibleCode, setSelectedIneligibleCode] =
-    useState<string>("");
+  const [selectedIneligibleCode, setSelectedIneligibleCode] = useState<string>("");
+  const [consoleOpen, setConsoleOpen] = useState<boolean>(false);
   const [selectedInvalidCode, setSelectedInvalidCode] = useState<string>("");
   const [selectedPriceIndex, setSelectedPriceIndex] = useState<number>(-1);
   
   const [showOverview, setShowOverview] = useState(false);
   const [showRateTable, setShowRateTable] = useState(false);
   const [showFees, setShowFees] = useState(false);
-  const [showBreakdown, setShowBreakdown] = useState(false);
   const [showRuleBuckets, setShowRuleBuckets] = useState(false);
 
   const [inputMode, setInputMode] = useState<"upload" | "paste">("upload");
@@ -1628,12 +1575,15 @@ export default function PricingInspector() {
                                           {isSelected && (
                                             <tr className="bg-gray-50">
                                               <td colSpan={7} className="p-3">
-                                                <PriceAdjustmentsPanel
-                                                  ruleResultsProduct={
-                                                    selectedProduct.ruleResults ?? []
-                                                  }
-                                                  ruleResultsRow={row.ruleResults ?? []}
-                                                />
+                                                <div className="flex gap-4">
+                                                  <PriceAdjustmentsPanel
+                                                    ruleResultsProduct={
+                                                      selectedProduct.ruleResults ?? []
+                                                    }
+                                                    ruleResultsRow={row.ruleResults ?? []}
+                                                  />
+                                                  <PriceMathBreakdown breakdown={priceBreakdown} />
+                                                </div>
                                               </td>
                                             </tr>
                                           )}
@@ -1646,35 +1596,6 @@ export default function PricingInspector() {
                           )}
                         </div>
 
-                        {/* ========================================================== */}
-                        {/* PRICE CONSTRUCTION BREAKDOWN (GLOBAL, SELECTED ROW)        */}
-                        {/* ========================================================== */}
-                        {selectedPriceRow && priceBreakdown && (
-                          <section className="mt-6 space-y-2">
-
-                            {/* HEADER (Collapsible trigger) */}
-                            <div
-                              onClick={() => setShowBreakdown((v) => !v)}
-                              role="button"
-                              tabIndex={0}
-                              className="flex items-center justify-between w-full cursor-pointer select-none"
-                            >
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                Price Construction Breakdown (Selected Rate)
-                              </h3>
-
-                              <CollapseIcon open={showBreakdown} />
-                            </div>
-
-                            {/* CONTENT */}
-                            {showBreakdown && (
-                              <div className="pt-2">
-                                <PriceMathBreakdown breakdown={priceBreakdown} />
-                              </div>
-                            )}
-
-                          </section>
-                        )}
 
                         {/* ========================================================== */}
                         {/* FEE SUMMARY (APPLIED ONLY)                                */}
@@ -2393,9 +2314,6 @@ export default function PricingInspector() {
         {/* DEV CONSOLE DRAWER                                            */}
         {/* ============================================================= */}
         {(() => {
-          // local state for this component
-          const [consoleOpen, setConsoleOpen] = React.useState(false);
-
           return (
             <>
               {selectedProduct && (
