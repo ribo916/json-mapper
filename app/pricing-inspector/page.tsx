@@ -900,105 +900,120 @@ export default function PricingInspector() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* HEADER */}
-      <header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm">
-        <div className="flex items-center gap-3">
-          <a
-            href="/"
-            className="text-gray-500 hover:text-gray-700 text-sm font-medium flex items-center gap-1"
-          >
-            ← Back to Tools
-          </a>
-          <div className="w-8 h-8 bg-white border border-gray-300 flex items-center justify-center rounded-md">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#2563eb"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5"
-            >
-              <circle cx="6" cy="12" r="2" />
-              <circle cx="18" cy="6" r="2" />
-              <circle cx="18" cy="18" r="2" />
-              <line x1="8" y1="12" x2="16" y2="6" />
-              <line x1="8" y1="12" x2="16" y2="18" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-lg font-semibold tracking-tight">
-              Pricing Inspector
-            </div>
-            <div className="text-xs text-gray-600">
-              Upload a PPE response JSON and inspect products in{" "}
-              <code className="bg-gray-100 px-1 rounded text-[11px]">
-                $.data.results[]
-              </code>
-              .
-            </div>
-          </div>
-        </div>
+{/* HEADER */}
+<header className="flex items-center justify-between px-6 py-4 border-b bg-white shadow-sm">
+  <div className="flex items-center gap-3">
+    <a
+      href="/"
+      className="text-gray-500 hover:text-gray-700 text-sm font-medium flex items-center gap-1"
+    >
+      ← Back to Tools
+    </a>
 
-        <div className="flex items-center gap-3">
-          {fileName && (
-            <span className="text-gray-700 text-sm truncate max-w-xs">
-              {fileName}
-            </span>
-          )}
+    <div className="w-8 h-8 bg-white border border-gray-300 flex items-center justify-center rounded-md">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#2563eb"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-5 h-5"
+      >
+        <circle cx="6" cy="12" r="2" />
+        <circle cx="18" cy="6" r="2" />
+        <circle cx="18" cy="18" r="2" />
+        <line x1="8" y1="12" x2="16" y2="6" />
+        <line x1="8" y1="12" x2="16" y2="18" />
+      </svg>
+    </div>
 
-          <div className="flex items-center gap-1 border border-gray-300 rounded-md p-1">
-            <button
-              onClick={() => setInputMode("upload")}
-              className={`px-3 py-1 text-sm rounded ${
-                inputMode === "upload"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              Upload
-            </button>
-            <button
-              onClick={() => setInputMode("paste")}
-              className={`px-3 py-1 text-sm rounded ${
-                inputMode === "paste"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              Paste JSON
-            </button>
-          </div>
+    <div>
+      <div className="text-lg font-semibold tracking-tight">
+        Pricing Inspector
+      </div>
+      <div className="text-xs text-gray-600">
+        Upload a PPE response JSON and inspect products in{" "}
+        <code className="bg-gray-100 px-1 rounded text-[11px]">
+          $.data.results[]
+        </code>
+        .
+      </div>
+    </div>
+  </div>
 
-          {inputMode === "upload" && (
-            <>
-              <input
-                id="fileInput"
-                type="file"
-                accept=".json"
-                onChange={handleUpload}
-                className="hidden"
-              />
-              <label
-                htmlFor="fileInput"
-                className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
-              >
-                Choose File
-              </label>
-            </>
-          )}
+  {/* RIGHT SIDE CONTROLS */}
+  <div className="flex items-center gap-3">
 
-          {inputMode === "paste" && (
-            <button
-              onClick={() => setShowPastePanel(!showPastePanel)}
-              className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
-            >
-              {showPastePanel ? "Hide" : "Show"} Paste Panel
-            </button>
-          )}
-        </div>
-      </header>
+    {fileName && (
+      <span className="text-gray-700 text-sm truncate max-w-xs">
+        {fileName}
+      </span>
+    )}
+
+    {/* SEGMENTED CONTROL */}
+    <div className="flex items-center gap-1 border border-gray-300 rounded-md p-1 bg-white shadow-sm">
+      {/* Upload */}
+      <button
+        onClick={() => setInputMode("upload")}
+        className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition ${
+          inputMode === "upload"
+            ? "bg-blue-600 text-white"
+            : "text-gray-700 hover:bg-gray-50"
+        }`}
+      >
+        <span className="text-xs">📤</span>
+        Upload
+      </button>
+
+      {/* Paste */}
+      <button
+        onClick={() => setInputMode("paste")}
+        className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition ${
+          inputMode === "paste"
+            ? "bg-blue-600 text-white"
+            : "text-gray-700 hover:bg-gray-50"
+        }`}
+      >
+        <span className="text-xs">📋</span>
+        Paste
+      </button>
+    </div>
+
+    {/* FILE PICKER (Upload Mode) */}
+    {inputMode === "upload" && (
+      <>
+        <input
+          id="fileInput"
+          type="file"
+          accept=".json"
+          onChange={handleUpload}
+          className="hidden"
+        />
+        <label
+          htmlFor="fileInput"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
+        >
+          <span className="text-xs">📁</span>
+          Choose File
+        </label>
+      </>
+    )}
+
+    {/* PASTE PANEL TOGGLE (Paste Mode) */}
+    {inputMode === "paste" && (
+      <button
+        onClick={() => setShowPastePanel(!showPastePanel)}
+        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-100 cursor-pointer"
+      >
+        <span className="text-xs">{showPastePanel ? "🙈" : "📝"}</span>
+        {showPastePanel ? "Hide" : "Show"} Paste Panel
+      </button>
+    )}
+  </div>
+</header>
+
 
       {/* PASTE PANEL */}
       {showPastePanel && (
@@ -1016,7 +1031,7 @@ export default function PricingInspector() {
               <textarea
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                placeholder="Paste your PPE JSON response here..."
+                placeholder="Paste your PPE JSON response here... but know larger files may impact performance if pasted rather than uploaded"
                 className="w-full h-48 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <div className="flex justify-end">
