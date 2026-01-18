@@ -530,6 +530,30 @@ function isPpeResponse(value: unknown): value is PpeResponse {
   return true;
 }
 
+/**
+ * Checks if a parsed JSON object is missing the `data` wrapper but otherwise
+ * has a valid PPE structure (has `results` array at root level).
+ * If so, wraps it with `{ data: ... }`.
+ */
+function maybeWrapWithData(parsed: unknown): { wrapped: unknown; wasWrapped: boolean } {
+  // If already has data property, return as-is
+  if (parsed && typeof parsed === "object" && "data" in parsed) {
+    return { wrapped: parsed, wasWrapped: false };
+  }
+
+  // Check if it has a results array at root level (indicating valid PPE structure without wrapper)
+  if (parsed && typeof parsed === "object") {
+    const obj = parsed as { results?: unknown };
+    if (Array.isArray(obj.results)) {
+      // Valid PPE structure detected - wrap it
+      return { wrapped: { data: parsed }, wasWrapped: true };
+    }
+  }
+
+  // Not a valid structure to wrap, return as-is
+  return { wrapped: parsed, wasWrapped: false };
+}
+
 /* -------------------------------------------------------------------------- */
 /* PRICE BREAKDOWN HELPERS (mirror wiki logic)                               */
 /* -------------------------------------------------------------------------- */
@@ -728,6 +752,7 @@ function buildPriceBreakdown(
 export default function PricingInspector() {
   const [rawResults, setRawResults] = useState<PpeResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
 
   const [loanAmount, setLoanAmount] = useState<number | null>(null);
@@ -763,7 +788,11 @@ export default function PricingInspector() {
     try {
       const text = await file.text();
       const parsed: unknown = JSON.parse(text);
-      loadPpeJson(parsed, file.name);
+      const { wrapped, wasWrapped } = maybeWrapWithData(parsed);
+      if (wasWrapped) {
+        setInfoMessage("Root data element was automatically added to match expected format.");
+      }
+      loadPpeJson(wrapped, file.name);
     } catch {
       setError("Invalid JSON");
       setRawResults([]);
@@ -771,13 +800,18 @@ export default function PricingInspector() {
       setLoanAmount(null);
       setDesiredLockPeriod(null);
       setBrokerCompBps(0);
+      setInfoMessage(null);
     }
   };
 
   const handlePaste = (): void => {
     try {
       const parsed: unknown = JSON.parse(pasteText);
-      loadPpeJson(parsed);
+      const { wrapped, wasWrapped } = maybeWrapWithData(parsed);
+      if (wasWrapped) {
+        setInfoMessage("Root data element was automatically added to match expected format.");
+      }
+      loadPpeJson(wrapped);
     } catch {
       setError("Invalid JSON");
       setRawResults([]);
@@ -785,6 +819,7 @@ export default function PricingInspector() {
       setLoanAmount(null);
       setDesiredLockPeriod(null);
       setBrokerCompBps(0);
+      setInfoMessage(null);
     }
   };
 
@@ -796,6 +831,7 @@ export default function PricingInspector() {
       setLoanAmount(null);
       setDesiredLockPeriod(null);
       setBrokerCompBps(0);
+      setInfoMessage(null);
       return;
     }
 
@@ -1054,6 +1090,13 @@ export default function PricingInspector() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded text-sm">
             {error}
+          </div>
+        )}
+
+        {/* INFO MESSAGE */}
+        {infoMessage && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2 rounded text-sm">
+            {infoMessage}
           </div>
         )}
 
