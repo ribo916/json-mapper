@@ -774,7 +774,24 @@ export default function PricingInspector() {
   const [pasteText, setPasteText] = useState<string>("");
   const [showPastePanel, setShowPastePanel] = useState<boolean>(false);
 
+  const [peRequestId, setPeRequestId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
+
+  const copyToClipboard = async (text: string) => {
+    if (!text) return;
+  
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+  
+      setTimeout(() => setCopied(false), 1200);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+  
+  
   /* ------------------------------------------------------------------------ */
   /* FILE UPLOAD                                                              */
   /* ------------------------------------------------------------------------ */
@@ -831,33 +848,37 @@ export default function PricingInspector() {
       setLoanAmount(null);
       setDesiredLockPeriod(null);
       setBrokerCompBps(0);
+      setPeRequestId(null);
       setInfoMessage(null);
       return;
     }
-
+  
     const results = parsed.data?.results ?? [];
     setRawResults(results);
     setError(null);
     setFileName(fileName ?? null);
-
-    // Pull out shared scenario fields for UI calculations
+  
+    // ✅ Capture PPE Request ID
+    const id = (parsed as any)?.data?.id;
+    setPeRequestId(id ?? null);
+  
     const loanAmt = toNumberSafe(parsed.data?.loan?.amount);
     setLoanAmount(loanAmt || null);
-
+  
     const lock = toNumberSafe(parsed.data?.search?.desiredLockPeriod);
     setDesiredLockPeriod(lock || null);
-
+  
     const comp = toNumberSafe(
       parsed.data?.brokerCompPlan?.calculatedAdjustment
     );
     setBrokerCompBps(comp || 0);
-
-    // Reset selections
+  
     setSelectedEligibleCode("");
     setSelectedIneligibleCode("");
     setSelectedInvalidCode("");
     setSelectedPriceIndex(-1);
   };
+  
 
   /* ------------------------------------------------------------------------ */
   /* CLASSIFICATION GROUPS                                                    */
@@ -1345,6 +1366,38 @@ export default function PricingInspector() {
 
                               <table className="w-full text-sm">
                                 <tbody className="divide-y divide-gray-100">
+
+                                  {/* PE REQUEST ID */}
+                                  <tr>
+                                    <td className="py-2 font-medium text-gray-700 w-1/3">
+                                      peRequestId
+                                    </td>
+
+                                    <td className="py-2 text-gray-900">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono text-sm">
+                                          {peRequestId ?? "(missing)"}
+                                        </span>
+
+                                        {peRequestId && (
+                                          <button
+                                            onClick={() => copyToClipboard(peRequestId)}
+                                            className="text-gray-500 hover:text-gray-800"
+                                            title="Copy to clipboard"
+                                          >
+                                            {copied ? "✅" : "📋"}
+                                          </button>
+                                        )}
+
+                                      </div>
+                                    </td>
+
+                                    <td className="py-2 text-xs text-gray-500 text-right align-top">
+                                      <code className="bg-gray-100 px-1 rounded">
+                                        $.data.id
+                                      </code>
+                                    </td>
+                                  </tr>
 
                                   {/* Product Name */}
                                   <tr>
