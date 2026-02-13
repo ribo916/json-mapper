@@ -1133,6 +1133,28 @@ export default function PricingInspector() {
             </div>
           ) : (
             <div className="space-y-4">
+
+              {/* PE REQUEST ID (Top-Level) */}
+              {peRequestId && (
+                <div className="flex items-center gap-3 px-4 py-2 rounded bg-blue-50 border border-blue-200 text-sm">
+                  <span className="font-medium text-blue-900">
+                  <code>$.data.id</code>:
+                  </span>
+
+                  <code className="font-mono text-blue-900">
+                    {peRequestId}
+                  </code>
+
+                  <button
+                    onClick={() => copyToClipboard(peRequestId)}
+                    className="text-blue-700 hover:text-blue-900"
+                    title="Copy to clipboard"
+                  >
+                    {copied ? "✅" : "📋"}
+                  </button>
+                </div>
+              )}
+
               {/* Summary counts */}
               <div className="flex flex-wrap gap-4 text-sm">
 
@@ -1228,7 +1250,7 @@ export default function PricingInspector() {
                   />
                 </div>
               </div>
-            </div>
+            </div>            
           )}
         </section>
 
