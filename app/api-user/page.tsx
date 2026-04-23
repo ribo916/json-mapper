@@ -1,12 +1,11 @@
 'use client';
 
+import Link from "next/link";
 import { useState, type CSSProperties } from "react";
 
 // ============================================================
 // TYPES
 // ============================================================
-
-type Environment = "STAGE" | "PROD" | "TEST";
 
 type FormState = {
   partnerName: string;
@@ -346,9 +345,36 @@ export default function Page() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <div style={styles.pageHeader}>
-          <h1 style={styles.heading}>API User Provisioning</h1>
-          <p style={styles.subheading}>Fill in the fields below. All outputs update instantly.</p>
+        <div style={styles.headerBar}>
+          <div style={styles.headerBrand}>
+            <Link href="/" style={styles.backLink}>
+              ← Back to Tools
+            </Link>
+            <div style={styles.logoBox} aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#2563eb"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={styles.logoIcon}
+              >
+                <circle cx="6" cy="12" r="2" />
+                <circle cx="18" cy="6" r="2" />
+                <circle cx="18" cy="18" r="2" />
+                <line x1="8" y1="12" x2="16" y2="6" />
+                <line x1="8" y1="12" x2="16" y2="18" />
+              </svg>
+            </div>
+            <div>
+              <div style={styles.headerTitle}>API User Provisioning</div>
+              <div style={styles.headerSubtitle}>
+                Generate the standard values needed to provision an API user and application.
+              </div>
+            </div>
+          </div>
         </div>
 
         <InputForm values={form} onChange={handleChange} />
@@ -389,6 +415,54 @@ const styles: Record<string, CSSProperties> = {
   container: {
     maxWidth: 720,
     margin: "0 auto",
+  },
+  headerBar: {
+    background: "#fff",
+    borderRadius: 12,
+    padding: "14px 18px",
+    marginBottom: 20,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  },
+  headerBrand: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  backLink: {
+    color: "#6b7280",
+    fontSize: 14,
+    fontWeight: 500,
+    textDecoration: "none",
+    display: "flex",
+    alignItems: "center",
+    gap: 4,
+  },
+  logoBox: {
+    width: 32,
+    height: 32,
+    background: "#fff",
+    border: "1px solid #d1d5db",
+    borderRadius: 8,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  logoIcon: {
+    width: 20,
+    height: 20,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 600,
+    color: "#111827",
+    letterSpacing: "-0.01em",
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 2,
   },
   pageHeader: {
     marginBottom: 24,
