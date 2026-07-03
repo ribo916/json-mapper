@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(curl -s http://localhost:3000/api-user -o /tmp/apiuser.html -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Read(//private/tmp/claude-501/bundled-skills/2.1.198/**)",
+      "Read(//private/tmp/claude-501/bundled-skills/**)",
+      "Bash(command -v chromium-cli)",
+      "Bash(npx --no-install chromium-cli --help)",
+      "Bash(find / -maxdepth 4 -iname \"*chromium-cli*\")",
+      "Bash(npm ls *)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")",
+      "Bash(find /Users/ribo/Dev -maxdepth 3 -iname \"playwright\" -path \"*node_modules*\" 2>/dev/null | head -5; ls /Users/ribo/Dev/node_modules/.bin/ 2>/dev/null | grep -i play)",
+      "Read(//Users/ribo/Dev/**)",
+      "Read(//Users/ribo/Dev/node_modules/**)",
+      "Read(//Users/ribo/Dev/resume/node_modules/.bin/**)",
+      "Bash(node -e \"console.log\\(require.resolve\\('playwright', {paths:['/Users/ribo/Dev/resume/node_modules']}\\)\\)\")",
+      "Read(//Users/ribo/Dev/resume/**)",
+      "Bash(node /private/tmp/claude-501/-Users-ribo-Dev-json-mapper/9ce06276-7814-40b0-8b79-aeb90476b2a8/scratchpad/verify.js)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/api-user --max-time 3)",
+      "Bash(nohup npm run dev)",
+      "Bash(disown)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000 --max-time 5)",
+      "Bash(rm -f /private/tmp/claude-501/-Users-ribo-Dev-json-mapper/9ce06276-7814-40b0-8b79-aeb90476b2a8/scratchpad/verify.js /private/tmp/claude-501/-Users-ribo-Dev-json-mapper/9ce06276-7814-40b0-8b79-aeb90476b2a8/scratchpad/api-user.png /tmp/nextdev.log)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp"
+    ]
+  }
+}

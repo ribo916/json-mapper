@@ -10,8 +10,8 @@ import { useState, type CSSProperties } from "react";
 type FormState = {
   partnerName: string;
   customerName: string;
-  pollyEnv: "STAGE" | "PROD";
-  customerEnv: "TEST" | "PROD";
+  pollyEnv: "STAGE" | "PROD" | "SANDBOX";
+  customerEnv: string;
 };
 
 type OutputState = {
@@ -85,7 +85,8 @@ function buildFirstName(partnerName: string, customerName: string): string {
 }
 
 function buildLastName(customerEnv: FormState["customerEnv"]): string {
-  return customerEnv === "PROD" ? "Prod API User" : "Test API User";
+  const env = customerEnv.trim() || "Prod";
+  return `${env} API User`;
 }
 
 function buildJob(): string {
@@ -97,7 +98,8 @@ function buildEmail(
   customerName: string,
   customerEnv: FormState["customerEnv"]
 ): string {
-  return `${stripSpaces(partnerName)}${stripSpaces(customerName)}${toDisplayCase(customerEnv)}API@pollyex.com`;
+  const env = customerEnv.trim() || "Prod";
+  return `${stripSpaces(partnerName)}${stripSpaces(customerName)}${env}API@pollyex.com`;
 }
 
 function buildApplicationName(
@@ -105,8 +107,8 @@ function buildApplicationName(
   customerName: string,
   customerEnv: FormState["customerEnv"]
 ): string {
-  const label = customerEnv === "PROD" ? "Prod" : "Test";
-  return `${stripSpaces(partnerName)} ${stripSpaces(customerName)} ${label} API`;
+  const env = customerEnv.trim() || "Prod";
+  return `${stripSpaces(partnerName)} ${stripSpaces(customerName)} ${env} API`;
 }
 
 function computeOutputs(
@@ -203,7 +205,11 @@ function InfoSection({ title, items }: InfoSectionProps) {
 }
 
 function InputForm({ values, onChange }: InputFormProps) {
-  const textField = (label: string, key: "partnerName" | "customerName") => (
+  const textField = (
+    label: string,
+    key: "partnerName" | "customerName" | "customerEnv",
+    placeholder?: string
+  ) => (
     <div style={styles.inputRow}>
       <label style={styles.inputLabel}>{label}</label>
       <input
@@ -211,14 +217,14 @@ function InputForm({ values, onChange }: InputFormProps) {
         type="text"
         value={values[key]}
         onChange={(e) => onChange(key, e.target.value)}
-        placeholder={`Enter ${label}`}
+        placeholder={placeholder ?? `Enter ${label}`}
       />
     </div>
   );
 
   const selectField = (
     label: string,
-    key: "pollyEnv" | "customerEnv",
+    key: "pollyEnv",
     options: string[]
   ) => (
     <div style={styles.inputRow}>
@@ -243,8 +249,8 @@ function InputForm({ values, onChange }: InputFormProps) {
       <div style={styles.formGrid}>
         {textField("Partner Name", "partnerName")}
         {textField("Customer Name", "customerName")}
-        {selectField("Polly Environment", "pollyEnv", ["STAGE", "PROD"])}
-        {selectField("Customer Environment", "customerEnv", ["TEST", "PROD"])}
+        {selectField("Environment", "pollyEnv", ["STAGE", "PROD", "SANDBOX"])}
+        {textField("Customer Environment", "customerEnv", "Prod")}
       </div>
     </div>
   );
@@ -259,7 +265,7 @@ export default function Page() {
     partnerName: "",
     customerName: "",
     pollyEnv: "PROD",
-    customerEnv: "PROD",
+    customerEnv: "",
   });
 
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -310,8 +316,8 @@ export default function Page() {
         { label: "Username", value: out.username },
         { label: "FirstName", value: out.firstName },
         { label: "LastName", value: out.lastName },
-        { label: "JobTitle", value: out.job },
         { label: "Email", value: out.email },
+        { label: "JobTitle", value: out.job },
       ],
     },
     {
