@@ -30,56 +30,12 @@ export default function Home() {
             <h1 className="text-4xl font-bold text-gray-900">Data Tools Suite</h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose a tool to work with your data. Transform JSON with mappings or analyze pricing engine results.
+            Choose a tool to work with your data. Analyze pricing engine results, manage templates, and provision API users.
           </p>
         </div>
 
         {/* Tool Cards */}
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* JSON Converter Card */}
-          <Link
-            href="/json-converter"
-            className="group block bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 p-8 border border-gray-200 hover:border-blue-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center rounded-lg transition-colors">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#2563eb"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-6 h-6"
-                >
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold text-gray-900">JSON Converter</h2>
-            </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Transform and map JSON data between different formats using configurable mapping rules.
-              Perfect for data integration and API transformations.
-            </p>
-            <div className="flex items-center text-blue-600 font-medium group-hover:text-blue-700">
-              <span>Start Converting</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </div>
-          </Link>
-
           {/* Pricing Inspector Card */}
           <Link
             href="/pricing-inspector"
