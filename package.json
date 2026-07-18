@@ -3,16 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/gen-samples.mjs && node scripts/copy-monaco.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/gen-samples.mjs && node scripts/copy-monaco.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "samples": "node scripts/gen-samples.mjs",
+    "monaco": "node scripts/copy-monaco.mjs"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
     "jsoneditor": "^10.4.2",
+    "monaco-editor": "^0.52.2",
     "next": "^16.0.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "zustand": "^5.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

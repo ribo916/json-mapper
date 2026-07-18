@@ -1,0 +1,1164 @@
+{
+  "loan": {
+    "aus": {
+      "value": 5,
+      "visible": true,
+      "disabled": false
+    },
+    "ltv": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "cltv": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "hcltv": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "amount": {
+      "value": "300001",
+      "visible": true,
+      "disabled": false
+    },
+    "purpose": {
+      "value": 1,
+      "visible": true,
+      "disabled": false
+    },
+    "position": {
+      "value": 1,
+      "visible": true,
+      "disabled": false
+    },
+    "lenderFee": {
+      "visible": false,
+      "disabled": true
+    },
+    "downPayment": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "waiveEscrow": {
+      "value": false,
+      "visible": true,
+      "disabled": false
+    },
+    "secondAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "cashOutAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "propertyValue": {
+      "value": "400000",
+      "visible": true,
+      "disabled": false
+    },
+    "purchasePrice": {
+      "value": "400000",
+      "visible": true,
+      "disabled": false
+    },
+    "rollLenderFee": {
+      "visible": false,
+      "disabled": true
+    },
+    "applicationDate": {
+      "visible": false,
+      "disabled": false
+    },
+    "helocDrawAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "helocLineAmount": {
+      "visible": false,
+      "disabled": false
+    },
+    "isRelocationLoan": {
+      "visible": false,
+      "disabled": false
+    },
+    "refinancePurpose": {
+      "value": "7",
+      "visible": true,
+      "disabled": false
+    },
+    "secondloanamount": {
+      "visible": true,
+      "disabled": false
+    },
+    "isSecondPiggyback": {
+      "value": false,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "temporaryBuydownType": {
+      "value": "0",
+      "visible": true,
+      "disabled": false
+    },
+    "isSecondCommunityLoan": {
+      "value": false,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "streamlineRefinanceType": {
+      "visible": true,
+      "disabled": false
+    },
+    "isSecondInvestorSameAsFirst": {
+      "value": false,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "prepaymentPenaltyPeriodMonths": {
+      "value": 0,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "prepaymentPenaltyStructureType": {
+      "value": 1,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "isMortgageInsurancePaidByBorrower": {
+      "value": true,
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "options": {
+    "mode": {
+      "visible": true,
+      "disabled": false
+    },
+    "channel": {
+      "visible": true,
+      "disabled": false
+    },
+    "version": {
+      "visible": true,
+      "disabled": true
+    },
+    "visible": true
+  },
+  "borrower": {
+    "fico": {
+      "value": "700",
+      "visible": true,
+      "disabled": false
+    },
+    "income": {
+      "visible": true,
+      "disabled": false
+    },
+    "isITIN": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "dEMultBK": {
+      "visible": true,
+      "disabled": false
+    },
+    "dtiRatio": {
+      "value": "30",
+      "visible": true,
+      "disabled": false
+    },
+    "citizenship": {
+      "value": 4,
+      "visible": true,
+      "disabled": false
+    },
+    "creditGrade": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsDIL": {
+      "visible": true,
+      "disabled": false
+    },
+    "isGiftFunds": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMultEvents": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt30x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt30x24": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt60x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt60x24": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt90x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt90x24": {
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsBKC13": {
+      "visible": true,
+      "disabled": false
+    },
+    "fullDocMonths": {
+      "value": 24,
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt120x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt120x24": {
+      "visible": true,
+      "disabled": false
+    },
+    "isSelfEmployed": {
+      "visible": true,
+      "disabled": false
+    },
+    "residualIncome": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsLoanMod": {
+      "visible": true,
+      "disabled": false
+    },
+    "propertiesOwned": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsBKC7or11": {
+      "visible": true,
+      "disabled": false
+    },
+    "monthsOfReserves": {
+      "value": "6",
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsChargeOff": {
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsShortSale": {
+      "visible": true,
+      "disabled": false
+    },
+    "investorExperience": {
+      "visible": true,
+      "disabled": false
+    },
+    "verificationMethod": {
+      "value": 1,
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsForeclosure": {
+      "visible": true,
+      "disabled": false
+    },
+    "isFirstTimeHomeBuyer": {
+      "visible": true,
+      "disabled": false
+    },
+    "multipleBorrowerPairs": {
+      "visible": true,
+      "disabled": false
+    },
+    "isNonOccupancyBorrower": {
+      "visible": false,
+      "disabled": false
+    },
+    "isNonTraditionalCredit": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsNoticeOfDefault": {
+      "visible": true,
+      "disabled": false
+    },
+    "assetQualificationAmount": {
+      "visible": false,
+      "disabled": false
+    },
+    "debtServiceCoverageRatio": {
+      "visible": true,
+      "disabled": false
+    },
+    "isNonOccupancyCoborrower": {
+      "value": false,
+      "visible": true,
+      "disabled": false
+    },
+    "bankStatementsNumberOfMonthsBusiness": {
+      "visible": true,
+      "disabled": false
+    },
+    "bankStatementsNumberOfMonthsPersonal": {
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "criteria": {
+    "va": {
+      "visible": true,
+      "disabled": false
+    },
+    "C10": {
+      "visible": true,
+      "disabled": false
+    },
+    "C15": {
+      "visible": true,
+      "disabled": false
+    },
+    "C20": {
+      "visible": true,
+      "disabled": false
+    },
+    "C25": {
+      "visible": true,
+      "disabled": false
+    },
+    "C30": {
+      "value": "yes",
+      "visible": true,
+      "disabled": false
+    },
+    "fha": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT1": {
+      "visible": false,
+      "disabled": false
+    },
+    "CMT3": {
+      "visible": false,
+      "disabled": false
+    },
+    "CMT5": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT7": {
+      "visible": true,
+      "disabled": false
+    },
+    "usda": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT10": {
+      "visible": true,
+      "disabled": false
+    },
+    "jumbo": {
+      "visible": true,
+      "disabled": false
+    },
+    "nonQm": {
+      "visible": true,
+      "disabled": false
+    },
+    "armPrograms": {
+      "12": {
+        "visible": false,
+        "disabled": false
+      },
+      "36": {
+        "visible": false,
+        "disabled": false
+      },
+      "60": {
+        "visible": true,
+        "disabled": false
+      },
+      "84": {
+        "visible": true,
+        "disabled": false
+      },
+      "120": {
+        "value": false,
+        "visible": true,
+        "disabled": false
+      }
+    },
+    "conventional": {
+      "value": "yes",
+      "visible": true,
+      "disabled": false
+    },
+    "interestOnly": {
+      "visible": true,
+      "disabled": false
+    },
+    "loanPrograms": {
+      "300": {
+        "visible": true,
+        "disabled": false
+      },
+      "480": {
+        "visible": true,
+        "disabled": false
+      }
+    },
+    "desiredLockPeriod": {
+      "value": 30,
+      "visible": true,
+      "disabled": false
+    },
+    "countyLoanLimitYear": {
+      "value": 1,
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "property": {
+    "city": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "state": {
+      "value": "TX",
+      "visible": true,
+      "disabled": false
+    },
+    "units": {
+      "value": "1",
+      "visible": true,
+      "disabled": false
+    },
+    "msaCode": {
+      "visible": true,
+      "disabled": true,
+      "required": false
+    },
+    "stories": {
+      "visible": false,
+      "disabled": false
+    },
+    "zipCode": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "occupancy": {
+      "value": "1",
+      "visible": true,
+      "disabled": false
+    },
+    "isCondotel": {
+      "visible": false,
+      "disabled": false
+    },
+    "censusTract": {
+      "visible": true,
+      "disabled": true,
+      "required": false
+    },
+    "addressLine1": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "propertyType": {
+      "value": "1",
+      "visible": true,
+      "disabled": false
+    },
+    "stateFipsCode": {
+      "visible": true,
+      "disabled": true,
+      "required": false
+    },
+    "countyFipsCode": {
+      "visible": true,
+      "disabled": false,
+      "required": true
+    },
+    "inspectionWaiver": {
+      "visible": true,
+      "disabled": false
+    },
+    "isShortTermRental": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "countyFipsCodeOnly": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "isNonWarrantableProject": {
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "stateOptions": [
+    {
+      "id": "AL",
+      "text": "Alabama"
+    },
+    {
+      "id": "AK",
+      "text": "Alaska"
+    },
+    {
+      "id": "AZ",
+      "text": "Arizona"
+    },
+    {
+      "id": "AR",
+      "text": "Arkansas"
+    },
+    {
+      "id": "CA",
+      "text": "California"
+    },
+    {
+      "id": "CO",
+      "text": "Colorado"
+    },
+    {
+      "id": "CT",
+      "text": "Connecticut"
+    },
+    {
+      "id": "DE",
+      "text": "Delaware"
+    },
+    {
+      "id": "DC",
+      "text": "District of Columbia"
+    },
+    {
+      "id": "FL",
+      "text": "Florida"
+    },
+    {
+      "id": "GA",
+      "text": "Georgia"
+    },
+    {
+      "id": "HI",
+      "text": "Hawaii"
+    },
+    {
+      "id": "ID",
+      "text": "Idaho"
+    },
+    {
+      "id": "IL",
+      "text": "Illinois"
+    },
+    {
+      "id": "IN",
+      "text": "Indiana"
+    },
+    {
+      "id": "IA",
+      "text": "Iowa"
+    },
+    {
+      "id": "KS",
+      "text": "Kansas"
+    },
+    {
+      "id": "KY",
+      "text": "Kentucky"
+    },
+    {
+      "id": "LA",
+      "text": "Louisiana"
+    },
+    {
+      "id": "ME",
+      "text": "Maine"
+    },
+    {
+      "id": "MD",
+      "text": "Maryland"
+    },
+    {
+      "id": "MA",
+      "text": "Massachusetts"
+    },
+    {
+      "id": "MI",
+      "text": "Michigan"
+    },
+    {
+      "id": "MN",
+      "text": "Minnesota"
+    },
+    {
+      "id": "MS",
+      "text": "Mississippi"
+    },
+    {
+      "id": "MO",
+      "text": "Missouri"
+    },
+    {
+      "id": "MT",
+      "text": "Montana"
+    },
+    {
+      "id": "NE",
+      "text": "Nebraska"
+    },
+    {
+      "id": "NV",
+      "text": "Nevada"
+    },
+    {
+      "id": "NH",
+      "text": "New Hampshire"
+    },
+    {
+      "id": "NJ",
+      "text": "New Jersey"
+    },
+    {
+      "id": "NM",
+      "text": "New Mexico"
+    },
+    {
+      "id": "NY",
+      "text": "New York"
+    },
+    {
+      "id": "NC",
+      "text": "North Carolina"
+    },
+    {
+      "id": "ND",
+      "text": "North Dakota"
+    },
+    {
+      "id": "OH",
+      "text": "Ohio"
+    },
+    {
+      "id": "OK",
+      "text": "Oklahoma"
+    },
+    {
+      "id": "OR",
+      "text": "Oregon"
+    },
+    {
+      "id": "PA",
+      "text": "Pennsylvania"
+    },
+    {
+      "id": "RI",
+      "text": "Rhode Island"
+    },
+    {
+      "id": "SC",
+      "text": "South Carolina"
+    },
+    {
+      "id": "SD",
+      "text": "South Dakota"
+    },
+    {
+      "id": "TN",
+      "text": "Tennessee"
+    },
+    {
+      "id": "TX",
+      "text": "Texas"
+    },
+    {
+      "id": "UT",
+      "text": "Utah"
+    },
+    {
+      "id": "VT",
+      "text": "Vermont"
+    },
+    {
+      "id": "VA",
+      "text": "Virginia"
+    },
+    {
+      "id": "WA",
+      "text": "Washington"
+    },
+    {
+      "id": "WV",
+      "text": "West Virginia"
+    },
+    {
+      "id": "WI",
+      "text": "Wisconsin"
+    },
+    {
+      "id": "WY",
+      "text": "Wyoming"
+    }
+  ],
+  "brokerCompPlan": {
+    "paidBy": {
+      "visible": false,
+      "disabled": false
+    },
+    "percent": {
+      "visible": false,
+      "disabled": false
+    },
+    "maxAmount": {
+      "visible": false,
+      "disabled": false
+    },
+    "minAmount": {
+      "visible": false,
+      "disabled": false
+    },
+    "fixedAmount": {
+      "visible": false,
+      "disabled": false
+    },
+    "calculatedAmount": {
+      "visible": false,
+      "disabled": true
+    }
+  },
+  "customParameters": {
+    "Bond": {
+      "value": "No",
+      "visible": false,
+      "disabled": false
+    },
+    "MMCA": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Branch": {
+      "visible": false,
+      "disabled": false
+    },
+    "Cities": {
+      "visible": true,
+      "disabled": false
+    },
+    "Region": {
+      "visible": false,
+      "disabled": false
+    },
+    "Branches": {
+      "visible": false,
+      "disabled": false
+    },
+    "CLP/MMCA": {
+      "value": "No",
+      "visible": false,
+      "disabled": false
+    },
+    "Fee Type": {
+      "visible": false,
+      "disabled": true
+    },
+    "Relocation": {
+      "visible": false,
+      "disabled": true
+    },
+    "Sub-Source": {
+      "visible": true,
+      "disabled": false
+    },
+    "Broker Loan": {
+      "value": "No",
+      "visible": false,
+      "disabled": false
+    },
+    "Employee ID": {
+      "visible": false,
+      "disabled": false
+    },
+    "Lead Source": {
+      "value": "No",
+      "visible": false,
+      "disabled": false
+    },
+    "Branch Model": {
+      "visible": false,
+      "disabled": false
+    },
+    "Census Tract": {
+      "visible": false,
+      "disabled": false
+    },
+    "MH Advantage": {
+      "visible": false,
+      "disabled": false
+    },
+    "Employee Loan": {
+      "visible": true,
+      "disabled": false
+    },
+    "Extended Lock": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Affinity Group": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Detached Condo": {
+      "visible": true,
+      "disabled": false
+    },
+    "Builder Forward": {
+      "value": "false",
+      "visible": true,
+      "disabled": false
+    },
+    "Prospect Source": {
+      "visible": true,
+      "disabled": false
+    },
+    "AFF/AMI/MMCA/CLP": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "LNS Contract Date": {
+      "visible": false,
+      "disabled": false
+    },
+    "Temp Buydown Type": {
+      "value": "No",
+      "visible": false,
+      "disabled": false
+    },
+    "Application Status": {
+      "value": "Application",
+      "visible": true,
+      "disabled": false
+    },
+    "Lender Buydown Fee": {
+      "visible": false,
+      "disabled": false
+    },
+    "Loan Officer Email": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "Original MM Loan #": {
+      "visible": true,
+      "disabled": false
+    },
+    "Short Term Rentals": {
+      "visible": true,
+      "disabled": false
+    },
+    "Affordable Products": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Asset Qualification": {
+      "visible": true,
+      "disabled": false
+    },
+    "Lender Paid Buydown": {
+      "visible": false,
+      "disabled": false
+    },
+    "Builder FWD Discount": {
+      "visible": true,
+      "disabled": false
+    },
+    "Interest Only Product": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "TE - External User ID": {
+      "visible": false,
+      "disabled": false
+    },
+    "Current Servicer is MM": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Affordable/AMI Products": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Community Affordable 2nd": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    },
+    "Seller Pre-paid Discount": {
+      "visible": true,
+      "disabled": false
+    },
+    "Application Date Required": {
+      "value": "Scenario Mode",
+      "visible": true,
+      "disabled": true
+    },
+    "Construction Perm Lot Owned": {
+      "visible": true,
+      "disabled": true
+    },
+    "Special Cash out /Student Loan Cash out": {
+      "value": "No",
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "occupancyOptions": [
+    {
+      "id": 1,
+      "text": "Primary"
+    },
+    {
+      "id": 2,
+      "text": "Secondary"
+    },
+    {
+      "id": 3,
+      "text": "Investment"
+    }
+  ],
+  "lockPeriodOptions": [
+    {
+      "id": 15,
+      "text": "15 Day Lock"
+    },
+    {
+      "id": 25,
+      "text": "25 Day Lock"
+    },
+    {
+      "id": 30,
+      "text": "30 Day Lock"
+    },
+    {
+      "id": 37,
+      "text": "37 Day Lock"
+    },
+    {
+      "id": 40,
+      "text": "40 Day Lock"
+    },
+    {
+      "id": 45,
+      "text": "45 Day Lock"
+    },
+    {
+      "id": 50,
+      "text": "50 Day Lock"
+    },
+    {
+      "id": 55,
+      "text": "55 Day Lock"
+    },
+    {
+      "id": 60,
+      "text": "60 Day Lock"
+    },
+    {
+      "id": 75,
+      "text": "75 Day Lock"
+    },
+    {
+      "id": 90,
+      "text": "90 Day Lock"
+    },
+    {
+      "id": 120,
+      "text": "120 Day Lock"
+    },
+    {
+      "id": 180,
+      "text": "180 Day Lock"
+    },
+    {
+      "id": 270,
+      "text": "270 Day Lock"
+    },
+    {
+      "id": 300,
+      "text": "300 Day Lock"
+    },
+    {
+      "id": 360,
+      "text": "360 Day Lock"
+    }
+  ],
+  "loanPurposeOptions": [
+    {
+      "id": 1,
+      "text": "Purchase"
+    },
+    {
+      "id": 6,
+      "text": "No Cash-Out Refi"
+    },
+    {
+      "id": 7,
+      "text": "Cash-Out Refi"
+    },
+    {
+      "id": 4,
+      "text": "Construction-Permanent"
+    },
+    {
+      "id": 6,
+      "text": "Other"
+    }
+  ],
+  "propertyTypeOptions": [
+    {
+      "id": 1,
+      "text": "Single Family"
+    },
+    {
+      "id": 2,
+      "text": "Condo"
+    },
+    {
+      "id": 6,
+      "text": "Multi Unit"
+    },
+    {
+      "id": 16,
+      "text": "Manufactured Double"
+    },
+    {
+      "id": 7,
+      "text": "Co-op"
+    },
+    {
+      "id": 15,
+      "text": "Manufactured Single"
+    },
+    {
+      "id": 3,
+      "text": "PUD"
+    }
+  ],
+  "refinanceTypeOptions": [
+    {
+      "id": 1,
+      "text": "No Cash-Out"
+    },
+    {
+      "id": 2,
+      "text": "Cash-Out"
+    },
+    {
+      "id": 3,
+      "text": "Limited Cash-Out / Rate Term"
+    },
+    {
+      "id": 4,
+      "text": "Home Improvement"
+    },
+    {
+      "id": 5,
+      "text": "Debt Consolidation"
+    },
+    {
+      "id": 6,
+      "text": "Other"
+    }
+  ],
+  "verificationMethodOptions": [
+    {
+      "id": 1,
+      "text": "Full Document"
+    },
+    {
+      "id": 2,
+      "text": "Bank Statement(s)"
+    },
+    {
+      "id": 4,
+      "text": "Asset Qualification"
+    },
+    {
+      "id": 5,
+      "text": "Debt Service Coverage Ratio"
+    },
+    {
+      "id": 6,
+      "text": "1099"
+    }
+  ],
+  "countyLoanLimitYearOptions": [
+    {
+      "id": 1,
+      "text": "2025"
+    },
+    {
+      "id": 2,
+      "text": "2026"
+    }
+  ],
+  "temporaryBuydownTypeOptions": [
+    {
+      "id": 0,
+      "text": "None"
+    },
+    {
+      "id": 2,
+      "text": "2-1"
+    },
+    {
+      "id": 4,
+      "text": "1-0"
+    },
+    {
+      "id": 1,
+      "text": "3-2-1"
+    }
+  ]
+}

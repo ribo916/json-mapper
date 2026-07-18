@@ -1,0 +1,675 @@
+{
+  "loan": {
+    "aus": {
+      "visible": true,
+      "disabled": false
+    },
+    "ltv": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "cltv": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "term": {
+      "visible": true,
+      "disabled": false
+    },
+    "hcltv": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "amount": {
+      "value": "300000",
+      "visible": true,
+      "disabled": false
+    },
+    "purpose": {
+      "value": 1,
+      "visible": true,
+      "disabled": false
+    },
+    "position": {
+      "visible": true,
+      "disabled": false
+    },
+    "lenderFee": {
+      "visible": true,
+      "disabled": false
+    },
+    "downPayment": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "waiveEscrow": {
+      "value": 2,
+      "visible": true,
+      "disabled": false
+    },
+    "secondAmount": {
+      "value": "0",
+      "visible": true,
+      "disabled": false
+    },
+    "cashOutAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "propertyValue": {
+      "value": "400000",
+      "visible": true,
+      "disabled": false
+    },
+    "purchasePrice": {
+      "value": "400000",
+      "visible": true,
+      "disabled": false
+    },
+    "rollLenderFee": {
+      "visible": true,
+      "disabled": false
+    },
+    "applicationDate": {
+      "visible": false,
+      "disabled": false
+    },
+    "helocLineAmount": {
+      "value": "0",
+      "visible": true,
+      "disabled": false
+    },
+    "refinancePurpose": {
+      "value": "7",
+      "visible": true,
+      "disabled": false
+    },
+    "prepaymentPenaltyStructure": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "streamlineRefinancePurpose": {
+      "visible": true,
+      "disabled": false
+    },
+    "prepaymentPenaltyPeriodMonths": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "prepaymentPenaltyStructureType": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "isMortgageInsurancePaidByBorrower": {
+      "value": true,
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "options": {
+    "mode": {
+      "visible": true,
+      "disabled": false
+    },
+    "channel": {
+      "visible": true,
+      "disabled": false
+    },
+    "version": {
+      "visible": true,
+      "disabled": false
+    },
+    "visible": true
+  },
+  "borrower": {
+    "fico": {
+      "value": "700",
+      "visible": true,
+      "disabled": false,
+      "required": true
+    },
+    "income": {
+      "visible": true,
+      "disabled": false
+    },
+    "isITIN": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "dEMultBK": {
+      "visible": true,
+      "disabled": false
+    },
+    "dtiRatio": {
+      "value": 30,
+      "visible": true,
+      "disabled": false,
+      "required": true
+    },
+    "entityType": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "months1099": {
+      "visible": true,
+      "disabled": false
+    },
+    "citizenship": {
+      "visible": true,
+      "disabled": false
+    },
+    "creditGrade": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsDIL": {
+      "visible": true,
+      "disabled": false
+    },
+    "isGiftFunds": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsBKC7": {
+      "visible": true,
+      "disabled": false
+    },
+    "dEMultEvents": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt30x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt30x24": {
+      "visible": false,
+      "disabled": false
+    },
+    "latePmt60x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt60x24": {
+      "visible": false,
+      "disabled": false
+    },
+    "latePmt90x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt90x24": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsBKC11": {
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsBKC13": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt120x12": {
+      "visible": true,
+      "disabled": false
+    },
+    "latePmt120x24": {
+      "visible": false,
+      "disabled": false
+    },
+    "isSelfEmployed": {
+      "visible": true,
+      "disabled": false
+    },
+    "residualIncome": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsLoanMod": {
+      "visible": true,
+      "disabled": false
+    },
+    "propertiesOwned": {
+      "visible": true,
+      "disabled": false
+    },
+    "monthsOfReserves": {
+      "value": "0",
+      "visible": true,
+      "disabled": false,
+      "required": true
+    },
+    "dEMonthsChargeOff": {
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsShortSale": {
+      "visible": true,
+      "disabled": false
+    },
+    "investorExperience": {
+      "visible": true,
+      "disabled": false
+    },
+    "verificationMethod": {
+      "visible": true,
+      "disabled": false
+    },
+    "dEMonthsForeclosure": {
+      "visible": true,
+      "disabled": false
+    },
+    "assetDepletionAmount": {
+      "value": 0,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "isFirstTimeHomeBuyer": {
+      "visible": false,
+      "disabled": false
+    },
+    "multipleBorrowerPairs": {
+      "visible": true,
+      "disabled": false
+    },
+    "assetUtilizationAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "isNonOccupancyBorrower": {
+      "visible": true,
+      "disabled": false
+    },
+    "isNonTraditionalCredit": {
+      "visible": false,
+      "disabled": false
+    },
+    "dEMonthsNoticeOfDefault": {
+      "visible": true,
+      "disabled": false
+    },
+    "assetQualificationAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "debtServiceCoverageRatio": {
+      "visible": true,
+      "disabled": false
+    },
+    "isNonOccupancyCoborrower": {
+      "visible": true,
+      "disabled": false
+    },
+    "verificationOfEmploymentAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "bankStatementsNumberOfMonthsBusiness": {
+      "visible": true,
+      "disabled": false
+    },
+    "bankStatementsNumberOfMonthsPersonal": {
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "criteria": {
+    "va": {
+      "visible": true,
+      "disabled": false
+    },
+    "C10": {
+      "visible": true,
+      "disabled": false
+    },
+    "C15": {
+      "visible": true,
+      "disabled": false
+    },
+    "C20": {
+      "visible": true,
+      "disabled": false
+    },
+    "C25": {
+      "visible": true,
+      "disabled": false
+    },
+    "C30": {
+      "value": "yes",
+      "visible": true,
+      "disabled": false
+    },
+    "C40": {
+      "value": "yes",
+      "visible": true,
+      "disabled": false
+    },
+    "fha": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT1": {
+      "visible": false,
+      "disabled": false
+    },
+    "CMT3": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT5": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT7": {
+      "visible": true,
+      "disabled": false
+    },
+    "usda": {
+      "visible": true,
+      "disabled": false
+    },
+    "CMT10": {
+      "visible": true,
+      "disabled": false
+    },
+    "jumbo": {
+      "visible": true,
+      "disabled": false
+    },
+    "nonQm": {
+      "visible": true,
+      "disabled": false
+    },
+    "armPrograms": {
+      "36": {
+        "visible": true,
+        "disabled": false
+      },
+      "60": {
+        "visible": true,
+        "disabled": false
+      },
+      "84": {
+        "visible": true,
+        "disabled": false
+      },
+      "120": {
+        "value": false,
+        "visible": true,
+        "disabled": false
+      }
+    },
+    "conventional": {
+      "value": "yes",
+      "visible": true,
+      "disabled": false
+    },
+    "interestOnly": {
+      "visible": true,
+      "disabled": false
+    },
+    "desiredLockPeriod": {
+      "value": 45,
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "property": {
+    "state": {
+      "value": "OR",
+      "visible": true,
+      "disabled": false
+    },
+    "units": {
+      "value": "1",
+      "visible": true,
+      "disabled": false
+    },
+    "stories": {
+      "visible": false,
+      "disabled": false
+    },
+    "occupancy": {
+      "value": "1",
+      "visible": true,
+      "disabled": false
+    },
+    "isCondotel": {
+      "visible": true,
+      "disabled": false
+    },
+    "propertyType": {
+      "value": "1",
+      "visible": true,
+      "disabled": false
+    },
+    "countyFipsCode": {
+      "value": "001",
+      "visible": true,
+      "disabled": false
+    },
+    "isRuralProperty": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "inspectionWaiver": {
+      "visible": true,
+      "disabled": false
+    },
+    "isShortTermRental": {
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "propertyAttachmentType": {
+      "value": 1,
+      "visible": true,
+      "disabled": false,
+      "required": false
+    },
+    "isNonWarrantableProject": {
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "brokerCompPlan": {
+    "paidBy": {
+      "visible": true,
+      "disabled": false
+    },
+    "percent": {
+      "visible": true,
+      "disabled": false
+    },
+    "maxAmount": {
+      "value": "25000",
+      "visible": true,
+      "disabled": false
+    },
+    "minAmount": {
+      "value": "1000",
+      "visible": true,
+      "disabled": false
+    },
+    "fixedAmount": {
+      "visible": true,
+      "disabled": false
+    },
+    "calculatedAmount": {
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "customParameters": {
+    "DecTest1": {
+      "visible": true,
+      "disabled": false
+    },
+    "IntTest1": {
+      "visible": true,
+      "disabled": false
+    },
+    "Affordable Product": {
+      "visible": true,
+      "disabled": false
+    }
+  },
+  "occupancyOptions": [
+    {
+      "id": 1,
+      "text": "Primary"
+    },
+    {
+      "id": 2,
+      "text": "Secondary"
+    },
+    {
+      "id": 3,
+      "text": "Investment"
+    }
+  ],
+  "lockPeriodOptions": [
+    {
+      "id": 15,
+      "text": "15 Day Lock"
+    },
+    {
+      "id": 30,
+      "text": "30 Day Lock"
+    },
+    {
+      "id": 45,
+      "text": "45 Day Lock"
+    },
+    {
+      "id": 60,
+      "text": "60 Day Lock"
+    },
+    {
+      "id": 90,
+      "text": "90 Day Lock"
+    },
+    {
+      "id": 120,
+      "text": "120 Day Lock"
+    }
+  ],
+  "loanPurposeOptions": [
+    {
+      "id": 1,
+      "text": "Purchase"
+    },
+    {
+      "id": 6,
+      "text": "No Cash-Out Refi"
+    },
+    {
+      "id": 7,
+      "text": "Cash-Out Refi"
+    }
+  ],
+  "pricingTableColumns": {
+    "apr": {
+      "visible": true
+    },
+    "investor": {
+      "visible": true
+    },
+    "refinancePurposeOptions": [
+      {
+        "id": 1,
+        "text": "No Cash-Out"
+      },
+      {
+        "id": 2,
+        "text": "Cash-Out"
+      }
+    ]
+  },
+  "propertyTypeOptions": [
+    {
+      "id": 1,
+      "text": "Single Family"
+    },
+    {
+      "id": 2,
+      "text": "Condo"
+    },
+    {
+      "id": 3,
+      "text": "PUD"
+    },
+    {
+      "id": 6,
+      "text": "Multi Unit"
+    },
+    {
+      "id": 8,
+      "text": "Townhouse"
+    }
+  ],
+  "verificationMethodOptions": [
+    {
+      "id": 1,
+      "text": "Full Document"
+    },
+    {
+      "id": 2,
+      "text": "Bank Statement(s)"
+    },
+    {
+      "id": 3,
+      "text": "Verification of Employment"
+    },
+    {
+      "id": 5,
+      "text": "Debt Service Coverage Ratio"
+    },
+    {
+      "id": 6,
+      "text": "1099"
+    },
+    {
+      "id": 7,
+      "text": "CPA P&L"
+    },
+    {
+      "id": 8,
+      "text": "CPA P&L + Bank Statement(s)"
+    },
+    {
+      "id": 9,
+      "text": "Asset Depletion"
+    },
+    {
+      "id": 10,
+      "text": "Asset Utilization"
+    }
+  ],
+  "propertyAttachmentTypeOptions": [
+    {
+      "id": 0,
+      "text": "Unspecified"
+    },
+    {
+      "id": 1,
+      "text": "Detached"
+    },
+    {
+      "id": 2,
+      "text": "Attached"
+    }
+  ]
+}

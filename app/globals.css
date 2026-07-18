@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* The Pricer Templates feature themes via a `.dark` class (toggled by its
+   ThemeProvider), not the OS preference — make Tailwind's `dark:` variant
+   class-based. Other pages don't use `dark:` utilities, so this is safe. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -10,6 +15,23 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Pricer Templates semantic tokens (resolve the live "R G B" triples set
+     per theme in the [data-theme] blocks below). */
+  --color-bg: rgb(var(--bg));
+  --color-surface: rgb(var(--surface));
+  --color-surface2: rgb(var(--surface-2));
+  --color-fg: rgb(var(--fg));
+  --color-muted: rgb(var(--muted));
+  --color-faint: rgb(var(--faint));
+  --color-border: rgb(var(--border));
+  --color-border2: rgb(var(--border-2));
+  --color-selected: rgb(var(--selected));
+  --color-accent: rgb(var(--accent));
+  --color-accent-fg: rgb(var(--accent-fg));
+  --color-accent-text: rgb(var(--accent-text));
+  --color-accent-subtle: rgb(var(--accent-subtle));
+  --color-accent-subtle-fg: rgb(var(--accent-subtle-fg));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -66,5 +88,119 @@ body {
 
 .inspector-page button:hover {
   background: #1e4bb8;
+}
+
+
+/* ====================================================== */
+/* Pricer Templates feature — semantic design tokens.      */
+/* Each value is an "R G B" triple. These only take effect */
+/* while the Pricer route sets [data-theme] on <html>.     */
+/* All fg/bg pairs meet WCAG 2.1 AA (see scripts/verify.ts) */
+/* ====================================================== */
+:root[data-theme="daylight"] {
+  color-scheme: light;
+  --bg: 248 250 252;
+  --surface: 255 255 255;
+  --surface-2: 241 245 249;
+  --fg: 15 23 42;
+  --muted: 71 85 105;
+  --faint: 100 116 139;
+  --border: 226 232 240;
+  --border-2: 203 213 225;
+  --selected: 224 242 254;
+  --accent: 3 105 161;
+  --accent-fg: 255 255 255;
+  --accent-text: 3 105 161;
+  --accent-subtle: 224 242 254;
+  --accent-subtle-fg: 7 89 133;
+}
+
+:root[data-theme="paper"] {
+  color-scheme: light;
+  --bg: 245 240 232;
+  --surface: 255 251 245;
+  --surface-2: 238 231 220;
+  --fg: 41 37 31;
+  --muted: 92 82 66;
+  --faint: 120 107 88;
+  --border: 227 217 202;
+  --border-2: 209 197 179;
+  --selected: 250 239 220;
+  --accent: 154 52 18;
+  --accent-fg: 255 255 255;
+  --accent-text: 154 52 18;
+  --accent-subtle: 250 235 215;
+  --accent-subtle-fg: 124 45 18;
+}
+
+:root[data-theme="midnight"] {
+  color-scheme: dark;
+  --bg: 2 6 23;
+  --surface: 15 23 42;
+  --surface-2: 30 41 59;
+  --fg: 241 245 249;
+  --muted: 148 163 184;
+  --faint: 138 152 175;
+  --border: 30 41 59;
+  --border-2: 51 65 85;
+  --selected: 12 44 66;
+  --accent: 56 189 248;
+  --accent-fg: 3 18 33;
+  --accent-text: 125 211 252;
+  --accent-subtle: 12 44 66;
+  --accent-subtle-fg: 186 230 253;
+}
+
+:root[data-theme="ocean"] {
+  color-scheme: dark;
+  --bg: 8 15 30;
+  --surface: 15 27 48;
+  --surface-2: 25 40 66;
+  --fg: 226 237 247;
+  --muted: 148 170 197;
+  --faint: 116 138 168;
+  --border: 30 46 74;
+  --border-2: 45 66 100;
+  --selected: 10 51 56;
+  --accent: 45 212 191;
+  --accent-fg: 4 20 25;
+  --accent-text: 94 234 212;
+  --accent-subtle: 8 51 56;
+  --accent-subtle-fg: 153 246 228;
+}
+
+:root[data-theme="nord"] {
+  color-scheme: dark;
+  --bg: 46 52 64;
+  --surface: 59 66 82;
+  --surface-2: 67 76 94;
+  --fg: 236 239 244;
+  --muted: 197 205 219;
+  --faint: 178 187 204;
+  --border: 67 76 94;
+  --border-2: 76 86 106;
+  --selected: 59 78 92;
+  --accent: 136 192 208;
+  --accent-fg: 30 34 43;
+  --accent-text: 143 214 231;
+  --accent-subtle: 59 78 92;
+  --accent-subtle-fg: 175 222 235;
+}
+
+/* Accessible keyboard focus for the Pricer feature's interactive elements. */
+:root[data-theme] :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Thin scrollbars for dense panels */
+.scroll-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--border-2));
+  border-radius: 4px;
 }
 

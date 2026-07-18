@@ -131,6 +131,52 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* Pricer Templates Card */}
+          <Link
+            href="/pricer-templates"
+            className="group block bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 p-8 border border-gray-200 hover:border-purple-300"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center rounded-lg transition-colors">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#9333ea"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-6 h-6"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M3 9h18" />
+                  <path d="M9 21V9" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900">Pricer Templates</h2>
+            </div>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Load, visualize, edit, and compare PricerUITemplate JSON files. Inspect fields,
+              enums, and sections, diff templates side by side, and edit raw JSON.
+            </p>
+            <div className="flex items-center text-purple-600 font-medium group-hover:text-purple-700">
+              <span>Open Template Studio</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+
           {/* API User Provisioning Card */}
           <Link
             href="/api-user"
